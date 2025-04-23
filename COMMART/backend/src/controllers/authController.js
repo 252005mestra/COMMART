@@ -39,3 +39,48 @@ export const registerUser = async (req, res) => {
         res.status(500).json({ message: 'Error del servidor al registrar el usuario.' });
     }
 };
+
+// Inicio de sesión con correo o nombre de usuario
+export const loginUser = async (req, res) => {
+    const { identifier, password } = req.body;
+
+    if (!identifier || !password) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+    }
+
+    try {
+        // Buscar por email primero
+        let user = await findUserByEmail(identifier);
+
+        // Si no lo encuentra por email, buscar por username
+        if (!user) {
+            user = await findUserByUsername(identifier);
+        }
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        // Verificar contraseña
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Contraseña incorrecta.' });
+        }
+
+        // Generar token
+        const token = jwt.sign(
+            {
+                id: user.id,
+                username: user.username,
+                email: user.email
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.status(200).json({ message: 'Inicio de sesión exitoso', token });
+    } catch (error) {
+        console.error('Error en login:', error);
+        res.status(500).json({ message: 'Error del servidor al iniciar sesión.' });
+    }
+};
