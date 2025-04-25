@@ -1,0 +1,346 @@
+@import 'fonts.css';
+
+/* ============================================
+   Layout base y scroll
+============================================ */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.LandingContent {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+
+    /* Ocultar scrollbar */
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE 10+ */
+}
+.LandingContent::-webkit-scrollbar {
+    display: none;                /* WebKit */
+}
+
+/* ============================================
+   Secciones generales
+============================================ */
+.LandingContent section {
+    display: flex;
+    height: 100vh;
+    scroll-snap-align: start;
+}
+
+/* ============================================
+   Menú de navegación (header)
+============================================ */
+.Menu-Landing {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-height: 100px;
+    padding: 0 50px;
+}
+
+.Menu-Landing .Logo {
+    all: unset;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.Logo span {
+    font-family: 'Goldman';
+}
+
+.Menu-Landing ul {
+    display: flex;
+    gap: 25px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.Menu-Landing a,
+.Eslogan a,
+.Info a,
+.Suggestion-Box a {
+    font-family: 'Goldman';
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+/* Botones del menú */
+.Menu-Landing ul li:nth-child(1) a,
+.Menu-Landing ul li:nth-child(2) a {
+     color: #7d5938;
+}
+.Menu-Landing ul li:nth-child(1) a:hover,
+.Menu-Landing ul li:nth-child(2) a:hover {
+    color: #593f28;
+    text-decoration: underline;
+}
+
+.Menu-Landing ul li:nth-child(3) a {
+    border: 3px solid #7d5938;
+    border-radius: 25px;
+    color: #7d5938;
+    padding: 10px;
+}
+.Menu-Landing ul li:nth-child(3) a:hover {
+    border-color: #593f28;
+    color: #593f28;
+    background-color: #593f283b;
+}
+
+.Menu-Landing ul li:nth-child(4) a {
+    background-color: #809671;
+    border: 3px solid #B3B792;
+    border-radius: 25px;
+    color: #fff;
+    padding: 10px 15px;
+    transition: background-color 0.2s ease;
+}
+.Menu-Landing ul li:nth-child(4) a:hover {
+    background-color: #6b825e;
+}
+
+/* ============================================
+   Banner principal
+============================================ */
+.Banner > div {
+    align-items: center;
+    background-image: url('../assets/FondoVerdeOscuro.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border: 5px solid #593f28;
+    border-radius: 60px;
+    display: flex;
+    margin: 5vh auto;
+    height: 70vh;
+    max-height: 70vh;
+    width: 95%;
+}
+
+.Eslogan {
+    box-sizing: border-box;
+    height: auto;
+    max-width: 800px;
+    padding: clamp(1rem, 5vw, 60px);
+    width: 100%;
+}
+
+.Eslogan h1 {
+    font-family: 'Goldman';
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    margin: 0 0 40px 0;
+}
+
+.Eslogan p {
+    font-family: 'Nunito Sans';
+    margin: 0;
+}
+
+.Eslogan p:nth-of-type(1) {
+    font-size: clamp(1rem, 4vw, 25px);
+    letter-spacing: clamp(0.1em, 2vw, 0.22em);
+}
+
+.Eslogan p:nth-of-type(2) {
+    font-size: clamp(1rem, 3.5vw, 20px);
+    letter-spacing: 0.05em;
+    margin-bottom: 40px;
+}
+
+/* Botones principales */
+.Eslogan a,
+.Info a,
+.Suggestion-Box a {
+    background: linear-gradient(135deg, #7d5938 100%, #a47e53 0%);
+    border-radius: 35px;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.459);
+    color: #fff;
+    display: inline-block;
+    font-size: 20px;
+    margin: 0;
+    min-width: 190px;
+    max-width: 200px;
+    overflow: hidden;
+    padding: 20px 30px;
+    position: relative;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.Eslogan a:hover,
+.Info a:hover,
+.Suggestion-Box a:hover {
+    transform: scale(1.05);
+}
+
+/* ============================================
+   Sección Info
+============================================ */
+.Info {
+    background-color: #D2AB80;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.Info > div{
+    background-color: white;
+    background-image: url('../assets/FondoCommart.jpg');  
+    background-size: cover;       
+    background-position: center;   
+    background-repeat: no-repeat;  
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 32%;
+    min-width: 300px;
+    height: 75%; 
+    max-height: 75%;
+    margin: 7vh;
+    border: solid 5px #593f28;
+    border-radius: 180px 180px 0 0;
+    text-align: center;
+}
+
+.Info h2, .Suggestion-Text h2{
+    font-family: 'Goldman';
+    font-weight: 400;
+    font-size: 40px;
+    color: #593f28;
+    letter-spacing: 0.05em;
+}
+
+.Info p, .Suggestion-Text {
+    font-family: 'Nunito Sans';
+    font-size: 20px;
+    color: black;
+    padding-bottom: 50px;
+    letter-spacing: 0.15em;
+}
+
+/* ============================================
+   Sección Find-Artists
+============================================ */
+.Find-Artists{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.Find-Artists > div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 90vh;
+    max-height: 90vh;
+}
+
+.Find-Artists .Cards-Artists{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 35px;
+    width: 100%;
+    height: 75%;
+    padding: 10px 0;
+}
+
+.Find-Artists .Cards-Artists > div{
+    background-color: aliceblue;
+    width: 21%;
+    min-width: 240px;
+    height: 90%;
+    border: solid 4px black;
+    border-radius: 20px;
+}
+
+.Find-Artists h2, .Find-Artists h3 {
+    font-family: 'Goldman';
+    font-weight: 400;
+    font-size: 40px;
+    color: #593f28;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.Find-Artists p{
+    font-family: 'Nunito Sans';
+    font-size: 20px;
+    color: black;
+    letter-spacing: 0.15em;
+    margin: 0;
+}
+
+/* ============================================
+   Sección Sugerencias
+============================================ */
+.Suggestion-Box {
+    background-color: #B3B792;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.Suggestion-Images {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.Suggestion-Images img{
+    position: relative;
+}
+
+.Suggestion-Text {
+    background-color: white;
+    background-image: url('../assets/FondoCommart.jpg');  
+    background-size: cover;       
+    background-position: center;   
+    background-repeat: no-repeat;  
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 45%;
+    min-width: 300px;
+    height: 70%; 
+    max-height: 70%;
+    margin: 7vh;
+    border: solid 5px #593f28;
+    border-radius: 180px 180px 0 0;
+    text-align: center;
+}
+
+/* ============================================
+   Footer
+============================================ */
+
+  
+/* ============================================
+   Imágenes
+============================================ */
+.Info img,
+.Suggestion-Box img {
+    height: auto;
+    max-width: 650px;
+    object-fit: contain;
+    width: 100%;
+}
+

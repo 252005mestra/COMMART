@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken'; // Este lo usan cuando se haga el inicio de sesión
+import jwt from 'jsonwebtoken'; 
 import { createUser, findUserByEmail, findUserByUsername } from '../models/userModel.js';
 
 // Validación registro de usuario
