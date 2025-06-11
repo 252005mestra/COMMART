@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/landing.css'
+import '../styles/landing.css';
+import LoginModal from '../components/LoginModal';
+import RegisterModal from '../components/RegisterModal';
 
 // Imagenes
 import logo from '../assets/LogoCOMMART.png';
 import Lino1 from '../assets/1.1 Lino.png';
 import Tiko1 from '../assets/2.1 Tiko.png';
-import LinoTiko from '../assets/3. Lino y Tiko.png'
+import LinoTiko from '../assets/3. Lino y Tiko.png';
 
 const LandingPage = () => {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+
+  const openLoginFromRegister = () => {
+    setShowRegisterModal(false);
+    setTimeout(() => setShowLoginModal(true), 100);
+  };
+
+  const openRegisterFromLogin = () => {
+    setShowLoginModal(false);
+    setTimeout(() => setShowRegisterModal(true), 100);
+  };
+
   return (
     <>
       <nav className='Menu-Landing' aria-label='Menú principal'>
@@ -19,8 +34,12 @@ const LandingPage = () => {
         <ul>
             <li><Link to="">Info</Link></li>
             <li><Link to="">Blog</Link></li>
-            <li><Link to="">Iniciar Sesión</Link></li>
-            <li><Link to="">Registrarse</Link></li>
+            <li>
+              <Link><button onClick={() => setShowLoginModal(true)}>Iniciar Sesión</button></Link>
+            </li>
+            <li>
+              <Link><button onClick={() => setShowRegisterModal(true)}>Registrarse</button></Link>
+            </li>
         </ul>
       </nav>
 
@@ -82,8 +101,10 @@ const LandingPage = () => {
             <li><Link to="">Ayuda</Link></li>
         </ul>
       </footer>
+      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} onSwitchToRegister={openRegisterFromLogin} />}
+      {showRegisterModal && <RegisterModal onClose={() => setShowRegisterModal(false)} onSwitchToLogin={openLoginFromRegister} />}
     </>
-  )
-}
+  );
+};
 
-export default LandingPage
+export default LandingPage;

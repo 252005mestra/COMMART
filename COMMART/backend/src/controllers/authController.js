@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'; 
-import { createUser, findUserByEmail, findUserByUsername } from '../models/userModel.js';
+import { createUser, findUserByEmail, findUserByUsername, getAllUsers as getAllUsersFromModel } from '../models/userModel.js';
 
 // Validación registro de usuario
 export const registerUser = async (req, res) => {
@@ -44,6 +44,7 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
     const { identifier, password } = req.body;
 
+    // Validación de campos
     if (!identifier || !password) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
@@ -52,7 +53,7 @@ export const loginUser = async (req, res) => {
         // Buscar por email primero
         let user = await findUserByEmail(identifier);
 
-        // Si no lo encuentra por email, buscar por username
+        // Si no encuentra por email, buscar por username
         if (!user) {
             user = await findUserByUsername(identifier);
         }
@@ -75,12 +76,42 @@ export const loginUser = async (req, res) => {
                 email: user.email
             },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '1h' } // Token dura 1 hora
         );
 
-        res.status(200).json({ message: 'Inicio de sesión exitoso', token });
+        // Enviar el token en una cookie, no en el body
+        res.cookie('token', token, {
+            httpOnly: true, // solo accesible por el servidor
+            secure: process.env.NODE_ENV === 'production', // en producción solo por HTTPS
+            sameSite: 'strict', // prevenir ataques CSRF
+            maxAge: 60 * 60 * 1000 // 1 hora en milisegundos
+        });
+
+        res.status(200).json({ message: 'Inicio de sesión exitoso' });
+        
     } catch (error) {
         console.error('Error en login:', error);
         res.status(500).json({ message: 'Error del servidor al iniciar sesión.' });
     }
+};
+
+// Obtener todos los usuarios registrados (solo nombres de usuario)
+export const getAllUsers = async (req, res) => {
+  try {
+      const users = await getAllUsersFromModel(); // cambiar nombre para evitar conflicto
+      res.status(200).json(users);
+  } catch (error) {
+      console.error('Error al obtener los usuarios:', error);
+      res.status(500).json({ message: 'Error del servidor al obtener los usuarios.' });
+  }
+};
+
+// Cerrar sesión (Logout)
+export const logoutUser = (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+    });
+    res.status(200).json({ message: 'Sesión cerrada correctamente.' });
 };

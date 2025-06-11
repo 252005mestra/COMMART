@@ -29,3 +29,13 @@ export const findUserByUsername = (username) => {
     });
   });
 };
+
+// Obtener todos los usuarios (solo sus nombres de usuario)
+export const getAllUsers = () => {
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT username FROM users', (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};
