@@ -1,5 +1,6 @@
 @import 'fonts.css';
 
+/* Reset y reglas globales */
 html, body {
   height: 100%;               
   margin: 0;               
@@ -14,6 +15,9 @@ body {
   background-attachment: fixed;  
 }
 
+/* Componentes principales */
 .Logo img{
   height: 5em;
 }
+
+

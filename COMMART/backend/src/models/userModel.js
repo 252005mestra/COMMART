@@ -39,3 +39,40 @@ export const getAllUsers = () => {
     });
   });
 };
+
+// Obtener Usuario por ID
+export const findUserById = (id) => {
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT id, username, email FROM users WHERE id = ?', [id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results[0]);
+    });
+  });
+};
+
+// Actualizar usuario (por ID)
+export const updateUserInDB = (id, username, email, hashedPassword) => {
+  return new Promise((resolve, reject) => {
+    const query = hashedPassword
+      ? 'UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?'
+      : 'UPDATE users SET username = ?, email = ? WHERE id = ?';
+    const params = hashedPassword
+      ? [username, email, hashedPassword, id]
+      : [username, email, id];
+
+    connection.query(query, params, (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    });
+  });
+};
+
+// Eliminar usuario (por ID)
+export const deleteUserFromDB = (id) => {
+  return new Promise((resolve, reject) => {
+    connection.query('DELETE FROM users WHERE id = ?', [id], (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    });
+  });
+};
