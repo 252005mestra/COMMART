@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import authRoutes from './src/routes/authRoutes.js';
 import db from './src/config/db.js'
@@ -7,8 +8,13 @@ import db from './src/config/db.js'
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // frontend
+    credentials: true               // permitir cookies cross-origin
+  }));
+  
 app.use(express.json());
+app.use(cookieParser());
 
 app.use('/api/auth', authRoutes); // localhost:5000/api/auth/register
 
