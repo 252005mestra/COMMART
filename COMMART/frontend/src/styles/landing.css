@@ -424,35 +424,37 @@ html, body {
 .Cards-Artists .Card-info .user-row {
     display: flex;
     align-items: center;
-    gap: 8px;
     margin-bottom: 2px;
 }
 .Cards-Artists .Card-info .user-icon {
-    width: 26px;
-    height: 26px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
-    background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
-.Cards-Artists .Card-info .user-icon svg {
-    width: 18px;
-    height: 18px;
-    color: #fff;
+.Cards-Artists .Card-info .profile-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
 }
 .Cards-Artists .Card-info .artist-name {
     font-family: 'Goldman', sans-serif;
-    font-size: 1.1rem;
+    font-size: 0.95rem; /* más pequeño */
     color: #222;
     font-weight: 600;
     letter-spacing: 0.01em;
 }
 .Cards-Artists .Card-info .followers {
     font-family: 'Nunito Sans', sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.80rem;
     color: #888;
     margin-top: 2px;
+    margin-left: 20px;
     letter-spacing: 0.08em;
     text-align: center;
     font-weight: 400;

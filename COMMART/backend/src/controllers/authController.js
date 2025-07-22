@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'; 
+import connection from '../config/db.js';
 import { 
     createUser, 
     findUserByEmail, 
@@ -272,4 +273,27 @@ export const logoutUser = (req, res) => {
         sameSite: 'strict'
     });
     res.status(200).json({ message: 'Sesión cerrada correctamente.' });
+};
+
+// Obtener artistas públicos para la landing
+export const getPublicArtists = (req, res) => {
+    const query = `
+        SELECT 
+            u.id,
+            u.username,
+            u.profile_image,
+            (SELECT COUNT(*) FROM artist_followers WHERE artist_id = u.id) AS followers,
+            (SELECT image_path FROM portfolios WHERE artist_id = u.id ORDER BY created_at DESC LIMIT 1) AS portfolio_image
+        FROM users u
+        WHERE u.is_artist = TRUE AND u.role = 'artist'
+        ORDER BY u.id DESC
+        LIMIT 20
+    `;
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener artistas públicos:', err);
+            return res.status(500).json({ message: 'Error del servidor.' });
+        }
+        res.status(200).json(results);
+    });
 };

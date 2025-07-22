@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import '../styles/landing.css';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
@@ -10,16 +11,12 @@ import Lino1 from '../assets/1.1 Lino.png';
 import Tiko1 from '../assets/2.1 Tiko.png';
 import LinoTiko from '../assets/3. Lino y Tiko.png';
 
-import prueba1 from '../assets/Prueba/prueba1.jpg';
-import prueba2 from '../assets/Prueba/prueba2.jpg';
-import prueba3 from '../assets/Prueba/prueba3.jpg';
-import prueba4 from '../assets/Prueba/prueba4.jpg';
-import prueba5 from '../assets/Prueba/prueba5.jpg';
-import prueba6 from '../assets/Prueba/prueba6.jpg';
-
 const LandingPage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [artists, setArtists] = useState([]);
+  const [artistIndex, setArtistIndex] = useState(0);
+  const [artistGridIndex, setArtistGridIndex] = useState(0);
 
   const openLoginFromRegister = () => {
     setShowRegisterModal(false);
@@ -31,47 +28,52 @@ const LandingPage = () => {
     setTimeout(() => setShowRegisterModal(true), 100);
   };
 
-  // PRUEBA PARA LAS IMAGENES DE ARTISTAS
-  const artistSamples = [
-    { id: 1, name: "@Sofía", image: prueba1 },
-    { id: 2, name: "@Mateo", image: prueba2 },
-    { id: 3, name: "@Valentina", image: prueba3 },
-    { id: 4, name: "@Andrés", image: prueba4 },
-    { id: 5, name: "@Luisa", image: prueba5 },
-    { id: 6, name: "@Camilo", image: prueba6 }
-  ];
-
-  const [artistIndex, setArtistIndex] = useState(0);
-
+  // Obtener artistas públicos desde el backend
   useEffect(() => {
-    const interval = setInterval(() => {
-      setArtistIndex((prevIndex) => (prevIndex + 3) % artistSamples.length);
-    }, 5000);
-    return () => clearInterval(interval);
+    const fetchArtists = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/auth/public-artists');
+        setArtists(response.data);
+      } catch (error) {
+        console.error('Error al obtener artistas:', error);
+      }
+    };
+    fetchArtists();
   }, []);
 
-  const visibleArtists = [
-    artistSamples[artistIndex],
-    artistSamples[(artistIndex + 1) % artistSamples.length],
-    artistSamples[(artistIndex + 2) % artistSamples.length]
-  ];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setArtistIndex((prevIndex) => artists.length > 0 ? (prevIndex + 3) % artists.length : 0);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [artists]);
 
-  // Para las Cards-Artists (4 artistas visibles)
-  const [artistGridIndex, setArtistGridIndex] = useState(0);
+  const visibleArtists = artists.slice(artistIndex, artistIndex + 3).length === 3
+    ? artists.slice(artistIndex, artistIndex + 3)
+    : [
+        ...artists.slice(artistIndex),
+        ...artists.slice(0, 3 - (artists.length - artistIndex))
+      ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setArtistGridIndex((prevIndex) => (prevIndex + 4) % artistSamples.length);
+      setArtistGridIndex((prevIndex) => artists.length > 0 ? (prevIndex + 4) % artists.length : 0);
     }, 5000);
     return () => clearInterval(interval);
-  }, [artistSamples.length]);
+  }, [artists]);
 
-  const visibleGridArtists = [
-    artistSamples[artistGridIndex],
-    artistSamples[(artistGridIndex + 1) % artistSamples.length],
-    artistSamples[(artistGridIndex + 2) % artistSamples.length],
-    artistSamples[(artistGridIndex + 3) % artistSamples.length]
-  ];
+  const visibleGridArtists = artists.slice(artistGridIndex, artistGridIndex + 4).length === 4
+    ? artists.slice(artistGridIndex, artistGridIndex + 4)
+    : [
+        ...artists.slice(artistGridIndex),
+        ...artists.slice(0, 4 - (artists.length - artistGridIndex))
+      ];
+
+  const getPortfolioImageUrl = (imgPath) =>
+    imgPath ? `http://localhost:5000/${imgPath}` : '/default-artist.jpg';
+
+  const getProfileImageUrl = (imgPath) =>
+    imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
 
   return (
     <>
@@ -108,8 +110,11 @@ const LandingPage = () => {
               <div className='Cards-Banner'>
                 {visibleArtists.map((artist) => (
                   <div className='Card' key={artist.id}>
-                    <img src={artist.image} alt={artist.name} />
-                    <p>{artist.name}</p>
+                    <img
+                      src={getPortfolioImageUrl(artist.portfolio_image)}
+                      alt={artist.username}
+                    />
+                    <p>{artist.username}</p>
                   </div>
                 ))}
               </div>
@@ -136,16 +141,22 @@ const LandingPage = () => {
               <div className='Cards-Artists'>
                 {visibleGridArtists.map((artist) => (
                   <div className='Card' key={artist.id}>
-                    <img src={artist.image} alt={artist.name} />
+                    <img
+                      src={getPortfolioImageUrl(artist.portfolio_image)}
+                      alt={artist.username}
+                    />
                     <div className="Card-info">
                       <div className="user-row">
                         <span className="user-icon">
-                          {/* Puedes usar un SVG de usuario aquí */}
-                          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="5" fill="currentColor"/><ellipse cx="12" cy="17" rx="7" ry="4" fill="currentColor" opacity="0.3"/></svg>
+                          <img
+                            src={getProfileImageUrl(artist.profile_image)}
+                            alt={artist.username}
+                            className="profile-img"
+                          />
                         </span>
-                        <span className="artist-name">{artist.name}</span>
+                        <span className="artist-name">{artist.username}</span>
+                        <span className="followers">{artist.followers} Followers</span>
                       </div>
-                      <span className="followers">{artist.followers} Followers</span>
                     </div>
                   </div>
                 ))}
