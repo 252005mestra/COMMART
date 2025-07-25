@@ -2,31 +2,22 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/landing.css';
-import LoginModal from '../components/LoginModal';
+import Footer from '../components/Footer';
+import NavLanding from '../components/NavLanding';
 import RegisterModal from '../components/RegisterModal';
+import LoginModal from '../components/LoginModal';
 
 // Imagenes
-import logo from '../assets/LogoCOMMART.png';
 import Lino1 from '../assets/1.1 Lino.png';
 import Tiko1 from '../assets/2.1 Tiko.png';
 import LinoTiko from '../assets/3. Lino y Tiko.png';
 
 const LandingPage = () => {
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [artists, setArtists] = useState([]);
   const [artistIndex, setArtistIndex] = useState(0);
   const [artistGridIndex, setArtistGridIndex] = useState(0);
-
-  const openLoginFromRegister = () => {
-    setShowRegisterModal(false);
-    setTimeout(() => setShowLoginModal(true), 100);
-  };
-
-  const openRegisterFromLogin = () => {
-    setShowLoginModal(false);
-    setTimeout(() => setShowRegisterModal(true), 100);
-  };
 
   // Obtener artistas públicos desde el backend
   useEffect(() => {
@@ -75,28 +66,22 @@ const LandingPage = () => {
   const getProfileImageUrl = (imgPath) =>
     imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
 
+  const handleTryNow = () => setShowRegisterModal(true);
+
+  // Funciones para el switch entre modales
+  const openLoginFromRegister = () => {
+    setShowRegisterModal(false);
+    setTimeout(() => setShowLoginModal(true), 100);
+  };
+
+  const openRegisterFromLogin = () => {
+    setShowLoginModal(false);
+    setTimeout(() => setShowRegisterModal(true), 100);
+  };
+
   return (
     <>
-      <nav className='Menu-Landing' aria-label='Menú principal'>
-        <button onClick={() => window.location.reload()} className='Logo'>
-            <img src={logo} alt='Logo COMMART'/>
-            <span>COMMART</span>
-        </button>
-        <ul>
-            <li>
-              <Link to="">Info</Link>
-            </li>
-            <li>
-              <Link to="">Blog</Link>
-            </li>
-            <li>
-              <button onClick={() => setShowLoginModal(true)}>Iniciar Sesión</button>
-            </li>
-            <li>
-              <button onClick={() => setShowRegisterModal(true)}>Registrarse</button>
-            </li>
-        </ul>
-      </nav>
+      <NavLanding />
 
       <main className='LandingContent'>
         <section className='section Banner' aria-label="Sección principal con eslogan de COMMART">
@@ -105,7 +90,7 @@ const LandingPage = () => {
                   <h1>¡DONDE EL ARTE COBRA VIDA!</h1>
                   <p>COMMART ES TU VENTANA AL MUNDO CREATIVO</p>
                   <p>En COMMART podrás dar a relucir tus dotes artísticos, ganar reconocimiento y apoyar distintos artistas.</p>
-                  <button onClick={() => setShowRegisterModal(true)}>¡PRUEBA AHORA!</button>
+                  <button onClick={handleTryNow}>¡PRUEBA AHORA!</button>
               </div>
               <div className='Cards-Banner'>
                 {visibleArtists.map((artist) => (
@@ -179,17 +164,22 @@ const LandingPage = () => {
                 <img src={Tiko1} alt='Tiko' />
               </div>
             </div>
-            <footer className='Terms-and-Conditions'>
-              <ul>
-                  <li><Link to="">Términos del servicio</Link></li>
-                  <li><Link to="">Política de privacidad</Link></li>
-                  <li><Link to="">Ayuda</Link></li>
-              </ul>
-            </footer>
+            <Footer />
         </section>
       </main>
-      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} onSwitchToRegister={openRegisterFromLogin} />}
-      {showRegisterModal && <RegisterModal onClose={() => setShowRegisterModal(false)} onSwitchToLogin={openLoginFromRegister} />}
+
+      {showRegisterModal && (
+        <RegisterModal
+          onClose={() => setShowRegisterModal(false)}
+          onSwitchToLogin={openLoginFromRegister}
+        />
+      )}
+      {showLoginModal && (
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          onSwitchToRegister={openRegisterFromLogin}
+        />
+      )}
     </>
   );
 };

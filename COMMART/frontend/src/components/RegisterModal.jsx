@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../styles/loginModal.css';
+import '../styles/modal.css';
 import logo from "../assets/LogoCOMMART.png";
 
 // Regex igual que backend

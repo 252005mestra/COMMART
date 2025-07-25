@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
 const PrivateRoute = ({ children }) => {
-  const [isAuth, setIsAuth] = useState(null); // null: aún no sabemos
+  const [isAuth, setIsAuth] = useState(null); 
 
   useEffect(() => {
     fetch("http://localhost:5000/api/auth/users", {
@@ -10,15 +10,15 @@ const PrivateRoute = ({ children }) => {
     })
       .then((res) => {
         if (res.ok) {
-          setIsAuth(true); // autorizado
+          setIsAuth(true); // Autorizado
         } else {
-          setIsAuth(false); // no autorizado
+          setIsAuth(false); // No autorizado
         }
       })
       .catch(() => setIsAuth(false));
   }, []);
 
-  if (isAuth === null) return <div>Cargando...</div>; // espera confirmación
+  if (isAuth === null) return <div>Cargando...</div>; // Espera confirmación
 
   return isAuth ? children : <Navigate to="/" />;
 };

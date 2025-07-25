@@ -1,5 +1,3 @@
-@import 'fonts.css';
-
 /* ========== Layout base, scroll y secciones generales ========== */
 html, body {
     height: 100%;
@@ -47,90 +45,6 @@ html, body {
   object-fit: contain;
   display: block;
   margin: 0 auto;       
-}
-
-/* ========== Menú de navegación (header) ========== */
-.Menu-Landing {
-    box-sizing: border-box;
-    width: 100%;
-    height: 75px; 
-    min-height: 55px;   
-    padding: 0 clamp(1rem, 4vw, 2rem); 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: absolute;
-    z-index: 100;
-    background-color: white;
-    background-image: url('../assets/FondoCommart.jpg');  
-    background-size: cover;       
-    background-position: center;   
-    background-repeat: no-repeat;  
-    background-attachment: fixed;  
-}
-
-.Logo {
-    all: unset;
-    display: flex;
-    align-items: center;
-    cursor: pointer; 
-    gap: 0.5rem;
-}
-
-.Menu-Landing ul {
-    display: flex;
-    align-items: center;
-    gap: clamp(0.5rem, 3vw, 1.5rem);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-/* Botones del menú */
-.Menu-Landing a,
-.Menu-Landing button,
-.Eslogan a,
-.Eslogan button,
-.Info a,
-.Info button,
-.Suggestion-Box a,
-.Suggestion-Box button {
-    text-decoration: none;
-    font-family: 'Goldman';
-    transition: all 0.3s ease;
-}
-
-.Menu-Landing ul li a {
-    color: #7d5938;
-}
-.Menu-Landing ul li a:hover {
-    color: #593f28;
-    text-decoration: underline;
-}
-.Menu-Landing ul li:nth-child(3) button {
-    border: 3px solid #7d5938;
-    border-radius: 25px; 
-    color: #7d5938;
-    background-color: transparent;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-}
-.Menu-Landing ul li:nth-child(3) button:hover {
-    border-color: #593f28;
-    color: #593f28;
-    background-color: #593f283b;
-}
-.Menu-Landing ul li:nth-child(4) button {
-    background-color: #809671;
-    border: 3px solid #B3B792;
-    border-radius: 25px;
-    color: #fff;
-    padding: 0.5rem 1.5rem;
-    cursor: pointer;
-}
-.Menu-Landing ul li:nth-child(4) button:hover {
-    border-color: #aab482;
-    background-color: #6b825e;
 }
 
 /* ========== Banner principal ========== */
@@ -519,30 +433,6 @@ html, body {
     text-align: center;
     position: relative;
     top: 2rem;
-}
-
-/* ========== Footer ========== */
-.Terms-and-Conditions {
-    width: 100%;
-    background-color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2;
-    position: relative;
-    height: 48px;
-}
-.Terms-and-Conditions ul {
-    display: flex;
-    gap: clamp(0.5rem, 2vw, 2rem);
-    list-style: none;
-    justify-content: center;
-    align-items: center;
-}
-.Terms-and-Conditions li a {
-    color: black;
-    font-family: 'Nunito Sans';
-    text-decoration: none;
 }
 
 /* ========== Estilos para móviles ========== */

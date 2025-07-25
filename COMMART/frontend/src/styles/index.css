@@ -1,12 +1,16 @@
 @import 'fonts.css';
 
 /* Reset y reglas globales */
-html, body {
-  height: 100%;               
-  margin: 0;               
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-body {
+body, #root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: white;
   background-image: url('../assets/FondoCommart.jpg');  
   background-size: cover;       
@@ -18,6 +22,13 @@ body {
 /* Componentes principales */
 .Logo img{
   height: 5em;
+}
+
+.MainContent {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 
