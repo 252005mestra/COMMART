@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/modal.css';
-import logo from "../assets/LogoCOMMART.png";
+import logo from '../assets/LogoCOMMART.png';
 
 // Regex igual que backend
 const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
@@ -139,50 +139,50 @@ const RegisterModal = ({ onClose, onSwitchToLogin }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <button className="close-button" onClick={onClose}>×</button>
-        <img src={logo} alt="Logo COMMART" className="modal-logo" />
+    <div className='modal-overlay'>
+      <div className='modal-content'>
+        <button className='close-button' onClick={onClose}>×</button>
+        <img src={logo} alt='Logo COMMART' className='modal-logo' />
         <h2>Registrarse</h2>
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-        <form className="login-form" onSubmit={handleSubmit} noValidate>
+        {errorMessage && <p className='error-message'>{errorMessage}</p>}
+        <form className='login-form' onSubmit={handleSubmit} noValidate>
           <input
-            type="text"
-            placeholder="Nombre de Usuario"
+            type='text'
+            placeholder='Nombre de Usuario'
             value={username}
             onChange={handleChange(setUsername, 'username')}
             className={errors.username ? 'input-error' : ''}
           />
-          {errors.username && <span className="input-error-message">{errors.username}</span>}
+          {errors.username && <span className='input-error-message'>{errors.username}</span>}
           <input
-            type="email"
-            placeholder="Correo Electrónico"
+            type='email'
+            placeholder='Correo Electrónico'
             value={email}
             onChange={handleChange(setEmail, 'email')}
             className={errors.email ? 'input-error' : ''}
           />
-          {errors.email && <span className="input-error-message">{errors.email}</span>}
+          {errors.email && <span className='input-error-message'>{errors.email}</span>}
           <input
-            type="password"
-            placeholder="Contraseña"
+            type='password'
+            placeholder='Contraseña'
             value={password}
             onChange={handleChange(setPassword, 'password')}
             className={errors.password ? 'input-error' : ''}
           />
-          {errors.password && <span className="input-error-message">{errors.password}</span>}
+          {errors.password && <span className='input-error-message'>{errors.password}</span>}
           <input
-            type="password"
-            placeholder="Confirmar Contraseña"
+            type='password'
+            placeholder='Confirmar Contraseña'
             value={confirmPassword}
             onChange={handleChange(setConfirmPassword, 'confirmPassword')}
             className={errors.confirmPassword ? 'input-error' : ''}
           />
-          {errors.confirmPassword && <span className="input-error-message">{errors.confirmPassword}</span>}
-          <button type="submit">CREAR</button>
+          {errors.confirmPassword && <span className='input-error-message'>{errors.confirmPassword}</span>}
+          <button type='submit'>CREAR</button>
         </form>
         <p>
           ¿Ya tienes una cuenta?{' '}
-          <button className="link-button" onClick={() => {
+          <button className='link-button' onClick={() => {
             onClose();
             setTimeout(onSwitchToLogin, 100);
           }}>

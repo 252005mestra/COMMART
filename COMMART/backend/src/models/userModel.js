@@ -1,52 +1,68 @@
-import connection from '../config/db.js';
+import dbConnection from '../config/db.js';
 
-// Registro de Usuario
+// Registro de usuario
 export const createUser = (username, email, hashedPassword) => {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hashedPassword], (err, result) => { 
-        if (err) return reject(err); 
-        resolve(result); 
-    });
-  })
+    dbConnection.query(
+      'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+      [username, email, hashedPassword],
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
+  });
 };
 
 // Encontrar el usuario por correo electrónico
 export const findUserByEmail = (email) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-      if (err) return reject(err);
-      resolve(results[0]); 
-    });
+    dbConnection.query(
+      'SELECT * FROM users WHERE email = ?',
+      [email],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results[0]);
+      }
+    );
   });
 };
 
 // Encontrar el usuario por nombre de usuario
 export const findUserByUsername = (username) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
-      if (err) return reject(err);
-      resolve(results[0]);
-    });
+    dbConnection.query(
+      'SELECT * FROM users WHERE username = ?',
+      [username],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results[0]);
+      }
+    );
   });
 };
 
 // Obtener todos los usuarios (solo sus nombres de usuario)
 export const getAllUsers = () => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT username FROM users', (err, results) => {
+    dbConnection.query('SELECT username FROM users', (err, results) => {
       if (err) return reject(err);
       resolve(results);
     });
   });
 };
 
-// Obtener Usuario por ID
+// Obtener usuario por ID
 export const findUserById = (id) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT id, username, email FROM users WHERE id = ?', [id], (err, results) => {
-      if (err) return reject(err);
-      resolve(results[0]);
-    });
+    dbConnection.query(
+      'SELECT id, username, email FROM users WHERE id = ?',
+      [id],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results[0]);
+      }
+    );
   });
 };
 
@@ -60,7 +76,7 @@ export const updateUserInDB = (id, username, email, hashedPassword) => {
       ? [username, email, hashedPassword, id]
       : [username, email, id];
 
-    connection.query(query, params, (err, result) => {
+    dbConnection.query(query, params, (err, result) => {
       if (err) return reject(err);
       resolve(result);
     });
@@ -70,9 +86,13 @@ export const updateUserInDB = (id, username, email, hashedPassword) => {
 // Eliminar usuario (por ID)
 export const deleteUserFromDB = (id) => {
   return new Promise((resolve, reject) => {
-    connection.query('DELETE FROM users WHERE id = ?', [id], (err, result) => {
-      if (err) return reject(err);
-      resolve(result);
-    });
+    dbConnection.query(
+      'DELETE FROM users WHERE id = ?',
+      [id],
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
   });
 };

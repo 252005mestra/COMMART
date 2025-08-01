@@ -1,5 +1,5 @@
 /* ========== Footer ========== */
-.Terms-and-Conditions {
+.terms-and-conditions {
     width: 100%;
     background-color: #fff;
     display: flex;
@@ -9,7 +9,7 @@
     height: 48px;
 }
 
-.Terms-and-Conditions ul {
+.terms-and-conditions ul {
     display: flex;
     gap: clamp(0.5rem, 2vw, 2rem);
     list-style: none;
@@ -17,7 +17,7 @@
     align-items: center;
 }
 
-.Terms-and-Conditions li a {
+.terms-and-conditions li a {
     color: black;
     font-family: 'Nunito Sans';
     text-decoration: none;

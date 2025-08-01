@@ -1,4 +1,4 @@
-// Middleware para verificar token
+// Middleware para verificar el token JWT
 import jwt from 'jsonwebtoken';
 
 export const verifyToken = (req, res, next) => {

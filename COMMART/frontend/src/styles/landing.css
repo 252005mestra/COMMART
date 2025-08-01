@@ -7,14 +7,14 @@ html, body {
     box-sizing: border-box;
 }
 
-.LandingContent {
+.landing-content {
     height: 100vh;
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE y Edge antiguos */
 }
-.LandingContent::-webkit-scrollbar {
+.landing-content::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
 }
 
@@ -30,7 +30,7 @@ html, body {
 }
 
 /* ========== Imágenes generales ========== */
-.Info img {
+.info-section img {
   width: 100%;
   max-width: 500px;    
   height: auto;
@@ -38,7 +38,7 @@ html, body {
   display: block;
   margin: 0 auto;       
 }
-.Suggestion-Box img {
+.suggestion-box img {
   width: 100%;
   max-width: 400px;    
   height: auto;
@@ -48,12 +48,12 @@ html, body {
 }
 
 /* ========== Banner principal ========== */
-.Banner {
+.banner {
     width: 100%;
     justify-content: center;
     align-items: center;
 }
-.Banner > div {
+.banner > div {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -72,35 +72,35 @@ html, body {
     height: auto;
     padding: clamp(1rem, 4vw, 2rem);
 }
-.Eslogan {
+.slogan {
     box-sizing: border-box;
     width: 60%;
     padding: clamp(1rem, 5vw, 60px);
     height: auto;
 }
-.Eslogan h1{
+.slogan h1{
     font-family: 'Nunito Sans';
     font-weight: lighter;
     font-size: clamp(1rem, 1.5vw, 1.3rem);
     letter-spacing: clamp(0.1em, 2vw, 0.22em);
 }
-.Eslogan p:nth-of-type(1) {
+.slogan p:nth-of-type(1) {
     font-family: 'Goldman';
     font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 400;
     letter-spacing: 0.06em;
     margin: 0 0 clamp(1.5rem, 5vh, 40px) 0;
 }
-.Eslogan p:nth-of-type(2) {
+.slogan p:nth-of-type(2) {
     font-family: 'Nunito Sans';
     font-size: clamp(0.9rem, 2vw, 1.1rem); 
     letter-spacing: 0.04em;
     margin-bottom: clamp(1rem, 4vh, 2rem);
 }
 /* Botones principales */
-.Eslogan button,
-.Info a,
-.Suggestion-Text a {
+.slogan button,
+.info-section a,
+.suggestion-text a {
     all: unset;
     cursor: pointer;
     display: inline-block;
@@ -115,16 +115,16 @@ html, body {
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
 }
-.Eslogan button:hover,
-.Info a:hover,
-.Suggestion-Text a:hover {
+.slogan button:hover,
+.info-section a:hover,
+.suggestion-text a:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 8px rgba(0, 0, 0, 0.459);
     filter: brightness(1.05);
 }
 
-/* ========== Perfiles artistas (Cards-Banner) ========== */
-.Cards-Banner {
+/* ========== Perfiles artistas (banner-cards) ========== */
+.banner-cards {
     width: 35%;
     display: grid;
     grid-template-columns: 1fr 0.9fr;
@@ -134,26 +134,26 @@ html, body {
     gap: 1rem;
     position: relative;
 }
-.Cards-Banner .Card:first-child {
+.banner-cards .card:first-child {
     grid-row: span 2;
     aspect-ratio: 3 / 3.8;
     width: 100%;
     height: auto;
     z-index: 1;
 }
-.Cards-Banner .Card:nth-child(2) {
+.banner-cards .card:nth-child(2) {
     aspect-ratio: 1 / 1.2;
     width: 90%;
     height: auto;
     z-index: 2;
 }
-.Cards-Banner .Card:nth-child(3) {
+.banner-cards .card:nth-child(3) {
     aspect-ratio: 1 / 1;
     width: 75%;
     height: auto;
     z-index: 2;
 }
-.Card {
+.card {
     position: relative;
     border-radius: 20px;
     overflow: hidden;
@@ -163,16 +163,16 @@ html, body {
     cursor: pointer;
     animation: fadein 0.6s ease-in-out;
 }
-.Card:hover {
+.card:hover {
     transform: scale(1.08);
     box-shadow: 0 8px 8px rgba(0, 0, 0, 0.459);
 }
-.Card img {
+.card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
-.Card p {
+.card p {
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -199,13 +199,13 @@ html, body {
 }
 
 /* ========== Sección Info ========== */
-.Info {
+.info-section {
     background-color: #D2AB80;
     display: flex;
     width: 100%;
     padding: 0;    
 }
-.Info > div {
+.info-section > div {
     width: 100%; 
     display: flex;
     justify-content: center;
@@ -214,19 +214,19 @@ html, body {
     top: 2rem;
 }
 /* Imagen */
-.Info-Img {
+.info-img {
     width: 50%;
 }
-.Info-Img img,
-.Suggestion-Images img {
+.info-img img,
+.suggestion-images img {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.Info-Img img:hover,
-.Suggestion-Images img:hover {
+.info-img img:hover,
+.suggestion-images img:hover {
     transform: scale(1.08);
 }
 /* Texto */
-.Info-Text {
+.info-text {
     background-color: white;
     background-image: url('../assets/FondoCommart.jpg');
     background-size: cover;
@@ -247,24 +247,24 @@ html, body {
     border-radius: 200px 200px 0 0;
     text-align: center;
 }
-.Info-Text h2, 
-.Suggestion-Text h2 {
+.info-text h2, 
+.suggestion-text h2 {
     font-family: 'Goldman';
     font-size: clamp(2rem, 3vw, 2rem);
     font-weight: 400;
     letter-spacing: 0.06em;
     color: #593f28;
 }
-.Info-Text p,
-.Suggestion-Text p {
+.info-text p,
+.suggestion-text p {
     font-family: 'Nunito Sans';
     font-size: clamp(0.9rem, 2vw, 1.1rem); 
     letter-spacing: 0.04em;
     margin-bottom: clamp(3rem, 5vh, 3rem);
 }
 
-/* ========== Sección Find-Artists ========== */
-.Find-Artists > div{
+/* ========== Sección find-artists ========== */
+.find-artists > div{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -272,7 +272,7 @@ html, body {
     position: relative;
     top: 1rem;
 }
-.Find-Artists .Cards-Artists{
+.artist-cards{
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -281,7 +281,7 @@ html, body {
     width: 100%;
     height: 60vh;
 }
-.Find-Artists h2, .Find-Artists h3 {
+.find-artists h2, .find-artists h3 {
     font-family: 'Goldman';
     font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 400;
@@ -289,13 +289,13 @@ html, body {
     color: #593f28; 
     margin-bottom: 0;
 }
-.Find-Artists p{
+.find-artists p{
     font-family: 'Nunito Sans';
     font-size: clamp(0.9rem, 2vw, 1.1rem); 
     letter-spacing: 0.04em;
 }
-/* Cards-Artists estilo personalizado */
-.Cards-Artists .Card {
+/* artist-cards estilo personalizado */
+.artist-cards .card {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -311,17 +311,17 @@ html, body {
     cursor: pointer;
     animation: fadein 0.6s ease-in-out;
 }
-.Cards-Artists .Card:hover {
+.artist-cards .card:hover {
     transform: scale(1.08);
     box-shadow: 0 8px 8px rgba(0, 0, 0, 0.459);
 }
-.Cards-Artists .Card img {
+.artist-cards .card img {
     width: 100%;
     object-fit: cover;
     background: #fff;
     display: block;
 }
-.Cards-Artists .Card-info {
+.card-info {
     background: #fff;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
@@ -335,12 +335,12 @@ html, body {
     position: relative;
     z-index: 2;
 }
-.Cards-Artists .Card-info .user-row {
+.card-info .user-row {
     display: flex;
     align-items: center;
     margin-bottom: 2px;
 }
-.Cards-Artists .Card-info .user-icon {
+.card-info .user-icon {
     width: 54px;
     height: 54px;
     border-radius: 50%;
@@ -349,21 +349,21 @@ html, body {
     justify-content: center;
     overflow: hidden;
 }
-.Cards-Artists .Card-info .profile-img {
+.card-info .profile-img {
     width: 48px;
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
     display: block;
 }
-.Cards-Artists .Card-info .artist-name {
+.card-info .artist-name {
     font-family: 'Goldman', sans-serif;
     font-size: 0.95rem; /* más pequeño */
     color: #222;
     font-weight: 600;
     letter-spacing: 0.01em;
 }
-.Cards-Artists .Card-info .followers {
+.card-info .followers {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 0.80rem;
     color: #888;
@@ -375,7 +375,7 @@ html, body {
 }
 
 /* ========== Sección Sugerencias ========== */
-.Suggestion-Box.section {
+.suggestion-box.section {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -383,7 +383,7 @@ html, body {
     background-color: #B3B792;
     padding: 0;
 }
-.Suggestion-Box > div {
+.suggestion-box > div {
     flex: 1 1 auto;
     width: 100%;
     display: flex;
@@ -394,7 +394,7 @@ html, body {
     z-index: 1;
 }
 /* Imágenes laterales */
-.Suggestion-Images {
+.suggestion-images {
     flex: 2 2 0;
     display: flex;
     flex-direction: column;
@@ -404,14 +404,14 @@ html, body {
     max-width: 400px;
     z-index: 1;
 }
-.Suggestion-Images img {
+.suggestion-images img {
     width: 90%;
     height: auto;
     margin-bottom: 1rem;
     object-fit: contain;
 }
 /* Texto central */
-.Suggestion-Text {
+.suggestion-text {
     background-color: white;
     background-image: url('../assets/FondoCommart.jpg');
     background-size: cover;

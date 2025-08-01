@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/modal.css';
-import logo from "../assets/LogoCOMMART.png";
+import logo from '../assets/LogoCOMMART.png';
 
 const LoginModal = ({ onClose, onSwitchToRegister }) => {
   const [identifier, setIdentifier] = useState('');
@@ -70,35 +70,35 @@ const LoginModal = ({ onClose, onSwitchToRegister }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <button className="close-button" onClick={onClose}>×</button>
+    <div className='modal-overlay'>
+      <div className='modal-content'>
+        <button className='close-button' onClick={onClose}>×</button>
         <img src={logo} alt='Logo COMMART'/>
         <h2>Iniciar Sesión</h2>
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-        <form className="login-form" onSubmit={handleSubmit} noValidate>
+        {errorMessage && <p className='error-message'>{errorMessage}</p>}
+        <form className='login-form' onSubmit={handleSubmit} noValidate>
           <input
-            type="text"
-            placeholder="Usuario o Correo"
+            type='text'
+            placeholder='Usuario o Correo'
             value={identifier}
             onChange={handleChange(setIdentifier, 'identifier')}
             className={errors.identifier ? 'input-error' : ''}
           />
-          {errors.identifier && <span className="input-error-message">{errors.identifier}</span>}
+          {errors.identifier && <span className='input-error-message'>{errors.identifier}</span>}
           <input
-            type="password"
-            placeholder="Contraseña"
+            type='password'
+            placeholder='Contraseña'
             value={password}
             onChange={handleChange(setPassword, 'password')}
             className={errors.password ? 'input-error' : ''}
           />
-          {errors.password && <span className="input-error-message">{errors.password}</span>}
-          <Link to="/" className="forgot-password-link">¿Olvidaste tu contraseña?</Link>
-          <button type="submit">INICIAR</button>
+          {errors.password && <span className='input-error-message'>{errors.password}</span>}
+          <Link to='/' className='forgot-password-link'>¿Olvidaste tu contraseña?</Link>
+          <button type='submit'>INICIAR</button>
         </form>
         <p>
           ¿No tienes una cuenta?{' '}
-          <button className="link-button" onClick={() => {
+          <button className='link-button' onClick={() => {
             onClose();
             setTimeout(onSwitchToRegister, 100);
           }}>

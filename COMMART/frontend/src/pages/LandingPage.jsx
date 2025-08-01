@@ -3,28 +3,28 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/landing.css';
 import Footer from '../components/Footer';
-import NavLanding from '../components/NavLanding';
+import LandingNav from '../components/LandingNav';
 import RegisterModal from '../components/RegisterModal';
 import LoginModal from '../components/LoginModal';
 
-// Imagenes
+// Imágenes
 import Lino1 from '../assets/1.1 Lino.png';
 import Tiko1 from '../assets/2.1 Tiko.png';
 import LinoTiko from '../assets/3. Lino y Tiko.png';
 
 const LandingPage = () => {
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [artists, setArtists] = useState([]);
-  const [artistIndex, setArtistIndex] = useState(0);
-  const [artistGridIndex, setArtistGridIndex] = useState(0);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [artistList, setArtistList] = useState([]);
+  const [bannerArtistIndex, setBannerArtistIndex] = useState(0);
+  const [gridArtistIndex, setGridArtistIndex] = useState(0);
 
   // Obtener artistas públicos desde el backend
   useEffect(() => {
     const fetchArtists = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/auth/public-artists');
-        setArtists(response.data);
+        setArtistList(response.data);
       } catch (error) {
         console.error('Error al obtener artistas:', error);
       }
@@ -34,30 +34,30 @@ const LandingPage = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setArtistIndex((prevIndex) => artists.length > 0 ? (prevIndex + 3) % artists.length : 0);
+      setBannerArtistIndex((prevIndex) => artistList.length > 0 ? (prevIndex + 3) % artistList.length : 0);
     }, 5000);
     return () => clearInterval(interval);
-  }, [artists]);
+  }, [artistList]);
 
-  const visibleArtists = artists.slice(artistIndex, artistIndex + 3).length === 3
-    ? artists.slice(artistIndex, artistIndex + 3)
+  const visibleBannerArtists = artistList.slice(bannerArtistIndex, bannerArtistIndex + 3).length === 3
+    ? artistList.slice(bannerArtistIndex, bannerArtistIndex + 3)
     : [
-        ...artists.slice(artistIndex),
-        ...artists.slice(0, 3 - (artists.length - artistIndex))
+        ...artistList.slice(bannerArtistIndex),
+        ...artistList.slice(0, 3 - (artistList.length - bannerArtistIndex))
       ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setArtistGridIndex((prevIndex) => artists.length > 0 ? (prevIndex + 4) % artists.length : 0);
+      setGridArtistIndex((prevIndex) => artistList.length > 0 ? (prevIndex + 4) % artistList.length : 0);
     }, 5000);
     return () => clearInterval(interval);
-  }, [artists]);
+  }, [artistList]);
 
-  const visibleGridArtists = artists.slice(artistGridIndex, artistGridIndex + 4).length === 4
-    ? artists.slice(artistGridIndex, artistGridIndex + 4)
+  const visibleGridArtists = artistList.slice(gridArtistIndex, gridArtistIndex + 4).length === 4
+    ? artistList.slice(gridArtistIndex, gridArtistIndex + 4)
     : [
-        ...artists.slice(artistGridIndex),
-        ...artists.slice(0, 4 - (artists.length - artistGridIndex))
+        ...artistList.slice(gridArtistIndex),
+        ...artistList.slice(0, 4 - (artistList.length - gridArtistIndex))
       ];
 
   const getPortfolioImageUrl = (imgPath) =>
@@ -66,35 +66,35 @@ const LandingPage = () => {
   const getProfileImageUrl = (imgPath) =>
     imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
 
-  const handleTryNow = () => setShowRegisterModal(true);
+  const handleTryNow = () => setIsRegisterModalOpen(true);
 
   // Funciones para el switch entre modales
   const openLoginFromRegister = () => {
-    setShowRegisterModal(false);
-    setTimeout(() => setShowLoginModal(true), 100);
+    setIsRegisterModalOpen(false);
+    setTimeout(() => setIsLoginModalOpen(true), 100);
   };
 
   const openRegisterFromLogin = () => {
-    setShowLoginModal(false);
-    setTimeout(() => setShowRegisterModal(true), 100);
+    setIsLoginModalOpen(false);
+    setTimeout(() => setIsRegisterModalOpen(true), 100);
   };
 
   return (
     <>
-      <NavLanding />
+      <LandingNav />
 
-      <main className='LandingContent'>
-        <section className='section Banner' aria-label="Sección principal con eslogan de COMMART">
+      <main className='landing-content'>
+        <section className='section banner' aria-label='Sección principal con eslogan de COMMART'>
           <div>
-              <div className='Eslogan'>
+              <div className='slogan'>
                   <h1>¡DONDE EL ARTE COBRA VIDA!</h1>
                   <p>COMMART ES TU VENTANA AL MUNDO CREATIVO</p>
                   <p>En COMMART podrás dar a relucir tus dotes artísticos, ganar reconocimiento y apoyar distintos artistas.</p>
                   <button onClick={handleTryNow}>¡PRUEBA AHORA!</button>
               </div>
-              <div className='Cards-Banner'>
-                {visibleArtists.map((artist) => (
-                  <div className='Card' key={artist.id}>
+              <div className='banner-cards'>
+                {visibleBannerArtists.map((artist) => (
+                  <div className='card' key={artist.id}>
                     <img
                       src={getPortfolioImageUrl(artist.portfolio_image)}
                       alt={artist.username}
@@ -106,41 +106,41 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section className='section Info' aria-label="Información sobre monetización artística">
+        <section className='section info-section' aria-label='Información sobre monetización artística'>
           <div>
-            <div className='Info-Img'>
+            <div className='info-img'>
               <img src={LinoTiko} alt='Lino y Tiko, personajes de COMMART'/>
             </div>
-            <div className='Info-Text'>
+            <div className='info-text'>
                 <h2>Monetiza tu<br /> creatividad</h2>
                 <p>Acepta comisiones y<br />  lleva tu arte al siguiente<br />  nivel.</p>
-                <Link to="">CONOCE MÁS</Link>
+                <Link to=''>CONOCE MÁS</Link>
             </div>
           </div>
         </section>
 
-        <section className='section Find-Artists' aria-label="Invitación a encontrar artistas">
+        <section className='section find-artists' aria-label='Invitación a encontrar artistas'>
             <div>
               <h2>¿Tienes una idea en mente?</h2>
               <p>Hazla realidad con un artista único.</p>
-              <div className='Cards-Artists'>
+              <div className='artist-cards'>
                 {visibleGridArtists.map((artist) => (
-                  <div className='Card' key={artist.id}>
+                  <div className='card' key={artist.id}>
                     <img
                       src={getPortfolioImageUrl(artist.portfolio_image)}
                       alt={artist.username}
                     />
-                    <div className="Card-info">
-                      <div className="user-row">
-                        <span className="user-icon">
+                    <div className='card-info'>
+                      <div className='user-row'>
+                        <span className='user-icon'>
                           <img
                             src={getProfileImageUrl(artist.profile_image)}
                             alt={artist.username}
-                            className="profile-img"
+                            className='profile-img'
                           />
                         </span>
-                        <span className="artist-name">{artist.username}</span>
-                        <span className="followers">{artist.followers} Followers</span>
+                        <span className='artist-name'>{artist.username}</span>
+                        <span className='followers'>{artist.followers} Followers</span>
                       </div>
                     </div>
                   </div>
@@ -150,17 +150,17 @@ const LandingPage = () => {
             </div>
         </section>
 
-        <section className='section Suggestion-Box' aria-label="Buzón de sugerencias y Términos y Condiciones">
+        <section className='section suggestion-box' aria-label='Buzón de sugerencias y Términos y Condiciones'>
             <div>
-              <div className="Suggestion-Images">
+              <div className='suggestion-images'>
                 <img src={Lino1} alt='Lino' />
               </div>
-              <div className='Suggestion-Text'>
+              <div className='suggestion-text'>
                 <h2>Tu opinión cuenta</h2>
                 <p>Ayúdanos a hacer crecer nuestra plataforma. Deja tus sugerencias en el buzón y contribuye a nuestra mejora continua.</p>
-                <Link to="">IR A BUZÓN</Link>
+                <Link to=''>IR A BUZÓN</Link>
               </div>
-              <div className="Suggestion-Images">
+              <div className='suggestion-images'>
                 <img src={Tiko1} alt='Tiko' />
               </div>
             </div>
@@ -168,15 +168,15 @@ const LandingPage = () => {
         </section>
       </main>
 
-      {showRegisterModal && (
+      {isRegisterModalOpen && (
         <RegisterModal
-          onClose={() => setShowRegisterModal(false)}
+          onClose={() => setIsRegisterModalOpen(false)}
           onSwitchToLogin={openLoginFromRegister}
         />
       )}
-      {showLoginModal && (
+      {isLoginModalOpen && (
         <LoginModal
-          onClose={() => setShowLoginModal(false)}
+          onClose={() => setIsLoginModalOpen(false)}
           onSwitchToRegister={openRegisterFromLogin}
         />
       )}

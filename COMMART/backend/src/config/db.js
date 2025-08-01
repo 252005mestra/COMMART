@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Configuración de la conexión a la base de datos
-const connection = mysql.createConnection({
+const dbConnection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -12,7 +12,7 @@ const connection = mysql.createConnection({
 });
 
 // Verificar errores al establecer la conexión a la base de datos
-connection.connect(err => {
+dbConnection.connect(err => {
   if (err) {
     console.error('Error al conectar a la base de datos', err);
     return;
@@ -20,4 +20,4 @@ connection.connect(err => {
   console.log('Conectado a la base de datos');
 });
 
-export default connection;
+export default dbConnection;

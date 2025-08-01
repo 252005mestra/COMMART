@@ -1,5 +1,5 @@
 /* ========== Navbar principal ========== */
-.Navbar {
+.navbar {
   box-sizing: border-box;
   width: 100%;
   height: 70px;
@@ -13,7 +13,7 @@
 }
 
 /* ========== Logo y título ========== */
-.Logo {
+.logo {
   all: unset;
   display: flex;
   align-items: center;
@@ -21,16 +21,16 @@
   gap: 0.5rem;
 }
 
-.Logo span {
+.logo span {
   font-family: 'Goldman';
 }
 
 /* ========== Barra de búsqueda ========== */
-.Navbar-search {
+.navbar-search {
   flex: 1;
   display: flex;
   align-items: center;
-  background: #f8f8f5;;
+  background: #f8f8f5;
   border: 2px solid #7d5938;
   border-radius: 15px;
   margin: 0 2rem;
@@ -43,7 +43,7 @@
   color: #7d5938;
   margin-right: 0.7rem;
 }
-.Navbar-search input {
+.navbar-search input {
   border: none;
   background: transparent;
   font-size: 1rem;
@@ -54,7 +54,7 @@
 }
 
 /* ========== Menús de Acciones ========== */
-.Navbar-actions {
+.navbar-actions {
   display: flex;
   align-items: center;
   gap: 1.5rem;
@@ -79,9 +79,9 @@
 }
 
 /* Dropdowns generales */
-.Menu-Dropdown,
-.Profile-Dropdown,
-.Notifications-Dropdown {
+.menu-dropdown,
+.profile-dropdown,
+.notifications-dropdown {
   position: absolute;
   top: 70px;
   right: 2rem;
@@ -94,7 +94,7 @@
 }
 
 /* Encabezado de menú */
-.Menu-Header {
+.menu-header {
   background: #D2AB80;
   color: #fff;
   font-family: 'Goldman';
@@ -106,14 +106,14 @@
 }
 
 /* Listas de menú */
-.Menu-Dropdown ul,
-.Profile-Dropdown ul {
+.menu-dropdown ul,
+.profile-dropdown ul {
   list-style: none;
   margin: 0;
   padding: 1rem 1.2rem 0 1.2rem;
 }
-.Menu-Dropdown ul li,
-.Profile-Dropdown ul li {
+.menu-dropdown ul li,
+.profile-dropdown ul li {
   display: flex;
   align-items: center;
   gap: 0.7rem;
@@ -124,23 +124,23 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.Menu-Dropdown ul li:hover,
-.Profile-Dropdown ul li:hover {
+.menu-dropdown ul li:hover,
+.profile-dropdown ul li:hover {
   background: #f3f3f3;
   border-radius: 8px;
 }
 
 /* Notificaciones */
-.Notifications-Dropdown {
+.notifications-dropdown {
   min-width: 370px;
 }
-.Notifications-Tabs {
+.notifications-tabs {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
   padding: 0.7rem 1.2rem 0 1.2rem;
 }
-.Notifications-Tabs button {
+.notifications-tabs button {
   color: #fff;
   padding: 0.3rem 1.2rem;
   font-family: 'Nunito Sans', sans-serif;

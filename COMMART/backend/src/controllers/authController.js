@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'; 
-import connection from '../config/db.js';
+import dbConnection from '../config/db.js';
 import { 
     createUser, 
     findUserByEmail, 
@@ -289,7 +289,7 @@ export const getPublicArtists = (req, res) => {
         ORDER BY u.id DESC
         LIMIT 20
     `;
-    connection.query(query, (err, results) => {
+    dbConnection.query(query, (err, results) => {
         if (err) {
             console.error('Error al obtener artistas públicos:', err);
             return res.status(500).json({ message: 'Error del servidor.' });

@@ -1,5 +1,5 @@
-/* ========== Menú de navegación (header) ========== */
-.Menu-Landing {
+/* ========== Navigation menu (header) ========== */
+.landing-menu {
     box-sizing: border-box;
     width: 100%;
     height: 75px;   
@@ -17,7 +17,7 @@
     background-attachment: fixed;  
 }
 
-.Logo {
+.logo {
     all: unset;
     display: flex;
     align-items: center;
@@ -25,7 +25,7 @@
     gap: 0.5rem;
 }
 
-.Menu-Landing ul {
+.landing-menu ul {
     display: flex;
     align-items: center;
     gap: clamp(0.5rem, 3vw, 1.5rem);
@@ -35,27 +35,27 @@
 }
 
 /* Botones del menú */
-.Menu-Landing a,
-.Menu-Landing button,
-.Eslogan a,
-.Eslogan button,
-.Info a,
-.Info button,
-.Suggestion-Box a,
-.Suggestion-Box button {
+.landing-menu a,
+.landing-menu button,
+.slogan a,
+.slogan button,
+.info-section a,
+.info-section button,
+.suggestion-box a,
+.suggestion-box button {
     text-decoration: none;
     font-family: 'Goldman';
     transition: all 0.3s ease;
 }
 
-.Menu-Landing ul li a {
+.landing-menu ul li a {
     color: #7d5938;
 }
-.Menu-Landing ul li a:hover {
+.landing-menu ul li a:hover {
     color: #593f28;
     text-decoration: underline;
 }
-.Menu-Landing ul li:nth-child(3) button {
+.landing-menu ul li:nth-child(3) button {
     border: 3px solid #7d5938;
     border-radius: 25px; 
     color: #7d5938;
@@ -63,12 +63,12 @@
     padding: 0.5rem 1rem;
     cursor: pointer;
 }
-.Menu-Landing ul li:nth-child(3) button:hover {
+.landing-menu ul li:nth-child(3) button:hover {
     border-color: #593f28;
     color: #593f28;
     background-color: #593f283b;
 }
-.Menu-Landing ul li:nth-child(4) button {
+.landing-menu ul li:nth-child(4) button {
     background-color: #809671;
     border: 3px solid #B3B792;
     border-radius: 25px;
@@ -76,7 +76,7 @@
     padding: 0.5rem 1.5rem;
     cursor: pointer;
 }
-.Menu-Landing ul li:nth-child(4) button:hover {
+.landing-menu ul li:nth-child(4) button:hover {
     border-color: #aab482;
     background-color: #6b825e;
 }
