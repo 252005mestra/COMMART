@@ -1,0 +1,246 @@
+/* ========== Contenedor principal del carrusel ========== */
+.carousel-home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2.5rem 0 2rem 0;
+}
+
+.carousel-container {
+  position: relative;
+  width: 98vw;
+  max-width: 1100px;
+  height: 420px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.18);
+  background: #fff;
+  margin: 2rem auto 1.5rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: #7d5938 5px solid;
+}
+
+/* ========== Track y slides ========== */
+.carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.slide {
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+}
+
+.slide-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2.2rem 2.5rem;
+  gap: 2.2rem;
+  box-sizing: border-box;
+}
+
+/* ========== Columnas del slide ========== */
+.slide-img-col {
+  flex: 0 0 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide-character {
+  width: 300px;
+  height: auto;
+  display: block;
+}
+
+.slide-text-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.1rem;
+  text-align: right;
+}
+
+.slide-text-col h2 {
+  font-family: 'Goldman';
+  font-size: 1.35rem;
+  color: #000000;
+  font-weight: normal;
+}
+
+.slide-text-col p {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  margin: 0 0 0.7rem 0;
+  color: #000000;
+  font-weight: 400;
+}
+
+.slide-btn {
+  border: none;
+  border-radius: 25px;
+  color: #fff;
+  padding: 0.7rem 2.2rem;
+  font-family: 'Goldman';
+  font-size: 1rem;
+  cursor: pointer;
+  background: #7d5938;
+  transition: background 0.2s;
+  letter-spacing: 0.04em;
+  align-self: flex-end;
+}
+
+.slide-btn:hover {
+  background: #593f28;
+}
+
+/* ========== Controles de navegación ========== */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7d5938;
+  cursor: pointer;
+  background: rgba(255,255,255,0.85);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.arrow-left {
+  left: 18px;
+}
+
+.arrow-right {
+  right: 18px;
+}
+
+.arrow:hover {
+  background: #ffffff81;
+  color: #593f28;
+}
+
+/* ========== Indicadores de navegación ========== */
+.navigation {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+  z-index: 2;
+}
+
+.nav-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(125, 89, 56, 0.25);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.nav-dot.active {
+  background: #ffffff;
+  transform: scale(1.2);
+  border: rgba(165, 147, 147, 0.329) 2px solid;
+}
+
+/* ========== Barra de progreso ========== */
+.progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: #7d5938;
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 2;
+  border-radius: 2px;
+}
+
+/* ========== Partículas flotantes ========== */
+.floating-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: float-particle 6s infinite linear;
+}
+
+@keyframes float-particle {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 900px) {
+  .carousel-container {
+    width: 99vw;
+    height: 260px;
+  }
+  
+  .slide-content {
+    flex-direction: column;
+    gap: 1.2rem;
+    padding: 1.2rem 0.7rem;
+  }
+  
+  .slide-img-col {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .slide-text-col {
+    align-items: center;
+    text-align: center;
+  }
+}
