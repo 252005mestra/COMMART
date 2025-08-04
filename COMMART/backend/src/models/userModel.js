@@ -96,3 +96,23 @@ export const deleteUserFromDB = (id) => {
     );
   });
 };
+
+export const getArtistsBasicInfo = () => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        u.id,
+        u.username,
+        u.profile_image,
+        (SELECT COUNT(*) FROM artist_followers WHERE artist_id = u.id) AS followers,
+        (SELECT image_path FROM portfolios WHERE artist_id = u.id ORDER BY created_at DESC LIMIT 1) AS portfolio_image
+      FROM users u
+      WHERE u.role = 'artist'
+      ORDER BY u.id DESC
+    `;
+    dbConnection.query(query, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};

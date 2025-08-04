@@ -8,7 +8,8 @@ import {
     getUserById, 
     updateUser, 
     deleteUser,
-    getPublicArtists 
+    getPublicArtists,
+    getAllArtists
 } from '../controllers/authController.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 
@@ -29,6 +30,7 @@ router.get('/protected', verifyToken, (req, res) => {
 
 // Obtener artistas públicos para la landing
 router.get('/public-artists', getPublicArtists);
+router.get('/artists', verifyToken, getAllArtists);
 
 // Rutas protegidas para usuarios
 router.get('/users', verifyToken, getAllUsers);

@@ -8,7 +8,8 @@ import {
     getAllUsers as getAllUsersFromModel, 
     updateUserInDB,
     deleteUserFromDB,
-    findUserById
+    findUserById,
+    getArtistsBasicInfo
 } from '../models/userModel.js';
 
 // Función para detectar caracteres peligrosos
@@ -296,4 +297,15 @@ export const getPublicArtists = (req, res) => {
         }
         res.status(200).json(results);
     });
+};
+
+// Obtener todos los artistas (solo datos básicos)
+export const getAllArtists = async (req, res) => {
+  try {
+    const artists = await getArtistsBasicInfo();
+    res.status(200).json(artists);
+  } catch (error) {
+    console.error('Error al obtener artistas:', error);
+    res.status(500).json({ message: 'Error del servidor al obtener artistas.' });
+  }
 };
