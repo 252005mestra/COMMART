@@ -86,11 +86,11 @@ const MainNav = ({ searchTerm, setSearchTerm, artistSuggestions = [] }) => {
             autoComplete='off'
           />
           {showSuggestions && artistSuggestions.length > 0 && (
-            <ul className="suggestions-list">
+            <ul className='suggestions-list'>
               {artistSuggestions.map(user => (
                 <li
                   key={user.id}
-                  className="suggestion-item"
+                  className='suggestion-item'
                   onMouseDown={() => handleSuggestionClick(user.username)}
                 >
                   {user.username}

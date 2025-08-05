@@ -9,7 +9,9 @@ import {
     updateUserInDB,
     deleteUserFromDB,
     findUserById,
-    getArtistsBasicInfo
+    getArtistsBasicInfo,
+    getAllStyles,
+    getPublicArtists as getPublicArtistsFromModel
 } from '../models/userModel.js';
 
 // Función para detectar caracteres peligrosos
@@ -277,29 +279,17 @@ export const logoutUser = (req, res) => {
 };
 
 // Obtener artistas públicos para la landing
-export const getPublicArtists = (req, res) => {
-    const query = `
-        SELECT 
-            u.id,
-            u.username,
-            u.profile_image,
-            (SELECT COUNT(*) FROM artist_followers WHERE artist_id = u.id) AS followers,
-            (SELECT image_path FROM portfolios WHERE artist_id = u.id ORDER BY created_at DESC LIMIT 1) AS portfolio_image
-        FROM users u
-        WHERE u.is_artist = TRUE AND u.role = 'artist'
-        ORDER BY u.id DESC
-        LIMIT 20
-    `;
-    dbConnection.query(query, (err, results) => {
-        if (err) {
-            console.error('Error al obtener artistas públicos:', err);
-            return res.status(500).json({ message: 'Error del servidor.' });
-        }
-        res.status(200).json(results);
-    });
+export const getPublicArtists = async (req, res) => {
+  try {
+    const artists = await getPublicArtistsFromModel();
+    res.status(200).json(artists);
+  } catch (error) {
+    console.error('Error al obtener artistas públicos:', error);
+    res.status(500).json({ message: 'Error del servidor al obtener artistas públicos.' });
+  }
 };
 
-// Obtener todos los artistas (solo datos básicos)
+// Obtener todos los artistas (con información completa)
 export const getAllArtists = async (req, res) => {
   try {
     const artists = await getArtistsBasicInfo();
@@ -307,5 +297,28 @@ export const getAllArtists = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener artistas:', error);
     res.status(500).json({ message: 'Error del servidor al obtener artistas.' });
+  }
+};
+
+// Obtener artistas filtrados por estilo
+export const getArtistsByStyleId = async (req, res) => {
+  const { styleId } = req.params;
+  try {
+    const artists = await getArtistsBasicInfo(parseInt(styleId));
+    res.status(200).json(artists);
+  } catch (error) {
+    console.error('Error al obtener artistas por estilo:', error);
+    res.status(500).json({ message: 'Error del servidor al obtener artistas por estilo.' });
+  }
+};
+
+// Obtener todos los estilos
+export const getStyles = async (req, res) => {
+  try {
+    const styles = await getAllStyles();
+    res.status(200).json(styles);
+  } catch (error) {
+    console.error('Error al obtener estilos:', error);
+    res.status(500).json({ message: 'Error del servidor al obtener estilos.' });
   }
 };

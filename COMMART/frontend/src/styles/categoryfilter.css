@@ -1,0 +1,78 @@
+/* ========== Filtro de categorías ========== */
+.category-filter {
+  margin: 20px 0;
+  padding: 0 20px;
+}
+
+.category-filter h3 {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-button {
+  padding: 8px 16px;
+  border: 2px solid #7d5938;
+  border-radius: 25px;
+  background: transparent;
+  color: #7d5938;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.filter-button:hover {
+  background: #7d5938;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.filter-button.active {
+  background: #7d5938;
+  color: white;
+  box-shadow: 0 2px 8px rgba(125, 89, 56, 0.3);
+}
+
+.filter-button.show-more {
+  background: #f0f0f0;
+  border-color: #ccc;
+  color: #666;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-button.show-more:hover {
+  background: #e0e0e0;
+  border-color: #999;
+  color: #333;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .category-filter {
+    padding: 0 15px;
+  }
+
+  .filter-container {
+    gap: 8px;
+  }
+
+  .filter-button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}

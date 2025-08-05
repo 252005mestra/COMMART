@@ -110,17 +110,17 @@ const Carousel = () => {
   return (
     <section className='carousel-home'>
       <div
-        className="carousel-container"
+        className='carousel-container'
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         tabIndex={0}
       >
         {/* Floating particles */}
-        <div className="floating-particles">
+        <div className='floating-particles'>
           {particles.map((p, i) => (
             <div
               key={i}
-              className="particle"
+              className='particle'
               style={{
                 left: `${p.left}%`,
                 animationDelay: `${p.delay}s`,
@@ -132,7 +132,7 @@ const Carousel = () => {
 
         {/* Slides */}
         <div
-          className="carousel-track"
+          className='carousel-track'
           style={{
             width: `${slides.length * 100}%`,
             transform: `translateX(-${current * 100}%)`
@@ -140,7 +140,7 @@ const Carousel = () => {
         >
           {slides.map((slide, idx) => (
             <div
-              className="slide"
+              className='slide'
               key={idx}
               style={{
                 backgroundImage: `url(${slide.bg})`,
@@ -149,14 +149,14 @@ const Carousel = () => {
                 backgroundRepeat: 'no-repeat'
               }}
             >
-              <div className="slide-content">
-                <div className="slide-img-col">
-                  <img src={slide.character} alt={slide.alt} className="slide-character" />
+              <div className='slide-content'>
+                <div className='slide-img-col'>
+                  <img src={slide.character} alt={slide.alt} className='slide-character' />
                 </div>
-                <div className="slide-text-col">
+                <div className='slide-text-col'>
                   <h2>{slide.title}</h2>
                   <p>{slide.desc}</p>
-                  <button className="slide-btn">{slide.button}</button>
+                  <button className='slide-btn'>{slide.button}</button>
                 </div>
               </div>
             </div>
@@ -164,15 +164,15 @@ const Carousel = () => {
         </div>
 
         {/* Flechas */}
-        <button className="arrow arrow-left" onClick={prevSlide} aria-label="Anterior">
+        <button className='arrow arrow-left' onClick={prevSlide} aria-label='Anterior'>
           <CircleArrowLeft size={32} />
         </button>
-        <button className="arrow arrow-right" onClick={nextSlide} aria-label="Siguiente">
+        <button className='arrow arrow-right' onClick={nextSlide} aria-label='Siguiente'>
           <CircleArrowRight size={32} />
         </button>
 
         {/* Dots */}
-        <div className="navigation">
+        <div className='navigation'>
           {slides.map((_, idx) => (
             <div
               key={idx}
