@@ -15,21 +15,33 @@ import {
   Mail,
   MessageSquareText,
   Search,
-  Menu
+  Menu,
+  Tag
 } from 'lucide-react';
 
 import '../styles/navbar.css';
 
-const MainNav = ({ searchTerm, setSearchTerm, artistSuggestions = [] }) => {
+const MainNav = ({ 
+  searchTerm, 
+  setSearchTerm, 
+  artistSuggestions = [], 
+  styleSuggestions = [],
+  getProfileImageUrl,
+  onStyleSelect 
+}) => {
   const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(null); 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const menuRef = useRef();
+  const iconsRef = useRef();
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (
+        menuRef.current && !menuRef.current.contains(event.target) &&
+        iconsRef.current && !iconsRef.current.contains(event.target)
+      ) {
         setOpenMenu(null);
       }
     };
@@ -47,22 +59,32 @@ const MainNav = ({ searchTerm, setSearchTerm, artistSuggestions = [] }) => {
     try {
       await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
       navigate('/');
-      window.location.reload(); // Opcional: fuerza recarga para limpiar estado
+      window.location.reload();
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
   };
 
-  // Maneja selección de sugerencia
-  const handleSuggestionClick = (username) => {
+  // Maneja selección de sugerencia de artista
+  const handleArtistSuggestionClick = (username) => {
     setSearchTerm(username);
     setShowSuggestions(false);
+  };
+
+  // Maneja selección de sugerencia de estilo
+  const handleStyleSuggestionClick = (style) => {
+    setSearchTerm('');
+    setShowSuggestions(false);
+    onStyleSelect(style);
   };
 
   // Oculta sugerencias al perder foco
   const handleBlur = () => {
     setTimeout(() => setShowSuggestions(false), 100);
   };
+
+  // Verificar si hay sugerencias para mostrar
+  const hasSuggestions = (artistSuggestions.length > 0 || styleSuggestions.length > 0) && searchTerm;
 
   return (
     <>
@@ -75,7 +97,7 @@ const MainNav = ({ searchTerm, setSearchTerm, artistSuggestions = [] }) => {
           <Search className='search-icon' size={24} />
           <input
             type='text'
-            placeholder='Buscar artista'
+            placeholder='Buscar'
             value={searchTerm}
             onChange={e => {
               setSearchTerm(e.target.value);
@@ -85,21 +107,47 @@ const MainNav = ({ searchTerm, setSearchTerm, artistSuggestions = [] }) => {
             onBlur={handleBlur}
             autoComplete='off'
           />
-          {showSuggestions && artistSuggestions.length > 0 && (
+          {showSuggestions && hasSuggestions && (
             <ul className='suggestions-list'>
+              {/* Sugerencias de artistas */}
               {artistSuggestions.map(user => (
                 <li
-                  key={user.id}
+                  key={`artist-${user.id}`}
                   className='suggestion-item'
-                  onMouseDown={() => handleSuggestionClick(user.username)}
+                  onMouseDown={() => handleArtistSuggestionClick(user.username)}
                 >
-                  {user.username}
+                  <img 
+                    src={getProfileImageUrl ? getProfileImageUrl(user.profile_image) : '/default-profile.jpg'} 
+                    alt={user.username}
+                    className='suggestion-avatar'
+                  />
+                  <div className='suggestion-content'>
+                    <span className='suggestion-username'>{user.username}</span>
+                    <span className='suggestion-type'>Artista</span>
+                  </div>
+                </li>
+              ))}
+              
+              {/* Sugerencias de estilos */}
+              {styleSuggestions.map(style => (
+                <li
+                  key={`style-${style.id}`}
+                  className='suggestion-item style-suggestion'
+                  onMouseDown={() => handleStyleSuggestionClick(style)}
+                >
+                  <div className='suggestion-style-icon'>
+                    <Tag size={20} />
+                  </div>
+                  <div className='suggestion-content'>
+                    <span className='suggestion-username'>{style.name}</span>
+                    <span className='suggestion-type'>Estilo</span>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
         </div>
-        <div className='navbar-actions'>
+        <div className='navbar-actions' ref={iconsRef}>
           <Bell
             className='thick-icon notifications'
             onClick={() => toggleMenu('notifications')}
@@ -139,7 +187,9 @@ const MainNav = ({ searchTerm, setSearchTerm, artistSuggestions = [] }) => {
             <div className='menu-header'>Perfil</div>
             <ul>
               <li><CircleUserRound className='thick-icon' size={22} /> Perfil</li>
-              <li><SquarePen className='thick-icon' size={22} /> Editar cuenta</li>
+              <li onClick={() => navigate('/edit-profile')} style={{ cursor: 'pointer' }}>
+                <SquarePen className='thick-icon' size={22} /> Editar cuenta
+              </li>
               <li><ClipboardPenLine className='thick-icon' size={22} /> Pedidos</li>
               <li onClick={handleLogout} style={{ cursor: 'pointer' }}>
                 <LogOut className='thick-icon' size={22} /> Cerrar sesión

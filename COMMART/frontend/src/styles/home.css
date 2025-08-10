@@ -1,26 +1,33 @@
 /* ========== Layout principal del Home ========== */
-.hero-section {
+.carousel-section {
   width: 100%;
 }
 
-.home-content {
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  padding: 20px 0;
+.CategoryFilter {
+  margin-bottom: 30px;
 }
 
+.CategoryFilter,
 .home-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  width: 95%;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
 }
 
+.CategoryFilter h3,
 .home-container h3 {
   font-family: 'Goldman';
-  text-align: center;
-  margin: 40px 0 24px 0;
   font-size: 1.8rem;
   color: #000000;
+  letter-spacing: 0.06em;
+  font-weight: normal;
+}
+
+.divider {
+  width: 95%;
+  height: 1px;
+  background-color: #ccc;
 }
 
 /* ========== Mensajes de error ========== */
@@ -35,11 +42,18 @@
 }
 
 /* ========== Grid de artistas ========== */
+.artists-profiles {
+  background-color: white;
+  border-radius: 30px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.459);
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
 .artists-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 40px;
+  gap: 20px;
 }
 
 .artist-card {
@@ -50,7 +64,7 @@
   transition: all 0.3s ease;
   cursor: pointer;
   border: 3px solid #000;
-  max-width: 300px;
+  max-width: 340px;
   margin: 0 auto;
 }
 
@@ -83,6 +97,7 @@
   padding: 16px;
   background: white;
   position: relative;
+  border-top: 2px solid #e0e0e0;
 }
 
 .artist-info {
@@ -92,11 +107,10 @@
 }
 
 .profile-avatar {
-  width: 50px;
-  height: 50px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #000;
   flex-shrink: 0;
   background: white;
 }
@@ -108,10 +122,10 @@
 
 .artist-name {
   margin: 0 0 4px 0;
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: normal;
   color: #000;
-  font-family: 'Goldman', sans-serif;
+  font-family: 'Goldman';
   line-height: 1.2;
 }
 
@@ -145,6 +159,17 @@
   color: white;
   font-size: 0.7rem;
   padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.style-tag-types {
+  background: transparent;
+  color: #7d5938;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border: 2px solid #7d5938;
   border-radius: 12px;
   font-weight: 500;
   font-family: 'Nunito Sans', sans-serif;

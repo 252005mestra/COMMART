@@ -21,7 +21,8 @@ const slides = [
     title: '¿Deseas encargar una ilustración con temática +18?',
     desc: 'Activa esta opción y comisiona artistas que ofrecen este contenido.',
     button: 'ACTÍVALO AQUÍ',
-    alt: '+18'
+    alt: '+18',
+    characterPosition: 'left' // Tiko a la izquierda
   },
   {
     bg: darkGreenBg,
@@ -29,7 +30,8 @@ const slides = [
     title: '¿Prefieres una navegación libre de anuncios?',
     desc: 'Adquiere nuestra membresía premium y elimina la publicidad de la página para siempre. ¡Disfruta de una sesión sin interrupciones!',
     button: 'COMPRA AQUÍ',
-    alt: 'Sin anuncios'
+    alt: 'Sin anuncios',
+    characterPosition: 'right' // Lino a la derecha
   },
   {
     bg: lightOrangeBg,
@@ -37,7 +39,8 @@ const slides = [
     title: '¿Tienes sugerencias o ideas para mejorar?',
     desc: '¡Nos encantaría saber tu opinión! Deja tus comentarios en nuestro buzón de sugerencias y ayúdanos a brindarte una mejor experiencia.',
     button: 'IR AL BUZÓN',
-    alt: 'Sugerencias'
+    alt: 'Sugerencias',
+    characterPosition: 'left' // Tiko a la izquierda
   },
   {
     bg: lightGreenBg,
@@ -45,7 +48,8 @@ const slides = [
     title: '¿Eres artista y estás listo para recibir comisiones?',
     desc: 'Activa tu cuenta como artista y empieza a mostrar tu talento al mundo. ¡Es el momento de comenzar a ganar por tus ilustraciones!',
     button: 'ACTÍVALO AQUÍ',
-    alt: 'Comisiones'
+    alt: 'Comisiones',
+    characterPosition: 'right' // Lino a la derecha
   }
 ];
 
@@ -144,19 +148,23 @@ const Carousel = () => {
               key={idx}
               style={{
                 backgroundImage: `url(${slide.bg})`,
-                backgroundSize: 'contain',
+                backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat'
               }}
             >
-              <div className='slide-content'>
+              <div className={`slide-content ${slide.characterPosition === 'right' ? 'reverse' : ''}`}>
                 <div className='slide-img-col'>
                   <img src={slide.character} alt={slide.alt} className='slide-character' />
                 </div>
                 <div className='slide-text-col'>
                   <h2>{slide.title}</h2>
                   <p>{slide.desc}</p>
-                  <button className='slide-btn'>{slide.button}</button>
+                  <button 
+                    className={`slide-btn ${slide.character.includes('Tiko') ? 'tiko-btn' : 'lino-btn'}`}
+                  >
+                    {slide.button}
+                  </button>
                 </div>
               </div>
             </div>

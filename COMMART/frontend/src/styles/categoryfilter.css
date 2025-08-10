@@ -1,22 +1,66 @@
 /* ========== Filtro de categorías ========== */
 .category-filter {
-  margin: 20px 0;
-  padding: 0 20px;
+  margin: 1rem 0;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
 .category-filter h3 {
-  font-family: 'Goldman', sans-serif;
+  font-family: 'Goldman';
   font-size: 1.2rem;
   color: #333;
-  margin-bottom: 15px;
-  font-weight: 600;
+  margin: 0;
+  font-weight: normal;
+}
+
+.category-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.slide-button {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #7d5938;
+  border-radius: 50%;
+  background: white;
+  color: #7d5938;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.slide-button:hover:not(.disabled) {
+  background: #7d5938;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.slide-button.disabled {
+  border-color: #ccc;
+  color: #ccc;
+  cursor: not-allowed;
 }
 
 .filter-container {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
-  align-items: center;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.filter-container.show-all {
+  flex-wrap: wrap;
+  overflow: visible;
 }
 
 .filter-button {
@@ -25,12 +69,13 @@
   border-radius: 25px;
   background: transparent;
   color: #7d5938;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: 'Goldman';
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .filter-button:hover {
@@ -45,20 +90,27 @@
   box-shadow: 0 2px 8px rgba(125, 89, 56, 0.3);
 }
 
-.filter-button.show-more {
-  background: #f0f0f0;
-  border-color: #ccc;
-  color: #666;
-  min-width: 40px;
+.filter-button.show-more.grid-button {
+  background: white;
+  border: 2px solid #7d5938;
+  color: #7d5938;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  padding: 8px;
+  position: static;
+  box-shadow: none;
+  transition: all 0.3s ease;
 }
 
-.filter-button.show-more:hover {
-  background: #e0e0e0;
-  border-color: #999;
-  color: #333;
+.filter-button.show-more.grid-button:hover {
+  background: #7d5938;
+  color: white;
+  transform: translateY(-1px);
 }
 
 /* ========== Responsive ========== */
@@ -74,5 +126,16 @@
   .filter-button {
     padding: 6px 12px;
     font-size: 0.8rem;
+  }
+
+  .slide-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .filter-button.show-more.grid-button {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
   }
 }

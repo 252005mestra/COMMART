@@ -67,6 +67,10 @@
   margin: 0;
   padding: 0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-family: 'Nunito Sans';
+  font-size: 0.9rem;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .suggestion-item {
@@ -74,6 +78,9 @@
   cursor: pointer;
   border-bottom: 1px solid #eee;
   transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
 }
 
 .suggestion-item:last-child {
@@ -82,6 +89,52 @@
 
 .suggestion-item:hover {
   background: #f3f3f3;
+}
+
+.suggestion-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.suggestion-style-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #7d5938;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.suggestion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.suggestion-username {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 500;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.suggestion-type {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 400;
+  color: #666;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.style-suggestion:hover .suggestion-style-icon {
+  background: #593f28;
 }
 
 /* ========== Menús de Acciones ========== */

@@ -1,0 +1,494 @@
+/* ========== Layout principal ========== */
+.edit-profile-main {
+  flex: 1;
+  padding: 2rem 0;
+  background: #f8f9fa;
+  min-height: calc(100vh - 140px);
+}
+
+.edit-profile-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0;
+  min-height: calc(100vh - 140px);
+}
+
+.edit-profile-container {
+  width: 95%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== Header ========== */
+.edit-profile-header {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 2px solid #8B6D47;
+  border-radius: 25px;
+  padding: 0.5rem 1rem;
+  color: #8B6D47;
+  font-family: 'Goldman';
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.back-btn:hover {
+  background: #8B6D47;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.edit-profile-header h1 {
+  font-family: 'Goldman';
+  font-size: 2rem;
+  color: #8B6D47;
+  letter-spacing: 0.06em;
+  font-weight: normal;
+  margin: 0;
+}
+
+/* ========== Card principal ========== */
+.edit-profile-card {
+  background: #f5f5f5;
+  border-radius: 30px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background: #ffffff;
+  padding: 1.5rem 0;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.card-header h2 {
+  font-family: 'Goldman';
+  font-size: 1.5rem;
+  color: #8B6D47;
+  margin: 0;
+  font-weight: normal;
+  letter-spacing: 0.04em;
+}
+
+/* ========== Imagen de perfil ========== */
+.profile-image-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0 1.5rem 0;
+}
+
+.profile-image-preview {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: white;
+}
+
+.profile-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edit-image-btn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #333;
+  color: white;
+  border: 3px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.edit-image-btn:hover {
+  background: #555;
+}
+
+/* ========== Formulario ========== */
+.profile-form {
+  padding: 0 3rem 2rem 3rem;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-field label {
+  display: block;
+  font-family: 'Goldman';
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-weight: normal;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: #e8e8e8;
+  font-family: 'Nunito Sans';
+  font-size: 1rem;
+  color: #333;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.form-field input:focus {
+  outline: none;
+  background: #ddd;
+}
+
+.form-field input.input-error {
+  border: 2px solid #e74c3c;
+  background: #fdf2f2;
+}
+
+.disabled-field {
+  background: #d0d0d0 !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+}
+
+.field-error {
+  display: block;
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  font-family: 'Nunito Sans';
+}
+
+/* ========== Campo de contraseña especial ========== */
+.password-field {
+  cursor: pointer;
+}
+
+.password-display {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: #e8e8e8;
+  font-family: 'Nunito Sans';
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.password-display:hover {
+  background: #ddd;
+}
+
+.password-dots {
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+/* ========== Botones del formulario ========== */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.cancel-btn,
+.save-btn {
+  padding: 0.75rem 2.5rem;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Goldman';
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: normal;
+}
+
+.cancel-btn {
+  background: #666;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #555;
+}
+
+.save-btn {
+  background: #8B6D47;
+  color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #7A5D3F;
+}
+
+.save-btn:disabled {
+  background: #ccc !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.save-btn:disabled:hover {
+  background: #ccc !important;
+}
+
+/* ========== Modales ========== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* ========== Modal de confirmación ========== */
+.confirmation-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  border: 3px solid #8B6D47;
+}
+
+.confirmation-modal h3 {
+  font-family: 'Goldman';
+  font-size: 1.2rem;
+  color: #333;
+  margin: 0 0 2rem 0;
+  font-weight: normal;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.cancel-modal-btn,
+.continue-modal-btn {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Goldman';
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-modal-btn {
+  background: #666;
+  color: white;
+}
+
+.cancel-modal-btn:hover {
+  background: #555;
+}
+
+.continue-modal-btn {
+  background: #8B6D47;
+  color: white;
+}
+
+.continue-modal-btn:hover {
+  background: #7A5D3F;
+}
+
+/* ========== Modal de cambio de contraseña ========== */
+.password-change-modal {
+  background: white;
+  border-radius: 30px;
+  padding: 2rem;
+  max-width: 450px;
+  width: 90%;
+  border: 5px solid #593f28;
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.modal-logo {
+  height: 4rem;
+  margin-bottom: 1rem;
+}
+
+.modal-header h2 {
+  font-family: 'Goldman';
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+  font-weight: normal;
+  letter-spacing: 0.06em;
+}
+
+/* ========== Formulario de contraseña ========== */
+.password-change-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.password-input-group {
+  position: relative;
+}
+
+.password-input-group input {
+  width: 100%;
+  padding: 0.75rem 3rem 0.75rem 1rem;
+  border: 3px solid #b3b792;
+  border-radius: 10px;
+  background: #f8f8f5;
+  font-family: 'Nunito Sans';
+  font-size: 1rem;
+  color: #333;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.password-input-group input:focus {
+  outline: none;
+  border-color: #78966a;
+  background: #f4f7f2;
+}
+
+.password-input-group input.input-error {
+  border-color: #e74c3c;
+  background: #fdf2f2;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #333;
+}
+
+/* ========== Botones del modal de contraseña ========== */
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.save-modal-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Goldman';
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #8a9e7c;
+  color: white;
+}
+
+.save-modal-btn:hover {
+  background: #7A8A6E;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .edit-profile-container {
+    width: 95%;
+    padding: 0 1rem;
+  }
+
+  .edit-profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    align-self: flex-start;
+  }
+
+  .profile-form {
+    padding: 0 1.5rem 2rem 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+  }
+
+  .confirmation-buttons,
+  .modal-buttons {
+    flex-direction: column;
+  }
+
+  .password-change-modal {
+    padding: 1.5rem;
+  }
+}
+
+/* ========== Estilos adicionales ========== */
+.general-error {
+  background: #fdf2f2;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  margin: 1rem 2rem;
+  text-align: center;
+  font-family: 'Nunito Sans';
+  font-size: 0.9rem;
+}

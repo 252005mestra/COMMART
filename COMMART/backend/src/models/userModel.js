@@ -14,7 +14,7 @@ export const createUser = (username, email, hashedPassword) => {
   });
 };
 
-// Encontrar el usuario por correo electrónico
+// Encontrar usuario por correo electrónico
 export const findUserByEmail = (email) => {
   return new Promise((resolve, reject) => {
     dbConnection.query(
@@ -28,7 +28,7 @@ export const findUserByEmail = (email) => {
   });
 };
 
-// Encontrar el usuario por nombre de usuario
+// Encontrar usuario por nombre de usuario
 export const findUserByUsername = (username) => {
   return new Promise((resolve, reject) => {
     dbConnection.query(
@@ -42,21 +42,15 @@ export const findUserByUsername = (username) => {
   });
 };
 
-// Obtener todos los usuarios (solo sus nombres de usuario)
-export const getAllUsers = () => {
+// Encontrar usuario por ID (con opción de incluir datos completos)
+export const findUserById = (id, includePassword = false) => {
   return new Promise((resolve, reject) => {
-    dbConnection.query('SELECT username FROM users', (err, results) => {
-      if (err) return reject(err);
-      resolve(results);
-    });
-  });
-};
-
-// Obtener usuario por ID
-export const findUserById = (id) => {
-  return new Promise((resolve, reject) => {
+    const fields = includePassword 
+      ? 'id, username, email, recovery_email, profile_image, registered_at, is_artist, role, password'
+      : 'id, username, email, recovery_email, profile_image, registered_at, is_artist, role';
+    
     dbConnection.query(
-      'SELECT id, username, email FROM users WHERE id = ?',
+      `SELECT ${fields} FROM users WHERE id = ?`,
       [id],
       (err, results) => {
         if (err) return reject(err);
@@ -66,19 +60,55 @@ export const findUserById = (id) => {
   });
 };
 
-// Actualizar usuario (por ID)
-export const updateUserInDB = (id, username, email, hashedPassword) => {
+// Obtener todos los usuarios (datos completos para admin)
+export const getAllUsers = () => {
   return new Promise((resolve, reject) => {
-    const query = hashedPassword
-      ? 'UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?'
-      : 'UPDATE users SET username = ?, email = ? WHERE id = ?';
-    const params = hashedPassword
-      ? [username, email, hashedPassword, id]
-      : [username, email, id];
+    dbConnection.query(
+      'SELECT id, username, email, registered_at, is_artist, role FROM users ORDER BY registered_at DESC',
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
+      }
+    );
+  });
+};
 
-    dbConnection.query(query, params, (err, result) => {
+// Actualizar usuario (unificado para admin y perfil)
+export const updateUser = (id, updateData) => {
+  return new Promise((resolve, reject) => {
+    const fields = Object.keys(updateData);
+    const values = Object.values(updateData);
+    
+    if (fields.length === 0) {
+      return reject(new Error('No se proporcionaron campos para actualizar.'));
+    }
+
+    const setClause = fields.map(field => `${field} = ?`).join(', ');
+    values.push(id);
+    
+    const query = `UPDATE users SET ${setClause} WHERE id = ?`;
+    
+    dbConnection.query(query, values, (err, result) => {
       if (err) return reject(err);
       resolve(result);
+    });
+  });
+};
+
+// Verificar si un nombre de usuario está disponible (excluyendo un ID específico)
+export const isUsernameAvailable = (username, excludeUserId = null) => {
+  return new Promise((resolve, reject) => {
+    let query = 'SELECT id FROM users WHERE username = ?';
+    let params = [username];
+    
+    if (excludeUserId) {
+      query += ' AND id != ?';
+      params.push(excludeUserId);
+    }
+    
+    dbConnection.query(query, params, (err, results) => {
+      if (err) return reject(err);
+      resolve(results.length === 0); // true si está disponible
     });
   });
 };

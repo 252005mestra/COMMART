@@ -8,6 +8,7 @@ import '../styles/home.css';
 
 const Home = () => {
   const [users, setUsers] = useState([]);
+  const [styles, setStyles] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,36 +36,72 @@ const Home = () => {
     fetchArtists();
   }, []);
 
-  // Manejar selección de estilo
+  // Obtener estilos
+  useEffect(() => {
+    const fetchStyles = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/auth/styles');
+        setStyles(response.data);
+      } catch (error) {
+        console.error('Error al obtener estilos:', error);
+      }
+    };
+    fetchStyles();
+  }, []);
+
   const handleStyleSelect = (style) => {
     setSelectedStyle(style);
-    setSearchTerm(''); // Limpiar búsqueda cuando se selecciona estilo
+    setSearchTerm(''); 
   };
 
-  // Efecto para manejar búsqueda - NUEVA LÓGICA
   useEffect(() => {
     if (searchTerm && searchTerm.trim() !== '') {
-      // Si hay búsqueda, deseleccionar filtro y buscar en todos los usuarios
       setSelectedStyle(null);
-      const filtered = users.filter(user =>
+      
+      // Buscar por artista
+      const filteredByArtist = users.filter(user =>
         user.username.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredUsers(filtered);
+
+      // Buscar por estilo
+      const searchTermLower = searchTerm.toLowerCase();
+      const matchingStyles = styles.filter(style => 
+        style.name.toLowerCase().includes(searchTermLower)
+      );
+
+      let filteredByStyle = [];
+      if (matchingStyles.length > 0) {
+        filteredByStyle = users.filter(user => 
+          user.styles && user.styles.some(userStyle => 
+            matchingStyles.some(matchingStyle => 
+              userStyle.toLowerCase().includes(matchingStyle.name.toLowerCase())
+            )
+          )
+        );
+      }
+
+      // Combinar resultados y eliminar duplicados
+      const combinedResults = [...filteredByArtist];
+      filteredByStyle.forEach(styleUser => {
+        if (!combinedResults.find(user => user.id === styleUser.id)) {
+          combinedResults.push(styleUser);
+        }
+      });
+
+      setFilteredUsers(combinedResults);
     }
-  }, [searchTerm, users]);
+  }, [searchTerm, users, styles]);
 
   // Efecto para manejar filtro por estilo
   useEffect(() => {
     const applyStyleFilter = async () => {
       if (!selectedStyle) {
-        // Si no hay estilo seleccionado y no hay búsqueda, mostrar todos
         if (!searchTerm || searchTerm.trim() === '') {
           setFilteredUsers(users);
         }
         return;
       }
 
-      // Si hay estilo seleccionado, hacer petición al backend
       try {
         setLoading(true);
         setError('');
@@ -81,19 +118,26 @@ const Home = () => {
       }
     };
 
-    // Solo ejecutar si tenemos usuarios cargados y no hay búsqueda activa
     if (users.length > 0 && (!searchTerm || searchTerm.trim() === '')) {
       applyStyleFilter();
     }
   }, [selectedStyle, users, searchTerm]);
 
-  // Sugerencias para autocompletado (máximo 6)
+  // Sugerencias de artistas
   const artistSuggestions = users
     .filter(user =>
       searchTerm &&
       user.username.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .slice(0, 6);
+    .slice(0, 4); // Reducido para hacer espacio a los estilos
+
+  // Sugerencias de estilos
+  const styleSuggestions = styles
+    .filter(style =>
+      searchTerm &&
+      style.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .slice(0, 4); // Máximo 4 estilos
 
   // Obtener URL de imagen de portafolio
   const getPortfolioImageUrl = (imgPath) =>
@@ -103,27 +147,37 @@ const Home = () => {
   const getProfileImageUrl = (imgPath) =>
     imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
 
+  // Determinar si mostrar el carrusel (solo cuando no hay búsqueda activa)
+  const showCarousel = !searchTerm || searchTerm.trim() === '';
+
   return (
     <>
       <MainNav
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         artistSuggestions={artistSuggestions}
+        styleSuggestions={styleSuggestions}
+        getProfileImageUrl={getProfileImageUrl}
+        onStyleSelect={handleStyleSelect}
       />
       
       <main className='main-content'>
-        <section className='hero-section'>
-          <Carousel />
-        </section>
+        {showCarousel && (
+          <section className='carousel-section'>
+            <Carousel />
+          </section>
+        )}
 
-        <div className='home-container'>
-          <CategoryFilter 
+        <section className='CategoryFilter'>
+           <CategoryFilter 
             onStyleSelect={handleStyleSelect}
             selectedStyle={selectedStyle}
           />
           
           {error && <div className='error-message'>{error}</div>}
-          
+        </section>
+        <hr className='divider' />
+        <section className='home-container'>
           <h3>
             {searchTerm 
               ? `Buscando: "${searchTerm}"` 
@@ -133,65 +187,67 @@ const Home = () => {
             }
           </h3>
           
-          {loading ? (
-            <div className='loading'>
-              <p>Cargando artistas...</p>
-            </div>
-          ) : (
-            <div className='artists-grid'>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <div className='artist-card' key={user.id}>
-                    <div className='card-image'>
-                      <img
-                        src={getPortfolioImageUrl(user.portfolio_image)}
-                        alt={`Portfolio de ${user.username}`}
-                      />
-                    </div>
-                    <div className='card-footer'>
-                      <div className='artist-info'>
+          <div className='artists-profiles'>
+            {loading ? (
+              <div className='loading'>
+                <p>Cargando artistas...</p>
+              </div>
+            ) : (
+              <div className='artists-grid'>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <div className='artist-card' key={user.id}>
+                      <div className='card-image'>
                         <img
-                          src={getProfileImageUrl(user.profile_image)}
-                          alt={user.username}
-                          className='profile-avatar'
+                          src={getPortfolioImageUrl(user.portfolio_image)}
+                          alt={`Portfolio de ${user.username}`}
                         />
-                        <div className='artist-details'>
-                          <h4 className='artist-name'>{user.username}</h4>
-                          <p className='artist-followers'>{user.followers || 0} Followers</p>
-                          {user.styles && user.styles.length > 0 && (
-                            <div className='artist-styles'>
-                              <span className='style-tag'>Estilos:</span>
-                              {user.styles.slice(0, 2).map((style, index) => (
-                                <span key={index} className='style-tag'>{style}</span>
-                              ))}
-                              {user.styles.length > 2 && <span className='style-more'>+{user.styles.length - 2}</span>}
-                            </div>
-                          )}
-                          {user.description && (
-                            <p className='artist-description'>
-                              Descripción: {user.description}
-                            </p>
-                          )}
+                      </div>
+                      <div className='card-footer'>
+                        <div className='artist-info'>
+                          <img
+                            src={getProfileImageUrl(user.profile_image)}
+                            alt={user.username}
+                            className='profile-avatar'
+                          />
+                          <div className='artist-details'>
+                            <h4 className='artist-name'>{user.username}</h4>
+                            <p className='artist-followers'>{user.followers || 0} Followers</p>
+                            {user.styles && user.styles.length > 0 && (
+                              <div className='artist-styles'>
+                                <span className='style-tag'>Estilos:</span>
+                                {user.styles.slice(0, 2).map((style, index) => (
+                                  <span key={index} className='style-tag-types'>{style}</span>
+                                ))}
+                                {user.styles.length > 2 && <span className='style-more'>+{user.styles.length - 2}</span>}
+                              </div>
+                            )}
+                            {user.description && (
+                              <p className='artist-description'>
+                                {user.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className='loading'>
+                    <p>
+                      {searchTerm 
+                        ? `No se encontraron artistas con el nombre "${searchTerm}".`
+                        : selectedStyle 
+                          ? `No se encontraron artistas con el estilo "${selectedStyle.name}".`
+                          : 'No se encontraron artistas.'
+                      }
+                    </p>
                   </div>
-                ))
-              ) : (
-                <div className='loading'>
-                  <p>
-                    {searchTerm 
-                      ? `No se encontraron artistas con el nombre "${searchTerm}".`
-                      : selectedStyle 
-                        ? `No se encontraron artistas con el estilo "${selectedStyle.name}".`
-                        : 'No se encontraron artistas.'
-                    }
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
       </main>
       <Footer />
     </>
