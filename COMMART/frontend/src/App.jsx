@@ -2,7 +2,9 @@ import { Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import Home from './pages/Home'
 import EditProfile from './pages/EditProfile'
+import ResetPassword from './pages/ResetPasswordPage'; // o './pages/ResetPassword'
 import PrivateRoute from './components/PrivateRoute'
+import Profile from './components/Profile';
 
 
 const App = () => {
@@ -28,6 +30,18 @@ const App = () => {
             </PrivateRoute>
           }
         />
+
+        <Route path='/reset-password/:token' element={<ResetPassword />} />
+
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+
       </Routes>
     </>
   )

@@ -144,9 +144,30 @@
   margin-top: 0.5rem;
   margin-bottom: 0;
   font-family: 'Nunito Sans';
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 .forgot-password-link:hover {
   text-decoration: underline;
+}
+
+/* Spinner para botones de envío */
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid #8a9e7c;
+  border-top: 2px solid #ccc;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Responsive */

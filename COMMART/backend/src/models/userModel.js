@@ -1,4 +1,5 @@
 import dbConnection from '../config/db.js';
+import bcrypt from 'bcrypt';
 
 // Registro de usuario
 export const createUser = (username, email, hashedPassword) => {
@@ -209,5 +210,61 @@ export const getPublicArtists = () => {
       if (err) return reject(err);
       resolve(results);
     });
+  });
+};
+
+// Encontrar usuario por correo electrónico de recuperación
+export const findUserByRecoveryEmail = (recovery_email) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      'SELECT * FROM users WHERE recovery_email = ?',
+      [recovery_email],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results[0]);
+      }
+    );
+  });
+};
+
+// Establecer token de restablecimiento
+export const setResetToken = (userId, token, expiry) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      'UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE id = ?',
+      [token, expiry, userId],
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
+  });
+};
+
+// Buscar usuario por token de recuperación
+export const findUserByResetToken = (token) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      'SELECT * FROM users WHERE reset_token = ?',
+      [token],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results[0]);
+      }
+    );
+  });
+};
+
+// Actualizar contraseña y limpiar token
+export const updatePasswordAndClearToken = (userId, hashedPassword) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      'UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?',
+      [hashedPassword, userId],
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
   });
 };

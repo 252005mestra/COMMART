@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/LogoCOMMART.png';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
+import ForgotPasswordModal from './ForgotPasswordModal';
 import '../styles/navlanding.css';
 
 const LandingNav = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const navigate = useNavigate();
 
   // Función para abrir login desde registro
@@ -48,12 +50,21 @@ const LandingNav = () => {
         <LoginModal
           onClose={() => setIsLoginModalOpen(false)}
           onSwitchToRegister={openRegisterFromLogin}
+          onForgotPassword={() => {
+            setIsLoginModalOpen(false);
+            setTimeout(() => setIsForgotModalOpen(true), 100);
+          }}
         />
       )}
       {isRegisterModalOpen && (
         <RegisterModal
           onClose={() => setIsRegisterModalOpen(false)}
           onSwitchToLogin={openLoginFromRegister}
+        />
+      )}
+      {isForgotModalOpen && (
+        <ForgotPasswordModal
+          onClose={() => setIsForgotModalOpen(false)}
         />
       )}
     </>

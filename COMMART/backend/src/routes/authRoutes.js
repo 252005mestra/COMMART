@@ -15,7 +15,10 @@ import {
     getUserProfileController, 
     updateUserProfileController, 
     checkUsernameController, 
-    verifyCurrentPasswordController  
+    verifyCurrentPasswordController,
+    findUserForRecoveryController,
+    forgotPasswordController,
+    resetPasswordController
 } from '../controllers/authController.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 import multer from 'multer';
@@ -76,5 +79,10 @@ router.get('/profile', verifyToken, getUserProfileController);
 router.put('/profile', verifyToken, upload.single('profile_image'), updateUserProfileController);
 router.post('/check-username', verifyToken, checkUsernameController);
 router.post('/verify-password', verifyToken, verifyCurrentPasswordController);
+
+// Rutas para recuperación de contraseña 
+router.post('/find-user', findUserForRecoveryController);
+router.post('/forgot-password', forgotPasswordController);
+router.post('/reset-password/:token', resetPasswordController);
 
 export default router;

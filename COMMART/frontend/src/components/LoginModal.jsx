@@ -3,13 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/modal.css';
 import logo from '../assets/LogoCOMMART.png';
+import { useUser } from '../context/UserContext';
 
-const LoginModal = ({ onClose, onSwitchToRegister }) => {
+const LoginModal = ({ onClose, onSwitchToRegister, onForgotPassword }) => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { fetchProfile } = useUser();
 
   // Validación en tiempo real
   const validate = () => {
@@ -48,7 +50,7 @@ const LoginModal = ({ onClose, onSwitchToRegister }) => {
         { identifier, password },
         { withCredentials: true }
       );
-
+      await fetchProfile(); // <-- ACTUALIZA EL PERFIL INMEDIATAMENTE
       alert('¡Inicio de sesión exitoso!');
       navigate('/home');
       onClose();
@@ -93,7 +95,13 @@ const LoginModal = ({ onClose, onSwitchToRegister }) => {
             className={errors.password ? 'input-error' : ''}
           />
           {errors.password && <span className='input-error-message'>{errors.password}</span>}
-          <Link to='/' className='forgot-password-link'>¿Olvidaste tu contraseña?</Link>
+          <button
+            type='button'
+            className='forgot-password-link'
+            onClick={onForgotPassword}
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
           <button type='submit'>INICIAR</button>
         </form>
         <p>

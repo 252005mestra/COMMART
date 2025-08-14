@@ -1,5 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'; 
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 import { 
     createUser, 
     findUserByEmail, 
@@ -11,7 +13,10 @@ import {
     isUsernameAvailable,
     getArtistsBasicInfo,
     getAllStyles,
-    getPublicArtists  // Mantener nombre original del modelo
+    getPublicArtists,  // Mantener nombre original del modelo
+    setResetToken,
+    findUserByResetToken,
+    updatePasswordAndClearToken
 } from '../models/userModel.js';
 
 // Función para detectar caracteres peligrosos (para validación - rechazar entrada)
@@ -520,6 +525,120 @@ export const verifyCurrentPasswordController = async (req, res) => {
     
   } catch (error) {
     console.error('Error al verificar contraseña:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Encontrar usuario para recuperación (por email o username)
+export const findUserForRecoveryController = async (req, res) => {
+  const { identifier } = req.body;
+  if (!identifier) {
+    return res.status(400).json({ message: 'Debes ingresar usuario o correo.' });
+  }
+  try {
+    let user = await findUserByEmail(identifier);
+    if (!user) user = await findUserByUsername(identifier);
+    if (!user) user = await findUserByRecoveryEmail(identifier);
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
+
+    res.status(200).json({
+      email: user.email || null,
+      recovery_email: user.recovery_email || null
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Enviar correo de recuperación de contraseña
+export const forgotPasswordController = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: 'Debes ingresar un correo válido.' });
+  }
+  try {
+    // Buscar por email principal o de recuperación
+    const user = await findUserByEmail(email) || await findUserByRecoveryEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: 'No se encontró el usuario con ese correo.' });
+    }
+
+    // Generar token y guardar en la base de datos
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiry = Date.now() + 3600000; // 1 hora
+    await setResetToken(user.id, token, expiry);
+
+    // Configura tu transporter con tus credenciales
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const resetUrl = `http://localhost:5173/reset-password/${token}`;
+    await transporter.sendMail({
+      to: email,
+      subject: 'Restablecimiento de contraseña',
+      html: `<p>Haz clic <a href="${resetUrl}">aquí</a> para restablecer tu contraseña.</p>`
+    });
+
+    res.status(200).json({ message: 'Correo de recuperación enviado.' });
+  } catch (error) {
+    console.error('Error al enviar correo de recuperación:', error);
+    res.status(500).json({ message: 'Error al enviar el correo de recuperación.' });
+  }
+};
+
+// Restablecer contraseña
+export const resetPasswordController = async (req, res) => {
+  // Obtener token y nueva contraseña del request
+  const token = req.params.token || req.body.token;
+  const password = req.body.password || req.body.newPassword;
+
+  // Validaciones robustas
+  if (!token || !password) {
+    // Token o contraseña faltante
+    return res.status(400).json({ message: 'Token y nueva contraseña son requeridos.' });
+  }
+  if (/\s/.test(password)) {
+    // Espacios en la contraseña
+    return res.status(400).json({ message: 'La contraseña no puede contener espacios.' });
+  }
+  if (containsXSSChars(password)) {
+    // Caracteres peligrosos
+    return res.status(400).json({ message: 'La contraseña contiene caracteres peligrosos.' });
+  }
+  if (!passwordRegex.test(password)) {
+    // Contraseña débil
+    return res.status(400).json({
+      message: 'La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.'
+    });
+  }
+
+  try {
+    // Buscar usuario por token de recuperación
+    const user = await findUserByResetToken(token);
+
+    // Verificar expiración del token
+    // Si tu campo es BIGINT (milisegundos):
+    if (!user || !user.reset_token_expiry || user.reset_token_expiry < Date.now()) {
+      // Token inválido o expirado
+      return res.status(400).json({ message: 'Token inválido o expirado.' });
+    }
+    // Si tu campo es DATETIME, usa:
+    // if (!user || !user.reset_token_expiry || new Date(user.reset_token_expiry) < new Date()) { ... }
+
+    // Hashear y actualizar la contraseña, limpiar token y expiración
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await updatePasswordAndClearToken(user.id, hashedPassword);
+
+    // Contraseña cambiada correctamente
+    res.status(200).json({ message: 'Contraseña restablecida exitosamente.' });
+  } catch (error) {
+    // Error inesperado
+    console.error('Error al restablecer contraseña:', error);
     res.status(500).json({ message: 'Error del servidor.' });
   }
 };

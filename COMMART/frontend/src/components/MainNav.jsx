@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useUser } from '../context/UserContext';
 
 // Iconos
 import logo from '../assets/LogoCOMMART.png';
@@ -30,6 +31,7 @@ const MainNav = ({
   onStyleSelect 
 }) => {
   const navigate = useNavigate();
+  const { profile, logout } = useUser();
   const [openMenu, setOpenMenu] = useState(null); 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const menuRef = useRef();
@@ -57,9 +59,8 @@ const MainNav = ({
   // Función para cerrar sesión
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
-      navigate('/');
-      window.location.reload();
+      await logout();
+      window.location.href = '/'; // Redirige al landing y limpia el estado
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -85,6 +86,11 @@ const MainNav = ({
 
   // Verificar si hay sugerencias para mostrar
   const hasSuggestions = (artistSuggestions.length > 0 || styleSuggestions.length > 0) && searchTerm;
+
+  // Maneja el click en el perfil
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
 
   return (
     <>
@@ -186,7 +192,9 @@ const MainNav = ({
           <div className='profile-dropdown modern-dropdown'>
             <div className='menu-header'>Perfil</div>
             <ul>
-              <li><CircleUserRound className='thick-icon' size={22} /> Perfil</li>
+              <li onClick={handleProfileClick} style={{ cursor: 'pointer' }}>
+                <CircleUserRound className='thick-icon' size={22} /> Perfil
+              </li>
               <li onClick={() => navigate('/edit-profile')} style={{ cursor: 'pointer' }}>
                 <SquarePen className='thick-icon' size={22} /> Editar cuenta
               </li>
