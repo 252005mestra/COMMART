@@ -12,14 +12,17 @@
   flex-direction: column;
   align-items: center;
   padding: 2rem 0;
-  min-height: calc(100vh - 140px);
+  min-height: unset;
+  background: transparent;
 }
 
 .edit-profile-container {
-  width: 95%;
+  width: 100%;
   max-width: 900px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
 }
 
 /* ========== Header ========== */
@@ -52,7 +55,8 @@
   transform: translateY(-2px);
 }
 
-.edit-profile-header h1 {
+.edit-profile-header h1,
+.edit-profile-header h2 {
   font-family: 'Goldman';
   font-size: 2rem;
   color: #8B6D47;
@@ -68,6 +72,7 @@
   padding: 0;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .card-header {
@@ -492,3 +497,102 @@
   font-family: 'Nunito Sans';
   font-size: 0.9rem;
 }
+
+/* Artist Activation Section */
+.artist-activation-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+.artist-activation-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border: 2px solid #8B6D47;
+  padding: 2rem 2.5rem 1.5rem 2.5rem;
+  max-width: 540px;
+  width: 100%;
+  margin: 0 auto 2rem auto;
+  text-align: center;
+}
+.artist-activation-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 2rem 2.5rem 2rem;
+  gap: 1.2rem;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.artist-activation-logo img {
+  height: 5em;
+}
+.artist-activation-title {
+  font-family: 'Goldman';
+  color: #8B6D47;
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+.artist-activation-desc {
+  font-family: 'Nunito Sans';
+  font-size: 1.1rem;
+  color: #333;
+  text-align: center;
+}
+.artist-activation-warning {
+  font-family: 'Nunito Sans';
+  font-size: 1rem;
+  color: #593f28;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+.artist-activation-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.artist-activation-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: 'Nunito Sans';
+  font-size: 1.08rem;
+  cursor: pointer;
+  user-select: none;
+}
+.artist-activation-checkbox input[type="checkbox"] {
+  accent-color: #8B6D47;
+  width: 20px;
+  height: 20px;
+  margin-left: 0.5rem;
+}
+.activate-artist-btn {
+  background: #8B6D47;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 2rem;
+  font-family: 'Goldman';
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+.activate-artist-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.already-artist-msg {
+  color: #78966a;
+  font-family: 'Nunito Sans';
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+

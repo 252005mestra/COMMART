@@ -41,6 +41,10 @@ const EditProfile = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({});
+  const [isArtist, setIsArtist] = useState(false);
+  const [artistActivationLoading, setArtistActivationLoading] = useState(false);
+  const [artistActivationError, setArtistActivationError] = useState('');
+  const [showArtistConfirm, setShowArtistConfirm] = useState(false);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -71,6 +75,9 @@ const EditProfile = () => {
         
         setUsers(artistsResponse.data);
         setStyles(stylesResponse.data);
+
+        // Verificar si es artista
+        setIsArtist(!!userData.is_artist);
       } catch (error) {
         console.error('Error al cargar datos:', error);
         setErrors({ general: 'Error al cargar los datos del perfil' });
@@ -452,6 +459,45 @@ const EditProfile = () => {
     }
   };
 
+  // Manejar activación de cuenta de artista
+  const handleArtistCheckbox = (e) => {
+    // Solo permite marcar, nunca desmarcar
+    if (!isArtist) setIsArtist(e.target.checked);
+  };
+
+  // Handler para activar artista (abre modal)
+  const handleArtistActivationRequest = (e) => {
+    e.preventDefault();
+    setShowArtistConfirm(true);
+  };
+
+  // Handler para confirmar activación
+  const handleArtistActivation = async () => {
+    setArtistActivationError('');
+    setArtistActivationLoading(true);
+    try {
+      await axios.put(
+        'http://localhost:5000/api/auth/profile',
+        { is_artist: true },
+        { withCredentials: true }
+      );
+      setIsArtist(true);
+      setShowArtistConfirm(false);
+      alert('¡Ahora eres artista! Recarga la página para ver las nuevas opciones.');
+    } catch (err) {
+      setArtistActivationError(
+        err.response?.data?.message || 'Error al activar cuenta de artista.'
+      );
+    } finally {
+      setArtistActivationLoading(false);
+    }
+  };
+
+  // Handler para cancelar el modal
+  const handleCancelArtistActivation = () => {
+    setShowArtistConfirm(false);
+  };
+
   return (
     <>
       <MainNav
@@ -462,124 +508,176 @@ const EditProfile = () => {
         getProfileImageUrl={getProfileImageUrl}
         onStyleSelect={handleStyleSelect}
       />
-      
-      <main className="main-content">
-        <section className="edit-profile-section">
-          <div className="edit-profile-container">
-            <div className="edit-profile-header">
-              <button 
-                type="button" 
-                className="back-btn"
-                onClick={handleGoBack}
-                title="Volver al inicio"
-              >
-                <ArrowLeft size={20} />
-                Volver
-              </button>
-              <h1>Datos Principales</h1>
+
+      {/* Sección de editar perfil */}
+      <section className="edit-profile-section">
+        <div className="edit-profile-container">
+          <div className="edit-profile-header">
+            <button 
+              type="button" 
+              className="back-btn"
+              onClick={handleGoBack}
+              title="Volver al inicio"
+            >
+              <ArrowLeft size={20} />
+              Volver
+            </button>
+            <h1>Datos Principales</h1>
+          </div>
+          <div className="edit-profile-card">
+            <div className="card-header">
+              <h2>Datos de Cuenta</h2>
             </div>
 
-            <div className="edit-profile-card">
-              <div className="card-header">
-                <h2>Datos de Cuenta</h2>
+            {errors.general && (
+              <div className="general-error">
+                {errors.general}
               </div>
+            )}
 
-              {errors.general && (
-                <div className="general-error">
-                  {errors.general}
-                </div>
+            <div className="profile-image-container">
+              <div className="profile-image-preview">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Profile" />
+                ) : (
+                  <CircleUserRound size={60} />
+                )}
+                <button
+                  type="button"
+                  className="edit-image-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera size={16} />
+                </button>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{ display: 'none' }}
+              />
+              {errors.image && (
+                <span className="field-error">{errors.image}</span>
               )}
+            </div>
 
-              <div className="profile-image-container">
-                <div className="profile-image-preview">
-                  {imagePreview ? (
-                    <img src={imagePreview} alt="Profile" />
-                  ) : (
-                    <CircleUserRound size={60} />
-                  )}
-                  <button
-                    type="button"
-                    className="edit-image-btn"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Camera size={16} />
-                  </button>
-                </div>
+            <form onSubmit={handleSubmit} className="profile-form">
+              <div className="form-field">
+                <label>Usuario</label>
                 <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  style={{ display: 'none' }}
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className={errors.username ? 'input-error' : ''}
                 />
-                {errors.image && (
-                  <span className="field-error">{errors.image}</span>
+                {errors.username && (
+                  <span className="field-error">{errors.username}</span>
                 )}
               </div>
 
-              <form onSubmit={handleSubmit} className="profile-form">
-                <div className="form-field">
-                  <label>Usuario</label>
-                  <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    className={errors.username ? 'input-error' : ''}
-                  />
-                  {errors.username && (
-                    <span className="field-error">{errors.username}</span>
-                  )}
-                </div>
+              <div className="form-field">
+                <label>Correo electrónico</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  disabled
+                  className="disabled-field"
+                />
+              </div>
 
-                <div className="form-field">
-                  <label>Correo electrónico</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    disabled
-                    className="disabled-field"
-                  />
-                </div>
+              <div className="form-field">
+                <label>Correo de recuperación</label>
+                <input
+                  type="email"
+                  name="recovery_email"
+                  value={formData.recovery_email}
+                  onChange={handleInputChange}
+                  className={errors.recovery_email ? 'input-error' : ''}
+                />
+                {errors.recovery_email && (
+                  <span className="field-error">{errors.recovery_email}</span>
+                )}
+              </div>
 
-                <div className="form-field">
-                  <label>Correo de recuperación</label>
-                  <input
-                    type="email"
-                    name="recovery_email"
-                    value={formData.recovery_email}
-                    onChange={handleInputChange}
-                    className={errors.recovery_email ? 'input-error' : ''}
-                  />
-                  {errors.recovery_email && (
-                    <span className="field-error">{errors.recovery_email}</span>
-                  )}
+              <div className="form-field password-field">
+                <label>Contraseña</label>
+                <div className="password-display" onClick={handlePasswordChangeClick}>
+                  <span className="password-dots">●●●●●●●●●●●●</span>
                 </div>
+              </div>
 
-                <div className="form-field password-field">
-                  <label>Contraseña</label>
-                  <div className="password-display" onClick={handlePasswordChangeClick}>
-                    <span className="password-dots">●●●●●●●●●●●●</span>
-                  </div>
-                </div>
+              <div className="form-actions">
+                <button type="button" className="cancel-btn" onClick={handleCancel}>
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="save-btn"
+                  disabled={loading || (!hasChanges() && Object.keys(errors).some(key => key !== 'general' && errors[key]))}
+                >
+                  {loading ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
 
-                <div className="form-actions">
-                  <button type="button" className="cancel-btn" onClick={handleCancel}>
-                    Cancelar
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="save-btn"
-                    disabled={loading || (!hasChanges() && Object.keys(errors).some(key => key !== 'general' && errors[key]))}
-                  >
-                    {loading ? 'Guardando...' : 'Guardar'}
-                  </button>
+      {/* Separador visual */}
+      <div className="section-separator">
+        <hr className="section-divider" />
+      </div>
+
+      {/* Sección de activar cuenta de artista */}
+      <section className="edit-profile-section">
+        <div className="edit-profile-container">
+          <div className="edit-profile-header">
+            <button 
+              type="button" 
+              className="back-btn"
+              onClick={handleGoBack}
+              title="Volver al inicio"
+            >
+              <ArrowLeft size={20} />
+              Volver
+            </button>
+            <h2>Activar cuenta de artista</h2>
+          </div>
+          <div className="edit-profile-card">
+            <div className="artist-activation-content">
+              <div className="artist-activation-logo">
+                <img src="/src/assets/LogoCOMMART.png" alt="COMMART" />
+              </div>
+              <h2 className="artist-activation-title">¿Deseas convertir tu cuenta como artista?</h2>
+              <div className="artist-activation-desc">
+                Al activar esta opción, tu cuenta se convertirá en una cuenta de ARTISTA. Mantendrás todas las funciones de una cuenta de USUARIO, pero contarás con herramientas adicionales, como un portafolio personal para gestionar y recibir comisiones.
+              </div>
+              <div className="artist-activation-warning">
+                <b>(IMPORTANTE: Esta función es para aquellos usuarios que deseen comercializar sus ilustraciones a través de comisiones. Ten en cuenta que, una vez activada, no podrás desactivar esta función).</b>
+              </div>
+              {artistActivationError && (
+                <div className="field-error">{artistActivationError}</div>
+              )}
+              {!isArtist ? (
+                <button
+                  type="button"
+                  className="save-btn"
+                  onClick={handleArtistActivationRequest}
+                  disabled={artistActivationLoading}
+                >
+                  {artistActivationLoading ? 'Activando...' : 'Activar cuenta de ARTISTA'}
+                </button>
+              ) : (
+                <div className="already-artist-msg">
+                  Ya eres artista. Esta acción no se puede deshacer.
                 </div>
-              </form>
+              )}
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
       {/* Modal de confirmación para cambio de contraseña */}
       {showPasswordConfirmModal && (
@@ -711,6 +809,28 @@ const EditProfile = () => {
         </div>
       )}
       
+      {/* Modal de confirmación para activar artista */}
+      {showArtistConfirm && (
+        <div className="modal-overlay">
+          <div className="confirmation-modal">
+            <p style={{ marginBottom: '1.2rem', marginTop: 0 }}>
+              ¿Estas seguro que deseas activar tu cuenta como <b>ARTISTA</b>?
+            </p>
+            <p style={{ fontWeight: 700, marginBottom: '2rem' }}>
+              (RECUERDA: No podrás desactivar esta opción una vez activada)
+            </p>
+            <div className="confirmation-buttons">
+              <button className="cancel-modal-btn" onClick={handleCancelArtistActivation}>
+                Cancelar
+              </button>
+              <button className="continue-modal-btn" onClick={handleArtistActivation}>
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </>
   );

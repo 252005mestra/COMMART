@@ -339,6 +339,7 @@ html, body {
     display: flex;
     align-items: center;
     margin-bottom: 2px;
+    gap: 14px;
 }
 .card-info .user-icon {
     width: 54px;
@@ -355,12 +356,12 @@ html, body {
     border-radius: 50%;
     object-fit: cover;
     display: block;
+
 }
 .card-info .artist-name {
-    font-family: 'Goldman', sans-serif;
-    font-size: 0.95rem; /* más pequeño */
+    font-family: 'Goldman';
+    font-size: 0.85rem; 
     color: #222;
-    font-weight: 600;
     letter-spacing: 0.01em;
 }
 .card-info .followers {

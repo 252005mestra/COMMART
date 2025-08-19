@@ -135,11 +135,11 @@
 }
 
 .forgot-password-link {
-  display: block;
+  display: flex;
+  justify-self: flex-end;
   font-size: 1em;
   color: black;
   transition: color 0.2s;
-  text-align: right; 
   text-decoration: none;
   margin-top: 0.5rem;
   margin-bottom: 0;

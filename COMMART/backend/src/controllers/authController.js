@@ -392,7 +392,7 @@ export const getUserProfileController = async (req, res) => {
 export const updateUserProfileController = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { username, recovery_email, current_password, new_password } = req.body;
+    const { username, recovery_email, current_password, new_password, is_artist } = req.body;
     const profileImage = req.file;
 
     // Obtener usuario actual
@@ -464,6 +464,19 @@ export const updateUserProfileController = async (req, res) => {
     // Actualizar imagen de perfil
     if (profileImage) {
       updateData.profile_image = `uploads/${profileImage.filename}`;
+    }
+
+    // Actualizar estado de artista si se proporciona
+    if (typeof is_artist !== 'undefined') {
+      if (currentUser.is_artist) {
+        // Ya es artista, no permitir volver a cliente
+        // Ignorar el cambio si intenta ponerlo en false
+      } else if (is_artist === true || is_artist === 'true') {
+        updateData.is_artist = true;
+        updateData.artist_activated_at = new Date();
+        updateData.role = 'artist'; // <--- Asegura el cambio de rol en la base de datos
+        // Aquí puedes crear el perfil de artista si no existe
+      }
     }
 
     // Si no hay campos para actualizar
