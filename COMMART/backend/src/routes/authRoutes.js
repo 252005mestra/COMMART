@@ -18,7 +18,12 @@ import {
     verifyCurrentPasswordController,
     findUserForRecoveryController,
     forgotPasswordController,
-    resetPasswordController
+    resetPasswordController,
+    getOwnArtistProfileController,
+    getPublicArtistProfileController,
+    getAllStylesController,
+    getAllLanguagesController,
+    updateArtistProfileController
 } from '../controllers/authController.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 import multer from 'multer';
@@ -84,5 +89,21 @@ router.post('/verify-password', verifyToken, verifyCurrentPasswordController);
 router.post('/find-user', findUserForRecoveryController);
 router.post('/forgot-password', forgotPasswordController);
 router.post('/reset-password/:token', resetPasswordController);
+
+// Perfil propio de artista
+router.get('/artist/profile', verifyToken, getOwnArtistProfileController);
+router.put(
+  '/artist/profile',
+  verifyToken,
+  upload.array('portfolio_images', 6), // Para subir hasta 6 imágenes
+  updateArtistProfileController
+);
+
+// Perfil público de artista
+router.get('/artist/:id', getPublicArtistProfileController);
+
+// Catálogo de estilos e idiomas
+router.get('/styles', getAllStylesController);
+router.get('/languages', getAllLanguagesController);
 
 export default router;

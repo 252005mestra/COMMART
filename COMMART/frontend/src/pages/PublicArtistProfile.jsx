@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import MainNav from '../components/MainNav';
 import ArtistPortfolio from '../components/ArtistPortfolio';
 
-const ArtistProfile = () => {
+const PublicArtistProfile = () => {
+  const { id } = useParams();
   const [artist, setArtist] = useState(null);
   const [allStyles, setAllStyles] = useState([]);
   const [allLanguages, setAllLanguages] = useState([]);
@@ -13,7 +15,7 @@ const ArtistProfile = () => {
     const fetchProfile = async () => {
       try {
         const [profileRes, stylesRes, langsRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/auth/artist/profile', { withCredentials: true }),
+          axios.get(`http://localhost:5000/api/auth/artist/${id}`),
           axios.get('http://localhost:5000/api/auth/styles'),
           axios.get('http://localhost:5000/api/auth/languages')
         ]);
@@ -27,10 +29,10 @@ const ArtistProfile = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [id]);
 
   if (loading) return <div>Cargando...</div>;
-  if (!artist) return <div>No eres artista.</div>;
+  if (!artist) return <div>Artista no encontrado.</div>;
 
   return (
     <>
@@ -39,17 +41,10 @@ const ArtistProfile = () => {
         artist={artist}
         allStyles={allStyles}
         allLanguages={allLanguages}
-        isOwnProfile={true}
-        onSave={async (formData) => {
-          const res = await axios.put('http://localhost:5000/api/auth/artist/profile', formData, {
-            withCredentials: true,
-            headers: { 'Content-Type': 'multipart/form-data' }
-          });
-          setArtist(res.data); // <-- Actualiza el estado local con la respuesta
-        }}
+        isOwnProfile={false}
       />
     </>
   );
 };
 
-export default ArtistProfile;
+export default PublicArtistProfile;

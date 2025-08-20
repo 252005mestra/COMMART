@@ -2,21 +2,34 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'; 
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
-import { 
-    createUser, 
-    findUserByEmail, 
-    findUserByUsername, 
-    getAllUsers,  // Mantener nombre original del modelo
-    updateUser,
-    deleteUserFromDB,
-    findUserById,
-    isUsernameAvailable,
-    getArtistsBasicInfo,
-    getAllStyles,
-    getPublicArtists,  // Mantener nombre original del modelo
-    setResetToken,
-    findUserByResetToken,
-    updatePasswordAndClearToken
+import {
+  createUserModel,
+  findUserByEmailModel,
+  findUserByUsernameModel,
+  findUserByIdModel,
+  getAllUsersModel,
+  updateUserModel,
+  isUsernameAvailableModel,
+  deleteUserFromDBModel,
+  getArtistsBasicInfoModel,
+  getArtistFullProfileModel,
+  getAllStylesModel,
+  getAllLanguagesModel,
+  findUserByRecoveryEmailModel,
+  setResetTokenModel,
+  findUserByResetTokenModel,
+  updatePasswordAndClearTokenModel,
+  getArtistPortfolioModel,
+  getArtistStylesModel,
+  getArtistLanguagesModel,
+  getArtistFollowersCountModel,
+  getArtistFollowingCountModel,
+  getArtistSalesCountModel,
+  getArtistPurchasesCountModel,
+  getArtistFavoritesCountModel,
+  getArtistReviewsCountModel,
+  getArtistRatingModel,
+  updateArtistProfileModel
 } from '../models/userModel.js';
 
 // Función para detectar caracteres peligrosos (para validación - rechazar entrada)
@@ -79,20 +92,20 @@ export const registerUser = async (req, res) => {
 
     try {
         // Validar que el correo electrónico no esté registrado
-        const existingEmail = await findUserByEmail(email);
+        const existingEmail = await findUserByEmailModel(email);
         if (existingEmail) {
             return res.status(400).json({ message: 'El correo ya está registrado.' });
         }
         
         // Validar que el nombre de usuario no esté registrado
-        const existingUsername = await findUserByUsername(username);
+        const existingUsername = await findUserByUsernameModel(username);
         if (existingUsername) {
             return res.status(400).json({ message: 'El nombre de usuario ya está en uso.' });
         }
         
         // Encriptación de la contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
-        await createUser(username, email, hashedPassword);
+        await createUserModel(username, email, hashedPassword);
         
         res.status(201).json({ message: 'Usuario registrado exitosamente.' });
     } catch (error) {
@@ -112,11 +125,11 @@ export const loginUser = async (req, res) => {
 
     try {
         // Buscar por email primero
-        let user = await findUserByEmail(identifier);
+        let user = await findUserByEmailModel(identifier);
 
         // Si no encuentra por email, buscar por username
         if (!user) {
-            user = await findUserByUsername(identifier);
+            user = await findUserByUsernameModel(identifier);
         }
 
         // Si no encuentra el usuario por ninguno de los dos, retornar error
@@ -160,7 +173,7 @@ export const loginUser = async (req, res) => {
 // Obtener todos los usuarios registrados (función del controlador)
 export const getUsersController = async (req, res) => {
     try {
-        const users = await getAllUsers();  // Usar directamente el nombre del modelo
+        const users = await getAllUsersModel();  // Usar directamente el nombre del modelo
         
         // Sanitizar los datos antes de enviarlos
         const sanitizedUsers = users.map(user => ({
@@ -181,7 +194,7 @@ export const getUserByIdController = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const user = await findUserById(id);
+        const user = await findUserByIdModel(id);
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
@@ -225,13 +238,13 @@ export const updateUserByIdController = async (req, res) => {
 
     try {
         // Buscar el usuario por ID
-        const existingEmail = await findUserByEmail(email);
+        const existingEmail = await findUserByEmailModel(email);
         if (existingEmail && existingEmail.id != id) {
             return res.status(400).json({ message: 'El correo ya está registrado.' });
         }
 
         // Validar que el nombre de usuario no esté en uso por otro usuario
-        const existingUsername = await findUserByUsername(username);
+        const existingUsername = await findUserByUsernameModel(username);
         if (existingUsername && existingUsername.id != id) {
             return res.status(400).json({ message: 'El nombre de usuario ya está en uso.' });
         }
@@ -260,7 +273,7 @@ export const updateUserByIdController = async (req, res) => {
         }
 
         // Actualizar el usuario en la base de datos
-        await updateUser(id, updateData);
+        await updateUserModel(id, updateData);
         res.status(200).json({ message: 'Usuario actualizado correctamente.' });
 
     } catch (error) {
@@ -274,7 +287,7 @@ export const deleteUserController = async (req, res) => {
     const { id } = req.params;
 
     try {
-        await deleteUserFromDB(id);
+        await deleteUserFromDBModel(id);
         res.status(200).json({ message: 'Usuario eliminado correctamente.' });
     } catch (error) {
         console.error('Error al eliminar usuario:', error);
@@ -295,7 +308,7 @@ export const logoutUser = (req, res) => {
 // Obtener artistas públicos para la landing (función del controlador)
 export const getPublicArtistsController = async (req, res) => {
   try {
-    const artists = await getPublicArtists();  // Usar directamente el nombre del modelo
+    const artists = await getArtistsBasicInfoModel();  // Usar directamente el nombre del modelo
     
     // Sanitizar datos antes de enviar (usernames que se muestran al público)
     const sanitizedArtists = artists.map(artist => ({
@@ -313,8 +326,8 @@ export const getPublicArtistsController = async (req, res) => {
 // Obtener todos los artistas (con información completa)
 export const getAllArtistsController = async (req, res) => {
   try {
-    const artists = await getArtistsBasicInfo();
-    
+    const artists = await getArtistsBasicInfoModel();
+
     // Sanitizar usernames para mostrar de forma segura
     const sanitizedArtists = artists.map(artist => ({
       ...artist,
@@ -333,8 +346,8 @@ export const getAllArtistsController = async (req, res) => {
 export const getArtistsByStyleController = async (req, res) => {
   const { styleId } = req.params;
   try {
-    const artists = await getArtistsBasicInfo(parseInt(styleId));
-    
+    const artists = await getArtistsBasicInfoModel(parseInt(styleId));
+
     // Sanitizar usernames para mostrar de forma segura
     const sanitizedArtists = artists.map(artist => ({
       ...artist,
@@ -352,7 +365,7 @@ export const getArtistsByStyleController = async (req, res) => {
 // Obtener todos los estilos
 export const getStylesController = async (req, res) => {
   try {
-    const styles = await getAllStyles();
+    const styles = await getAllStylesModel();
     res.status(200).json(styles);
   } catch (error) {
     console.error('Error al obtener estilos:', error);
@@ -360,28 +373,55 @@ export const getStylesController = async (req, res) => {
   }
 };
 
-// Obtener perfil del usuario actual
+// Obtener perfil del usuario actual (completo)
 export const getUserProfileController = async (req, res) => {
   try {
     const userId = req.user.id;
-    const user = await findUserById(userId, true); // incluir password para verificaciones
-    
+    const user = await findUserByIdModel(userId, true);
+
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
 
-    // Remover la contraseña y sanitizar datos antes de enviar la respuesta
-    const { password, ...userProfile } = user;
-    
-    // Sanitizar campos que se mostrarán en la interfaz
-    const sanitizedProfile = {
-      ...userProfile,
-      username: sanitizeInput(userProfile.username),
-      email: sanitizeInput(userProfile.email),
-      recovery_email: userProfile.recovery_email ? sanitizeInput(userProfile.recovery_email) : null
-    };
-    
-    res.status(200).json(sanitizedProfile);
+    // Si es artista, traer datos relacionados
+    let portfolio = [];
+    let styles = [];
+    let languages = [];
+    let followers = 0;
+    let following = 0;
+    let sales = 0;
+    let purchases = 0;
+    let favorites = 0;
+    let reviews = 0;
+    let rating = 0;
+
+    if (user.is_artist) {
+      portfolio = await getArtistPortfolioModel(userId); 
+      styles = await getArtistStylesModel(userId); 
+      languages = await getArtistLanguagesModel(userId); 
+      followers = await getArtistFollowersCountModel(userId);
+      following = await getArtistFollowingCountModel(userId);
+      sales = await getArtistSalesCountModel(userId);
+      purchases = await getArtistPurchasesCountModel(userId);
+      favorites = await getArtistFavoritesCountModel(userId);
+      reviews = await getArtistReviewsCountModel(userId);
+      rating = await getArtistRatingModel(userId);
+    }
+
+    // Sanitizar y devolver todo
+    res.status(200).json({
+      ...user,
+      portfolio,
+      styles,
+      languages,
+      followers,
+      following,
+      sales,
+      purchases,
+      favorites,
+      reviews,
+      rating
+    });
   } catch (error) {
     console.error('Error al obtener perfil:', error);
     res.status(500).json({ message: 'Error del servidor.' });
@@ -396,7 +436,7 @@ export const updateUserProfileController = async (req, res) => {
     const profileImage = req.file;
 
     // Obtener usuario actual
-    const currentUser = await findUserById(userId, true);
+    const currentUser = await findUserByIdModel(userId, true);
     if (!currentUser) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
@@ -415,7 +455,7 @@ export const updateUserProfileController = async (req, res) => {
       }
       
       // Verificar que no esté en uso
-      const isAvailable = await isUsernameAvailable(username, userId);
+      const isAvailable = await isUsernameAvailableModel(username, userId);
       if (!isAvailable) {
         return res.status(400).json({ message: 'El nombre de usuario ya está en uso.' });
       }
@@ -485,7 +525,7 @@ export const updateUserProfileController = async (req, res) => {
     }
 
     // Ejecutar actualización
-    await updateUser(userId, updateData);
+    await updateUserModel(userId, updateData);
     res.status(200).json({ message: 'Perfil actualizado exitosamente.' });
 
   } catch (error) {
@@ -508,7 +548,7 @@ export const checkUsernameController = async (req, res) => {
       return res.status(400).json({ message: 'Se requiere un nombre de usuario.' });
     }
     
-    const available = await isUsernameAvailable(username, excludeUserId);
+    const available = await isUsernameAvailableModel(username, excludeUserId);
     res.status(200).json({ available });
   } catch (error) {
     console.error('Error al verificar username:', error);
@@ -527,7 +567,7 @@ export const verifyCurrentPasswordController = async (req, res) => {
     }
     
     // Obtener usuario con contraseña
-    const user = await findUserById(userId, true);
+    const user = await findUserByIdModel(userId, true);
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
@@ -549,9 +589,9 @@ export const findUserForRecoveryController = async (req, res) => {
     return res.status(400).json({ message: 'Debes ingresar usuario o correo.' });
   }
   try {
-    let user = await findUserByEmail(identifier);
-    if (!user) user = await findUserByUsername(identifier);
-    if (!user) user = await findUserByRecoveryEmail(identifier);
+    let user = await findUserByEmailModel(identifier);
+    if (!user) user = await findUserByUsernameModel(identifier);
+    if (!user) user = await findUserByRecoveryEmailModel(identifier);
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
 
     res.status(200).json({
@@ -571,7 +611,7 @@ export const forgotPasswordController = async (req, res) => {
   }
   try {
     // Buscar por email principal o de recuperación
-    const user = await findUserByEmail(email) || await findUserByRecoveryEmail(email);
+    const user = await findUserByEmailModel(email) || await findUserByRecoveryEmailModel(email);
     if (!user) {
       return res.status(404).json({ message: 'No se encontró el usuario con ese correo.' });
     }
@@ -579,7 +619,7 @@ export const forgotPasswordController = async (req, res) => {
     // Generar token y guardar en la base de datos
     const token = crypto.randomBytes(32).toString('hex');
     const expiry = Date.now() + 3600000; // 1 hora
-    await setResetToken(user.id, token, expiry);
+    await setResetTokenModel(user.id, token, expiry);
 
     // Configura tu transporter con tus credenciales
     const transporter = nodemailer.createTransport({
@@ -632,7 +672,7 @@ export const resetPasswordController = async (req, res) => {
 
   try {
     // Buscar usuario por token de recuperación
-    const user = await findUserByResetToken(token);
+    const user = await findUserByResetTokenModel(token);
 
     // Verificar expiración del token
     // Si tu campo es BIGINT (milisegundos):
@@ -645,7 +685,7 @@ export const resetPasswordController = async (req, res) => {
 
     // Hashear y actualizar la contraseña, limpiar token y expiración
     const hashedPassword = await bcrypt.hash(password, 10);
-    await updatePasswordAndClearToken(user.id, hashedPassword);
+    await updatePasswordAndClearTokenModel(user.id, hashedPassword);
 
     // Contraseña cambiada correctamente
     res.status(200).json({ message: 'Contraseña restablecida exitosamente.' });
@@ -655,3 +695,76 @@ export const resetPasswordController = async (req, res) => {
     res.status(500).json({ message: 'Error del servidor.' });
   }
 };
+
+// Perfil propio (requiere autenticación)
+export const getOwnArtistProfileController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const profile = await getArtistFullProfileModel(userId);
+    if (!profile) return res.status(404).json({ message: 'No eres artista.' });
+    res.json(profile);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener perfil de artista.' });
+  }
+};
+
+// Perfil público de artista por ID
+export const getPublicArtistProfileController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const profile = await getArtistFullProfileModel(id);
+    if (!profile) return res.status(404).json({ message: 'Artista no encontrado.' });
+    res.json(profile);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener perfil público.' });
+  }
+};
+
+// Endpoint para obtener todos los estilos
+export const getAllStylesController = async (req, res) => {
+  try {
+    const styles = await getAllStylesModel();
+    res.json(styles);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener estilos.' });
+  }
+};
+
+// Endpoint para obtener todos los idiomas
+export const getAllLanguagesController = async (req, res) => {
+  try {
+    const languages = await getAllLanguagesModel();
+    res.json(languages);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener idiomas.' });
+  }
+};
+
+// Actualizar perfil de artista
+export const updateArtistProfileController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { bio, availability, price_policy, styles = [], languages = [] } = req.body;
+    const portfolioImages = req.files || [];
+
+    // Validaciones aquí si quieres
+
+    await updateArtistProfileModel({
+      userId,
+      bio,
+      availability,
+      price_policy,
+      styles,
+      languages,
+      portfolioImages
+    });
+
+    const updatedProfile = await getArtistFullProfileModel(userId);
+    res.status(200).json(updatedProfile);
+  } catch (err) {
+    console.error('Error al actualizar perfil de artista:', err);
+    res.status(500).json({ message: 'Error al actualizar perfil de artista.' });
+  }
+};
+
+

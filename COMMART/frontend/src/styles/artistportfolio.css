@@ -1,0 +1,676 @@
+/* Artist Portfolio Styles - Diseño mejorado basado en Figma */
+.artist-portfolio-container {
+  width: 90vw;
+  margin: 20px auto;
+  padding: 0 20px;
+  font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.artist-portfolio-profile {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Header Section - Estilo más compacto como en Figma */
+.artist-header {
+  display: flex;
+  padding: 30px;
+  gap: 24px;
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  align-items: flex-start;
+}
+
+.artist-avatar-section {
+  flex-shrink: 0;
+}
+
+.artist-avatar {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.artist-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-avatar-btn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #7d5938;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.edit-avatar-btn:hover {
+  background: #6B5237;
+}
+
+/* Artist Info Section - Layout más compacto */
+.artist-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.artist-main-info {
+  flex: 1;
+}
+
+.artist-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 8px 0;
+  font-family: 'Goldman', 'Nunito Sans', sans-serif;
+}
+
+/* Estadísticas en línea como en Figma */
+.artist-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.artist-stats span {
+  color: #666;
+  font-weight: 400;
+}
+
+.artist-stats strong {
+  color: #000;
+  font-weight: 600;
+}
+
+.artist-reviews {
+  margin-bottom: 12px;
+}
+
+.artist-reviews span {
+  color: #666;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.artist-reviews strong {
+  color: #000;
+  font-weight: 600;
+}
+
+/* Estilos Section - Similar al diseño de cards */
+.artist-styles-section {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.style-tag {
+  background: #7d5938;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.remove-style-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.remove-style-btn:hover {
+  color: white;
+}
+
+.add-style-select {
+  border: 2px solid #7d5938;
+  background: transparent;
+  color: #7d5938;
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 500;
+}
+
+/* Description - Formato más compacto */
+.artist-description {
+  color: #666;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.artist-description strong {
+  color: #000;
+  margin-right: 4px;
+  font-weight: 600;
+}
+
+.artist-description textarea {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  font-family: inherit;
+  margin-top: 4px;
+  resize: vertical;
+  min-height: 50px;
+  font-size: 14px;
+}
+
+/* Rating - Similar al diseño original pero más compacto */
+.artist-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-number {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+}
+
+.stars {
+  display: flex;
+  gap: 1px;
+}
+
+.star {
+  font-size: 16px;
+  color: #ddd;
+}
+
+.star.filled {
+  color: #7d5938;
+}
+
+/* Action Buttons - Estilo más moderno */
+.artist-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-left: 16px;
+}
+
+.btn-primary, .btn-secondary, .btn-edit, .btn-order {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.btn-primary {
+  background: #7d5938;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #6B5237;
+}
+
+.btn-secondary {
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+  background: #e9ecef;
+}
+
+.btn-edit {
+  background: #7d5938;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #6B5237;
+}
+
+.btn-order {
+  background: #dc3545;
+  color: white;
+  font-weight: 600;
+  padding: 12px 20px;
+}
+
+.btn-order:hover {
+  background: #c82333;
+}
+
+/* Body Section */
+.artist-body {
+  display: flex;
+  min-height: 400px;
+}
+
+/* Portfolio Section */
+.portfolio-section {
+  flex: 2;
+  position: relative;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portfolio-carousel {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portfolio-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 10;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.prev-btn {
+  left: 15px;
+}
+
+.next-btn {
+  right: 15px;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: #dc3545;
+}
+
+.remove-image-btn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.add-portfolio-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(125, 89, 56, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-portfolio-btn:hover {
+  background: #7d5938;
+  transform: scale(1.05);
+}
+
+.empty-portfolio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-style: italic;
+  height: 100%;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+/* Sidebar - Estilo más limpio */
+.sidebar {
+  flex: 1;
+  padding: 24px;
+  background: white;
+  border-left: 1px solid #e9ecef;
+  min-width: 280px;
+}
+
+.sidebar-item {
+  margin-bottom: 24px;
+}
+
+.sidebar-item:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar-item strong {
+  display: block;
+  color: #000;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+/* Status Section - Estilo mejorado */
+.status-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  margin-top: 4px;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.status-btn.available {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-btn.unavailable {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 4px;
+  font-family: 'Nunito Sans', sans-serif;
+  width: fit-content;
+}
+
+.status-info.available {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-info.unavailable {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.available {
+  background: #28a745;
+}
+
+.status-dot.unavailable {
+  background: #dc3545;
+}
+
+/* Languages Section - Estilo más limpio */
+.languages-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.language-tag {
+  background: #f8f9fa;
+  color: #666;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e9ecef;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 400;
+}
+
+.language-tag button {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.language-tag button:hover {
+  color: #dc3545;
+}
+
+.languages-edit select {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.language-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0 0;
+}
+
+.language-list li {
+  color: #666;
+  padding: 2px 0;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.language-list li:before {
+  content: "•";
+  color: #7d5938;
+  margin-right: 8px;
+}
+
+/* Price Policy */
+.sidebar-item textarea {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  font-family: 'Nunito Sans', sans-serif;
+  resize: vertical;
+  min-height: 80px;
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.sidebar-item textarea:focus {
+  outline: none;
+  border-color: #7d5938;
+  box-shadow: 0 0 0 2px rgba(125, 89, 56, 0.1);
+}
+
+.price-policy-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0 0;
+}
+
+.price-policy-list li {
+  color: #666;
+  padding: 2px 0;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 400;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.price-policy-list li:before {
+  content: "•";
+  color: #7d5938;
+  margin-right: 8px;
+}
+
+.price-policy-list li:empty {
+  display: none;
+}
+
+/* Select Styling */
+select {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 8px;
+  background: white;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+select:focus {
+  outline: none;
+  border-color: #7d5938;
+}
+
+/* Form Elements Focus States */
+textarea:focus, input:focus {
+  outline: none;
+  border-color: #7d5938;
+  box-shadow: 0 0 0 2px rgba(125, 89, 56, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .artist-portfolio-container {
+    padding: 0 10px;
+    margin: 10px auto;
+  }
+  
+  .artist-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .artist-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .artist-actions {
+    margin-left: 0;
+    margin-top: 16px;
+    justify-content: center;
+  }
+  
+  .artist-stats {
+    justify-content: center;
+  }
+  
+  .artist-body {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    border-left: none;
+    border-top: 1px solid #e9ecef;
+    min-width: auto;
+  }
+  
+  .portfolio-carousel {
+    height: 300px;
+  }
+  
+  .portfolio-image {
+    height: 300px;
+  }
+}
