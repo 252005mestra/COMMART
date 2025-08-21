@@ -10,6 +10,8 @@ const PublicArtistProfile = () => {
   const [allStyles, setAllStyles] = useState([]);
   const [allLanguages, setAllLanguages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -22,6 +24,9 @@ const PublicArtistProfile = () => {
         setArtist(profileRes.data);
         setAllStyles(stylesRes.data);
         setAllLanguages(langsRes.data);
+        // Aquí podrías consultar si el usuario actual sigue o tiene en favoritos a este artista
+        // setIsFollowing(...);
+        // setIsFavorite(...);
       } catch (err) {
         // Manejo de error
       } finally {
@@ -30,6 +35,21 @@ const PublicArtistProfile = () => {
     };
     fetchProfile();
   }, [id]);
+
+  const handleOrder = () => {
+    // Lógica para hacer pedido
+    alert('Funcionalidad de hacer pedido');
+  };
+
+  const handleFollow = () => {
+    setIsFollowing((prev) => !prev);
+    // Aquí puedes llamar a tu API para seguir/dejar de seguir
+  };
+
+  const handleFavorite = () => {
+    setIsFavorite((prev) => !prev);
+    // Aquí puedes llamar a tu API para agregar/quitar de favoritos
+  };
 
   if (loading) return <div>Cargando...</div>;
   if (!artist) return <div>Artista no encontrado.</div>;
@@ -42,6 +62,11 @@ const PublicArtistProfile = () => {
         allStyles={allStyles}
         allLanguages={allLanguages}
         isOwnProfile={false}
+        onOrder={handleOrder}
+        onFollow={handleFollow}
+        onFavorite={handleFavorite}
+        isFollowing={isFollowing}
+        isFavorite={isFavorite}
       />
     </>
   );

@@ -54,6 +54,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
+  align-items: stretch; /* <-- Esto fuerza que todas las cards tengan la misma altura */
 }
 
 .artist-card {
@@ -66,11 +67,9 @@
   border: 3px solid #000;
   max-width: 340px;
   margin: 0 auto;
-}
-
-.artist-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  height: 100%; /* <-- Esto asegura que todas las cards ocupen el 100% de la celda del grid */
+  display: flex;
+  flex-direction: column;
 }
 
 /* ========== Imagen del artista ========== */
@@ -158,9 +157,11 @@
   background: #7d5938;
   color: white;
   font-size: 0.7rem;
-  padding: 3px 8px;
+  padding: 4px 12px;
   border-radius: 12px;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  font-weight: 400;
   font-family: 'Nunito Sans', sans-serif;
 }
 
@@ -168,10 +169,12 @@
   background: transparent;
   color: #7d5938;
   font-size: 0.7rem;
-  padding: 3px 8px;
+  padding: 4px 12px;
   border: 2px solid #7d5938;
   border-radius: 12px;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  font-weight: 400;
   font-family: 'Nunito Sans', sans-serif;
 }
 

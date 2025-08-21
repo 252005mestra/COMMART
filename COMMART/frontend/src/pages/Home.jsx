@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import Carousel from '../components/Carousel';
@@ -197,39 +198,44 @@ const Home = () => {
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
                     <div className='artist-card' key={user.id}>
-                      <div className='card-image'>
-                        <img
-                          src={getPortfolioImageUrl(user.portfolio_image)}
-                          alt={`Portfolio de ${user.username}`}
-                        />
-                      </div>
-                      <div className='card-footer'>
-                        <div className='artist-info'>
+                      <Link
+                        to={`/artist/${user.id}`}
+                        style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
+                      >
+                        <div className='card-image'>
                           <img
-                            src={getProfileImageUrl(user.profile_image)}
-                            alt={user.username}
-                            className='profile-avatar'
+                            src={getPortfolioImageUrl(user.portfolio_image)}
+                            alt={`Portfolio de ${user.username}`}
                           />
-                          <div className='artist-details'>
-                            <h4 className='artist-name'>{user.username}</h4>
-                            <p className='artist-followers'>{user.followers || 0} Followers</p>
-                            {user.styles && user.styles.length > 0 && (
-                              <div className='artist-styles'>
-                                <span className='style-tag'>Estilos:</span>
-                                {user.styles.slice(0, 2).map((style, index) => (
-                                  <span key={index} className='style-tag-types'>{style}</span>
-                                ))}
-                                {user.styles.length > 2 && <span className='style-more'>+{user.styles.length - 2}</span>}
-                              </div>
-                            )}
-                            {user.description && (
-                              <p className='artist-description'>
-                                {user.description}
-                              </p>
-                            )}
+                        </div>
+                        <div className='card-footer'>
+                          <div className='artist-info'>
+                            <img
+                              src={getProfileImageUrl(user.profile_image)}
+                              alt={user.username}
+                              className='profile-avatar'
+                            />
+                            <div className='artist-details'>
+                              <h4 className='artist-name'>{user.username}</h4>
+                              <p className='artist-followers'>{user.followers || 0} Followers</p>
+                              {user.styles && user.styles.length > 0 && (
+                                <div className='artist-styles'>
+                                  <span className='style-tag'>Estilos:</span>
+                                  {user.styles.slice(0, 2).map((style, index) => (
+                                    <span key={index} className='style-tag-types'>{style}</span>
+                                  ))}
+                                  {user.styles.length > 2 && <span className='style-more'>+{user.styles.length - 2}</span>}
+                                </div>
+                              )}
+                              {user.description && (
+                                <p className='artist-description'>
+                                  {user.description}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     </div>
                   ))
                 ) : (

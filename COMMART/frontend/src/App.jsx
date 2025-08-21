@@ -5,6 +5,7 @@ import EditProfile from './pages/EditProfile'
 import ResetPassword from './pages/ResetPasswordPage'; // o './pages/ResetPassword'
 import PrivateRoute from './components/PrivateRoute'
 import Profile from './components/Profile';
+import PublicArtistProfile from './pages/PublicArtistProfile';
 
 
 const App = () => {
@@ -41,6 +42,8 @@ const App = () => {
             </PrivateRoute>
           }
         />
+
+        <Route path="/artist/:id" element={<PublicArtistProfile />} />
 
       </Routes>
     </>

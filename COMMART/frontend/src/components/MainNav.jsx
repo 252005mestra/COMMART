@@ -25,7 +25,7 @@ import '../styles/navbar.css';
 const MainNav = ({ 
   searchTerm, 
   setSearchTerm, 
-  artistSuggestions = [], 
+  artistSuggestions,
   styleSuggestions = [],
   getProfileImageUrl,
   onStyleSelect 
@@ -68,8 +68,13 @@ const MainNav = ({
 
   // Maneja selección de sugerencia de artista
   const handleArtistSuggestionClick = (username) => {
-    setSearchTerm(username);
-    setShowSuggestions(false);
+    const artist = artistSuggestions.find(u => u.username === username);
+    if (artist) {
+      navigate(`/artist/${artist.id}`);
+    } else {
+      setSearchTerm(username);
+      setShowSuggestions(false);
+    }
   };
 
   // Maneja selección de sugerencia de estilo
@@ -85,7 +90,7 @@ const MainNav = ({
   };
 
   // Verificar si hay sugerencias para mostrar
-  const hasSuggestions = (artistSuggestions.length > 0 || styleSuggestions.length > 0) && searchTerm;
+  const hasSuggestions = ((artistSuggestions?.length ?? 0) > 0 || (styleSuggestions?.length ?? 0) > 0) && searchTerm;
 
   // Maneja el click en el perfil
   const handleProfileClick = () => {

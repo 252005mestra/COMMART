@@ -45,7 +45,7 @@ const ArtistProfile = () => {
             withCredentials: true,
             headers: { 'Content-Type': 'multipart/form-data' }
           });
-          setArtist(res.data); // <-- Actualiza el estado local con la respuesta
+          setArtist(res.data);
         }}
       />
     </>
