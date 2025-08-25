@@ -1,53 +1,60 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useUser } from '../context/UserContext';
 import axios from 'axios';
 import MainNav from '../components/MainNav';
+import Footer from '../components/Footer';
 import ArtistPortfolio from '../components/ArtistPortfolio';
 
 const ArtistProfile = () => {
-  const [artist, setArtist] = useState(null);
+  const { profile } = useUser();
   const [allStyles, setAllStyles] = useState([]);
   const [allLanguages, setAllLanguages] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
-        const [profileRes, stylesRes, langsRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/auth/artist/profile', { withCredentials: true }),
+        const [stylesRes, langsRes] = await Promise.all([
           axios.get('http://localhost:5000/api/auth/styles'),
           axios.get('http://localhost:5000/api/auth/languages')
         ]);
-        setArtist(profileRes.data);
         setAllStyles(stylesRes.data);
         setAllLanguages(langsRes.data);
-      } catch (err) {
-        // Manejo de error
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
       }
     };
-    fetchProfile();
+    fetchData();
   }, []);
 
-  if (loading) return <div>Cargando...</div>;
-  if (!artist) return <div>No eres artista.</div>;
+  const handleSave = async (formData) => {
+    try {
+      await axios.put('http://localhost:5000/api/auth/artist-profile', formData, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      // Recargar datos o mostrar mensaje de éxito
+    } catch (error) {
+      console.error('Error al actualizar perfil:', error);
+    }
+  };
 
   return (
     <>
       <MainNav />
-      <ArtistPortfolio
-        artist={artist}
-        allStyles={allStyles}
-        allLanguages={allLanguages}
-        isOwnProfile={true}
-        onSave={async (formData) => {
-          const res = await axios.put('http://localhost:5000/api/auth/artist/profile', formData, {
-            withCredentials: true,
-            headers: { 'Content-Type': 'multipart/form-data' }
-          });
-          setArtist(res.data);
-        }}
-      />
+
+      <main className="main-content">
+        <section className="artist-profile-section">
+          <ArtistPortfolio
+            artist={profile}
+            allStyles={allStyles}
+            allLanguages={allLanguages}
+            isOwnProfile={true}
+            onSave={handleSave}
+          />
+        </section>
+      </main>
+
+      <Footer />
     </>
   );
 };

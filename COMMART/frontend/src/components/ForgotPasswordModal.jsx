@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
+import '../styles/modal.css';
+import logo from '../assets/LogoCOMMART.png';
 
 const ForgotPasswordModal = ({ onClose }) => {
   const [identifier, setIdentifier] = useState('');
@@ -56,13 +58,17 @@ const ForgotPasswordModal = ({ onClose }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <button className="close-button" onClick={onClose} disabled={loading}>×</button>
-        <img src="/src/assets/LogoCOMMART.png" alt="COMMART" style={{ height: '3rem', marginBottom: '1rem' }} />
+        <img src={logo} alt="Logo COMMART" />
         <h2>¿Tienes problemas para iniciar sesión?</h2>
-        <p>
-          Ingresa tu nombre de usuario, el correo asociado a tu cuenta o tu correo de recuperación para poder identificar tu cuenta. Luego, te enviaremos un enlace de recuperación a uno de los correos asociados.
-        </p>
+        
+        {error && <p className="error-message">{error}</p>}
+        {msg && <p className="success-message">{msg}</p>}
+        
         {!userEmails ? (
-          <form onSubmit={handleFindUser}>
+          <form className="login-form" onSubmit={handleFindUser}>
+            <p className="forgot-description">
+              Ingresa tu nombre de usuario, el correo asociado a tu cuenta o tu correo de recuperación para poder identificar tu cuenta. Luego, te enviaremos un enlace de recuperación a uno de los correos asociados.
+            </p>
             <input
               type="text"
               placeholder="Usuario, correo electrónico o correo de recuperación"
@@ -73,18 +79,20 @@ const ForgotPasswordModal = ({ onClose }) => {
             />
             <button type="submit" disabled={loading || !identifier}>
               {loading ? (
-                <span>
+                <>
                   <span className="spinner" /> Enviando...
-                </span>
+                </>
               ) : 'Enviar'}
             </button>
           </form>
         ) : (
-          <>
-            <p>Selecciona a qué correo deseas recibir el enlace de recuperación:</p>
-            <div style={{ marginBottom: '1rem' }}>
+          <div className="email-selection-container">
+            <p className="forgot-description">
+              Selecciona a qué correo deseas recibir el enlace de recuperación:
+            </p>
+            <div className="email-options">
               {userEmails.email && (
-                <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                <label className="email-option">
                   <input
                     type="radio"
                     name="email"
@@ -93,11 +101,11 @@ const ForgotPasswordModal = ({ onClose }) => {
                     onChange={() => setSelectedEmail(userEmails.email)}
                     disabled={loading}
                   />
-                  {userEmails.email} (principal)
+                  <span className="email-text">{userEmails.email} (principal)</span>
                 </label>
               )}
               {userEmails.recovery_email && (
-                <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                <label className="email-option">
                   <input
                     type="radio"
                     name="email"
@@ -106,25 +114,24 @@ const ForgotPasswordModal = ({ onClose }) => {
                     onChange={() => setSelectedEmail(userEmails.recovery_email)}
                     disabled={loading}
                   />
-                  {userEmails.recovery_email} (recuperación)
+                  <span className="email-text">{userEmails.recovery_email} (recuperación)</span>
                 </label>
               )}
             </div>
             <button
               type="button"
+              className="submit-button"
               disabled={loading || !selectedEmail}
               onClick={() => handleSendEmail(selectedEmail)}
             >
               {loading ? (
-                <span>
+                <>
                   <span className="spinner" /> Enviando...
-                </span>
+                </>
               ) : 'Enviar enlace'}
             </button>
-          </>
+          </div>
         )}
-        {msg && <p>{msg}</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
     </div>
   );

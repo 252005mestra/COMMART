@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import MainNav from '../components/MainNav';
+import Footer from '../components/Footer';
 import ArtistPortfolio from '../components/ArtistPortfolio';
 
 const PublicArtistProfile = () => {
@@ -24,11 +25,8 @@ const PublicArtistProfile = () => {
         setArtist(profileRes.data);
         setAllStyles(stylesRes.data);
         setAllLanguages(langsRes.data);
-        // Aquí podrías consultar si el usuario actual sigue o tiene en favoritos a este artista
-        // setIsFollowing(...);
-        // setIsFavorite(...);
       } catch (err) {
-        // Manejo de error
+        console.error('Error al cargar perfil:', err);
       } finally {
         setLoading(false);
       }
@@ -37,18 +35,15 @@ const PublicArtistProfile = () => {
   }, [id]);
 
   const handleOrder = () => {
-    // Lógica para hacer pedido
     alert('Funcionalidad de hacer pedido');
   };
 
   const handleFollow = () => {
     setIsFollowing((prev) => !prev);
-    // Aquí puedes llamar a tu API para seguir/dejar de seguir
   };
 
   const handleFavorite = () => {
     setIsFavorite((prev) => !prev);
-    // Aquí puedes llamar a tu API para agregar/quitar de favoritos
   };
 
   if (loading) return <div>Cargando...</div>;
@@ -57,17 +52,24 @@ const PublicArtistProfile = () => {
   return (
     <>
       <MainNav />
-      <ArtistPortfolio
-        artist={artist}
-        allStyles={allStyles}
-        allLanguages={allLanguages}
-        isOwnProfile={false}
-        onOrder={handleOrder}
-        onFollow={handleFollow}
-        onFavorite={handleFavorite}
-        isFollowing={isFollowing}
-        isFavorite={isFavorite}
-      />
+      
+      <main className="main-content">
+        <section className="public-artist-section">
+          <ArtistPortfolio
+            artist={artist}
+            allStyles={allStyles}
+            allLanguages={allLanguages}
+            isOwnProfile={false}
+            onOrder={handleOrder}
+            onFollow={handleFollow}
+            onFavorite={handleFavorite}
+            isFollowing={isFollowing}
+            isFavorite={isFavorite}
+          />
+        </section>
+      </main>
+
+      <Footer />
     </>
   );
 };

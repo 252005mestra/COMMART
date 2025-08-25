@@ -10,11 +10,6 @@ const EditProfile = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   
-  // Estados para la búsqueda (necesarios para MainNav)
-  const [searchTerm, setSearchTerm] = useState('');
-  const [users, setUsers] = useState([]);
-  const [styles, setStyles] = useState([]);
-  
   // Estados del formulario
   const [formData, setFormData] = useState({
     username: '',
@@ -30,27 +25,26 @@ const EditProfile = () => {
     new_password: '',
     confirm_password: ''
   });
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  });
   
-  const [profileImage, setProfileImage] = useState(null);
+  // Estados adicionales
   const [imagePreview, setImagePreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({});
   const [isArtist, setIsArtist] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Estados para activación de artista
+  const [showArtistConfirm, setShowArtistConfirm] = useState(false);
   const [artistActivationLoading, setArtistActivationLoading] = useState(false);
   const [artistActivationError, setArtistActivationError] = useState('');
-  const [showArtistConfirm, setShowArtistConfirm] = useState(false);
 
-  // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Cargar datos del usuario
         const userResponse = await axios.get('http://localhost:5000/api/auth/profile', {
           withCredentials: true
         });
@@ -67,16 +61,6 @@ const EditProfile = () => {
           setImagePreview(`http://localhost:5000/${userData.profile_image}`);
         }
 
-        // Cargar datos para la búsqueda
-        const [artistsResponse, stylesResponse] = await Promise.all([
-          axios.get('http://localhost:5000/api/auth/artists', { withCredentials: true }),
-          axios.get('http://localhost:5000/api/auth/styles')
-        ]);
-        
-        setUsers(artistsResponse.data);
-        setStyles(stylesResponse.data);
-
-        // Verificar si es artista
         setIsArtist(!!userData.is_artist);
       } catch (error) {
         console.error('Error al cargar datos:', error);
@@ -87,199 +71,142 @@ const EditProfile = () => {
     fetchData();
   }, []);
 
-  // Sugerencias para la búsqueda
-  const artistSuggestions = users
-    .filter(user =>
-      searchTerm &&
-      user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .slice(0, 4);
-
-  const styleSuggestions = styles
-    .filter(style =>
-      searchTerm &&
-      style.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .slice(0, 4);
-
-  const getProfileImageUrl = (imgPath) =>
-    imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
-
-  const handleStyleSelect = (style) => {
-    // Función requerida por MainNav, no necesaria aquí pero debe existir
-  };
-
-  // Función para verificar contraseña actual con el servidor
-  const verifyCurrentPassword = async (password) => {
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/verify-password', {
-        current_password: password
-      }, { withCredentials: true });
-      
-      return response.data.valid;
-    } catch (error) {
-      console.error('Error al verificar contraseña:', error);
-      return false;
-    }
-  };
-
-  // Validaciones en tiempo real (usando las mismas del registro)
-  const validateField = async (field, value, isPasswordField = false) => {
-    const newErrors = { ...errors };
-    
-    if (isPasswordField) {
-      // Validaciones para campos de contraseña
-      switch (field) {
-        case 'current_password':
-          if (!value.trim()) {
-            newErrors.current_password = 'La contraseña es obligatoria.';
-          } else if (/\s/.test(value)) {
-            newErrors.current_password = 'El nombre de usuario y la contraseña no pueden contener espacios.';
-          } else if (/[<>"'&/]/.test(value)) {
-            newErrors.current_password = 'El nombre de usuario y la contraseña no pueden contener caracteres peligrosos como < > " \' / &';
-          } else {
-            // Verificar con el servidor si la contraseña es correcta
-            const isValid = await verifyCurrentPassword(value);
-            if (!isValid) {
-              newErrors.current_password = 'Contraseña incorrecta.';
-            } else {
-              delete newErrors.current_password;
-            }
-          }
-          break;
-          
-        case 'new_password':
-          if (!value.trim()) {
-            newErrors.new_password = 'La contraseña es obligatoria.';
-          } else if (/[<>"'&/]/.test(value)) {
-            newErrors.new_password = 'El nombre de usuario y la contraseña no pueden contener caracteres peligrosos como < > " \' / &';
-          } else if (/\s/.test(value)) {
-            newErrors.new_password = 'El nombre de usuario y la contraseña no pueden contener espacios.';
-          } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(value)) {
-            newErrors.new_password = 'La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.';
-          } else if (passwordData.current_password && value === passwordData.current_password) {
-            newErrors.new_password = 'La nueva contraseña debe ser diferente a la actual.';
-          } else {
-            delete newErrors.new_password;
-          }
-          break;
-          
-        case 'confirm_password':
-          if (!value.trim()) {
-            newErrors.confirm_password = 'Confirma tu contraseña.';
-          } else if (passwordData.new_password && value !== passwordData.new_password) {
-            newErrors.confirm_password = 'Las contraseñas no coinciden.';
-          } else {
-            delete newErrors.confirm_password;
-          }
-          break;
-      }
-    } else {
-      // Validaciones para campos normales
-      switch (field) {
-        case 'username':
-          if (!value.trim()) {
-            newErrors.username = 'El nombre de usuario es obligatorio.';
-          } else if (/[<>"'&/]/.test(value)) {
-            newErrors.username = 'El nombre de usuario y la contraseña no pueden contener caracteres peligrosos como < > " \' / &';
-          } else if (/\s/.test(value)) {
-            newErrors.username = 'El nombre de usuario y la contraseña no pueden contener espacios.';
-          } else if (value !== initialData.username) {
-            // Verificar disponibilidad del username en tiempo real
-            try {
-              const response = await axios.post('http://localhost:5000/api/auth/check-username', {
-                username: value,
-                excludeUserId: initialData.id
-              }, { withCredentials: true });
-              
-              if (!response.data.available) {
-                newErrors.username = 'El nombre de usuario ya está en uso.';
-              } else {
-                delete newErrors.username;
-              }
-            } catch (error) {
-              // Si hay error en la verificación, no mostrar error aún
-              delete newErrors.username;
-            }
-          } else {
-            delete newErrors.username;
-          }
-          break;
-          
-        case 'recovery_email':
-          if (value && !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(value)) {
-            newErrors.recovery_email = 'Formato de correo inválido.';
-          } else {
-            delete newErrors.recovery_email;
-          }
-          break;
-      }
-    }
-    
-    setErrors(newErrors);
-  };
-
-  // Manejar cambios en inputs normales
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    validateField(name, value);
-  };
-
-  // Manejar cambios en inputs de contraseña
-  const handlePasswordInputChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData(prev => ({ ...prev, [name]: value }));
-    
-    // Validación en tiempo real
-    validateField(name, value, true);
-    
-    // Si cambia la contraseña actual, revalidar la nueva contraseña
-    if (name === 'current_password' && passwordData.new_password) {
-      setTimeout(() => validateField('new_password', passwordData.new_password, true), 100);
-    }
-    
-    // Si cambia la nueva contraseña, revalidar la confirmación
-    if (name === 'new_password' && passwordData.confirm_password) {
-      setTimeout(() => validateField('confirm_password', passwordData.confirm_password, true), 100);
-    }
-  };
-
-  // Manejar selección de imagen
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        setErrors(prev => ({ ...prev, image: 'Solo se permiten archivos de imagen' }));
-        return;
-      }
-      
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, image: 'La imagen no puede superar los 5MB' }));
-        return;
-      }
-      
-      setProfileImage(file);
-      setErrors(prev => ({ ...prev, image: undefined }));
-      
-      const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target.result);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Alternar visibilidad de contraseñas
-  const togglePasswordVisibility = (field) => {
-    setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
-  };
-
   // Verificar si hay cambios
   const hasChanges = () => {
     return (
       formData.username !== initialData.username ||
       formData.recovery_email !== (initialData.recovery_email || '') ||
-      profileImage
+      selectedFile
     );
+  };
+
+  // Manejar cambios en inputs de texto
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Limpiar errores específicos del campo
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  // Manejar cambio de imagen
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(prev => ({ ...prev, image: 'La imagen no puede ser mayor a 5MB' }));
+        return;
+      }
+      
+      // Validar tipo
+      if (!file.type.startsWith('image/')) {
+        setErrors(prev => ({ ...prev, image: 'Solo se permiten archivos de imagen' }));
+        return;
+      }
+      
+      setSelectedFile(file);
+      
+      // Crear preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      
+      // Limpiar error de imagen si existe
+      if (errors.image) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.image;
+          return newErrors;
+        });
+      }
+    }
+  };
+
+  // Manejar cambios en inputs de contraseña
+  const handlePasswordInputChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Limpiar errores específicos del campo
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  // Validación de campos
+  const validateField = async (field, value, isRequired = false) => {
+    const newErrors = { ...errors };
+    
+    switch (field) {
+      case 'username':
+        if (!value) {
+          newErrors.username = 'El nombre de usuario es obligatorio';
+        } else if (value.length < 3) {
+          newErrors.username = 'El nombre de usuario debe tener al menos 3 caracteres';
+        } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+          newErrors.username = 'El nombre de usuario solo puede contener letras, números y guiones bajos';
+        } else {
+          delete newErrors.username;
+        }
+        break;
+        
+      case 'recovery_email':
+        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) {
+          newErrors.recovery_email = 'Formato de correo inválido';
+        } else {
+          delete newErrors.recovery_email;
+        }
+        break;
+        
+      case 'current_password':
+        if (isRequired && !value) {
+          newErrors.current_password = 'La contraseña actual es obligatoria';
+        } else {
+          delete newErrors.current_password;
+        }
+        break;
+        
+      case 'new_password':
+        if (isRequired && !value) {
+          newErrors.new_password = 'La nueva contraseña es obligatoria';
+        } else if (value && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(value)) {
+          newErrors.new_password = 'La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial';
+        } else {
+          delete newErrors.new_password;
+        }
+        break;
+        
+      case 'confirm_password':
+        if (isRequired && !value) {
+          newErrors.confirm_password = 'Confirma tu nueva contraseña';
+        } else if (value && value !== passwordData.new_password) {
+          newErrors.confirm_password = 'Las contraseñas no coinciden';
+        } else {
+          delete newErrors.confirm_password;
+        }
+        break;
+    }
+    
+    setErrors(newErrors);
   };
 
   // Función para cancelar y restaurar datos originales
@@ -299,7 +226,7 @@ const EditProfile = () => {
     }
     
     // Limpiar imagen seleccionada
-    setProfileImage(null);
+    setSelectedFile(null);
     
     // Limpiar errores
     setErrors({});
@@ -350,7 +277,7 @@ const EditProfile = () => {
     await validateField('new_password', passwordData.new_password, true);
     await validateField('confirm_password', passwordData.confirm_password, true);
 
-    // Verificar si hay errores después de un breve delay para permitir que las validaciones async terminen
+    // Verificar si hay errores después de un breve delay
     setTimeout(() => {
       const hasPasswordErrors = ['current_password', 'new_password', 'confirm_password']
         .some(field => errors[field]);
@@ -371,6 +298,45 @@ const EditProfile = () => {
     }
   };
 
+  // Manejar solicitud de activación de artista
+  const handleArtistActivationRequest = () => {
+    setShowArtistConfirm(true);
+  };
+
+  // Cancelar activación de artista
+  const handleCancelArtistActivation = () => {
+    setShowArtistConfirm(false);
+    setArtistActivationError('');
+  };
+
+  // Activar cuenta de artista
+  const handleArtistActivation = async () => {
+    try {
+      setArtistActivationLoading(true);
+      setArtistActivationError('');
+      
+      const formDataToSend = new FormData();
+      formDataToSend.append('is_artist', 'true');
+      
+      await axios.put('http://localhost:5000/api/auth/profile', formDataToSend, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      setIsArtist(true);
+      setShowArtistConfirm(false);
+      alert('¡Cuenta de artista activada exitosamente!');
+      
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Error al activar cuenta de artista';
+      setArtistActivationError(msg);
+    } finally {
+      setArtistActivationLoading(false);
+    }
+  };
+
   // Enviar formulario
   const handleSubmit = async (e = null, includePassword = false) => {
     if (e) e.preventDefault();
@@ -385,9 +351,8 @@ const EditProfile = () => {
       return;
     }
     
-    setLoading(true);
-    
     try {
+      setLoading(true);
       const formDataToSend = new FormData();
       
       // Solo enviar campos que han cambiado
@@ -404,8 +369,8 @@ const EditProfile = () => {
         formDataToSend.append('new_password', passwordData.new_password);
       }
       
-      if (profileImage) {
-        formDataToSend.append('profile_image', profileImage);
+      if (selectedFile) {
+        formDataToSend.append('profile_image', selectedFile);
       }
       
       await axios.put('http://localhost:5000/api/auth/profile', formDataToSend, {
@@ -417,7 +382,6 @@ const EditProfile = () => {
       
       alert('Perfil actualizado exitosamente');
       
-      // En lugar de redirigir, actualizar los datos iniciales y limpiar el estado
       // Recargar los datos del usuario actualizado
       const userResponse = await axios.get('http://localhost:5000/api/auth/profile', {
         withCredentials: true
@@ -437,7 +401,7 @@ const EditProfile = () => {
       }
       
       // Limpiar el estado de la imagen seleccionada
-      setProfileImage(null);
+      setSelectedFile(null);
       
       // Limpiar datos de contraseña si se cambió
       if (includePassword) {
@@ -459,225 +423,182 @@ const EditProfile = () => {
     }
   };
 
-  // Manejar activación de cuenta de artista
-  const handleArtistCheckbox = (e) => {
-    // Solo permite marcar, nunca desmarcar
-    if (!isArtist) setIsArtist(e.target.checked);
-  };
-
-  // Handler para activar artista (abre modal)
-  const handleArtistActivationRequest = (e) => {
-    e.preventDefault();
-    setShowArtistConfirm(true);
-  };
-
-  // Handler para confirmar activación
-  const handleArtistActivation = async () => {
-    setArtistActivationError('');
-    setArtistActivationLoading(true);
-    try {
-      await axios.put(
-        'http://localhost:5000/api/auth/profile',
-        { is_artist: true },
-        { withCredentials: true }
-      );
-      setIsArtist(true);
-      setShowArtistConfirm(false);
-      alert('¡Ahora eres artista! Recarga la página para ver las nuevas opciones.');
-    } catch (err) {
-      setArtistActivationError(
-        err.response?.data?.message || 'Error al activar cuenta de artista.'
-      );
-    } finally {
-      setArtistActivationLoading(false);
-    }
-  };
-
-  // Handler para cancelar el modal
-  const handleCancelArtistActivation = () => {
-    setShowArtistConfirm(false);
-  };
-
   return (
     <>
-      <MainNav
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        artistSuggestions={artistSuggestions}
-        styleSuggestions={styleSuggestions}
-        getProfileImageUrl={getProfileImageUrl}
-        onStyleSelect={handleStyleSelect}
-      />
+      <MainNav />
 
-      {/* Sección de editar perfil */}
-      <section className="edit-profile-section">
-        <div className="edit-profile-container">
-          <div className="edit-profile-header">
-            <button 
-              type="button" 
-              className="back-btn"
-              onClick={handleGoBack}
-              title="Volver al inicio"
-            >
-              <ArrowLeft size={20} />
-              Volver
-            </button>
-            <h1>Datos Principales</h1>
-          </div>
-          <div className="edit-profile-card">
-            <div className="card-header">
-              <h2>Datos de Cuenta</h2>
+      <main className="main-content">
+        <section className="edit-profile-section">
+          <div className="edit-profile-container">
+            <div className="edit-profile-header">
+              <button 
+                type="button" 
+                className="back-btn"
+                onClick={handleGoBack}
+                title="Volver al inicio"
+              >
+                <ArrowLeft size={20} />
+                Volver
+              </button>
+              <h1>Datos Principales</h1>
             </div>
-
-            {errors.general && (
-              <div className="general-error">
-                {errors.general}
+            <div className="edit-profile-card">
+              <div className="card-header">
+                <h2>Datos de Cuenta</h2>
               </div>
-            )}
 
-            <div className="profile-image-container">
-              <div className="profile-image-preview">
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Profile" />
+              {errors.general && (
+                <div className="general-error">
+                  {errors.general}
+                </div>
+              )}
+
+              <div className="profile-image-container">
+                <div className="profile-image-preview">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Profile" />
+                  ) : (
+                    <CircleUserRound size={60} />
+                  )}
+                  <button
+                    type="button"
+                    className="edit-image-btn"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Camera size={16} />
+                  </button>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  style={{ display: 'none' }}
+                />
+                {errors.image && (
+                  <span className="field-error">{errors.image}</span>
+                )}
+              </div>
+
+              <form onSubmit={handleSubmit} className="profile-form">
+                <div className="form-field">
+                  <label>Usuario</label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    onBlur={() => validateField('username', formData.username)}
+                    className={errors.username ? 'input-error' : ''}
+                  />
+                  {errors.username && (
+                    <span className="field-error">{errors.username}</span>
+                  )}
+                </div>
+
+                <div className="form-field">
+                  <label>Correo electrónico</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    disabled
+                    className="disabled-field"
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label>Correo de recuperación</label>
+                  <input
+                    type="email"
+                    name="recovery_email"
+                    value={formData.recovery_email}
+                    onChange={handleInputChange}
+                    onBlur={() => validateField('recovery_email', formData.recovery_email)}
+                    className={errors.recovery_email ? 'input-error' : ''}
+                  />
+                  {errors.recovery_email && (
+                    <span className="field-error">{errors.recovery_email}</span>
+                  )}
+                </div>
+
+                <div className="form-field password-field">
+                  <label>Contraseña</label>
+                  <div className="password-display" onClick={handlePasswordChangeClick}>
+                    <span className="password-dots">●●●●●●●●●●●●</span>
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  <button type="button" className="cancel-btn" onClick={handleCancel}>
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="save-btn"
+                    disabled={loading || (!hasChanges() && Object.keys(errors).some(key => key !== 'general' && errors[key]))}
+                  >
+                    {loading ? 'Guardando...' : 'Guardar'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        {/* Separador visual */}
+        <section className="section-separator">
+          <hr className="section-divider" />
+        </section>
+
+        {/* Sección de activar cuenta de artista */}
+        <section className="artist-activation-section">
+          <div className="edit-profile-container">
+            <div className="edit-profile-header">
+              <button 
+                type="button" 
+                className="back-btn"
+                onClick={handleGoBack}
+                title="Volver al inicio"
+              >
+                <ArrowLeft size={20} />
+                Volver
+              </button>
+              <h2>Activar cuenta de artista</h2>
+            </div>
+            <div className="edit-profile-card">
+              <div className="artist-activation-content">
+                <div className="artist-activation-logo">
+                  <img src="/src/assets/LogoCOMMART.png" alt="COMMART" />
+                </div>
+                <h2 className="artist-activation-title">¿Deseas convertir tu cuenta como artista?</h2>
+                <div className="artist-activation-desc">
+                  Al activar esta opción, tu cuenta se convertirá en una cuenta de ARTISTA. Mantendrás todas las funciones de una cuenta de USUARIO, pero contarás con herramientas adicionales, como un portafolio personal para gestionar y recibir comisiones.
+                </div>
+                <div className="artist-activation-warning">
+                  <b>(IMPORTANTE: Esta función es para aquellos usuarios que deseen comercializar sus ilustraciones a través de comisiones. Ten en cuenta que, una vez activada, no podrás desactivar esta función).</b>
+                </div>
+                {artistActivationError && (
+                  <div className="field-error">{artistActivationError}</div>
+                )}
+                {!isArtist ? (
+                  <button
+                    type="button"
+                    className="save-btn"
+                    onClick={handleArtistActivationRequest}
+                    disabled={artistActivationLoading}
+                  >
+                    {artistActivationLoading ? 'Activando...' : 'Activar cuenta de ARTISTA'}
+                  </button>
                 ) : (
-                  <CircleUserRound size={60} />
-                )}
-                <button
-                  type="button"
-                  className="edit-image-btn"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Camera size={16} />
-                </button>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                style={{ display: 'none' }}
-              />
-              {errors.image && (
-                <span className="field-error">{errors.image}</span>
-              )}
-            </div>
-
-            <form onSubmit={handleSubmit} className="profile-form">
-              <div className="form-field">
-                <label>Usuario</label>
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  className={errors.username ? 'input-error' : ''}
-                />
-                {errors.username && (
-                  <span className="field-error">{errors.username}</span>
+                  <div className="already-artist-msg">
+                    Ya eres artista. Esta acción no se puede deshacer.
+                  </div>
                 )}
               </div>
-
-              <div className="form-field">
-                <label>Correo electrónico</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  disabled
-                  className="disabled-field"
-                />
-              </div>
-
-              <div className="form-field">
-                <label>Correo de recuperación</label>
-                <input
-                  type="email"
-                  name="recovery_email"
-                  value={formData.recovery_email}
-                  onChange={handleInputChange}
-                  className={errors.recovery_email ? 'input-error' : ''}
-                />
-                {errors.recovery_email && (
-                  <span className="field-error">{errors.recovery_email}</span>
-                )}
-              </div>
-
-              <div className="form-field password-field">
-                <label>Contraseña</label>
-                <div className="password-display" onClick={handlePasswordChangeClick}>
-                  <span className="password-dots">●●●●●●●●●●●●</span>
-                </div>
-              </div>
-
-              <div className="form-actions">
-                <button type="button" className="cancel-btn" onClick={handleCancel}>
-                  Cancelar
-                </button>
-                <button 
-                  type="submit" 
-                  className="save-btn"
-                  disabled={loading || (!hasChanges() && Object.keys(errors).some(key => key !== 'general' && errors[key]))}
-                >
-                  {loading ? 'Guardando...' : 'Guardar'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      {/* Separador visual */}
-      <div className="section-separator">
-        <hr className="section-divider" />
-      </div>
-
-      {/* Sección de activar cuenta de artista */}
-      <section className="edit-profile-section">
-        <div className="edit-profile-container">
-          <div className="edit-profile-header">
-            <button 
-              type="button" 
-              className="back-btn"
-              onClick={handleGoBack}
-              title="Volver al inicio"
-            >
-              <ArrowLeft size={20} />
-              Volver
-            </button>
-            <h2>Activar cuenta de artista</h2>
-          </div>
-          <div className="edit-profile-card">
-            <div className="artist-activation-content">
-              <div className="artist-activation-logo">
-                <img src="/src/assets/LogoCOMMART.png" alt="COMMART" />
-              </div>
-              <h2 className="artist-activation-title">¿Deseas convertir tu cuenta como artista?</h2>
-              <div className="artist-activation-desc">
-                Al activar esta opción, tu cuenta se convertirá en una cuenta de ARTISTA. Mantendrás todas las funciones de una cuenta de USUARIO, pero contarás con herramientas adicionales, como un portafolio personal para gestionar y recibir comisiones.
-              </div>
-              <div className="artist-activation-warning">
-                <b>(IMPORTANTE: Esta función es para aquellos usuarios que deseen comercializar sus ilustraciones a través de comisiones. Ten en cuenta que, una vez activada, no podrás desactivar esta función).</b>
-              </div>
-              {artistActivationError && (
-                <div className="field-error">{artistActivationError}</div>
-              )}
-              {!isArtist ? (
-                <button
-                  type="button"
-                  className="save-btn"
-                  onClick={handleArtistActivationRequest}
-                  disabled={artistActivationLoading}
-                >
-                  {artistActivationLoading ? 'Activando...' : 'Activar cuenta de ARTISTA'}
-                </button>
-              ) : (
-                <div className="already-artist-msg">
-                  Ya eres artista. Esta acción no se puede deshacer.
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       {/* Modal de confirmación para cambio de contraseña */}
       {showPasswordConfirmModal && (
@@ -718,7 +639,7 @@ const EditProfile = () => {
             >
               <div className="password-input-group">
                 <input
-                  type={showPasswords.current ? 'text' : 'password'}
+                  type={showCurrentPassword ? 'text' : 'password'}
                   name="current_password"
                   value={passwordData.current_password}
                   onChange={handlePasswordInputChange}
@@ -729,9 +650,9 @@ const EditProfile = () => {
                 <button
                   type="button"
                   className="password-toggle-btn"
-                  onClick={() => togglePasswordVisibility('current')}
+                  onClick={() => setShowCurrentPassword(prev => !prev)}
                 >
-                  {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
                 {errors.current_password && (
                   <span className="field-error">{errors.current_password}</span>
@@ -740,7 +661,7 @@ const EditProfile = () => {
 
               <div className="password-input-group">
                 <input
-                  type={showPasswords.new ? 'text' : 'password'}
+                  type={showNewPassword ? 'text' : 'password'}
                   name="new_password"
                   value={passwordData.new_password}
                   onChange={handlePasswordInputChange}
@@ -751,9 +672,9 @@ const EditProfile = () => {
                 <button
                   type="button"
                   className="password-toggle-btn"
-                  onClick={() => togglePasswordVisibility('new')}
+                  onClick={() => setShowNewPassword(prev => !prev)}
                 >
-                  {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
                 {errors.new_password && (
                   <span className="field-error">{errors.new_password}</span>
@@ -762,7 +683,7 @@ const EditProfile = () => {
 
               <div className="password-input-group">
                 <input
-                  type={showPasswords.confirm ? 'text' : 'password'}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   name="confirm_password"
                   value={passwordData.confirm_password}
                   onChange={handlePasswordInputChange}
@@ -773,9 +694,9 @@ const EditProfile = () => {
                 <button
                   type="button"
                   className="password-toggle-btn"
-                  onClick={() => togglePasswordVisibility('confirm')}
+                  onClick={() => setShowConfirmPassword(prev => !prev)}
                 >
-                  {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
                 {errors.confirm_password && (
                   <span className="field-error">{errors.confirm_password}</span>

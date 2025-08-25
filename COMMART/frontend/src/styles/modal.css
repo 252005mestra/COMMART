@@ -170,7 +170,140 @@
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* Estilos específicos para modal de recuperación de contraseña */
+.forgot-description {
+  font-family: 'Nunito Sans';
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.4;
+  margin: 1rem 0 1.5rem 0;
+  text-align: left;
+}
+
+.success-message {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-family: 'Nunito Sans';
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Contenedor de selección de emails */
+.email-selection-container {
+  margin-top: 1rem;
+}
+
+.email-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.email-option {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  background: #f8f8f5;
+  border: 2px solid #b3b792;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Nunito Sans';
+}
+
+.email-option:hover:not(:has(input:disabled)) {
+  background: #f4f7f2;
+  border-color: #78966a;
+}
+
+.email-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #8a9e7c;
+  cursor: pointer;
+}
+
+.email-option input[type="radio"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.email-text {
+  font-family: 'Nunito Sans';
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Botón de envío para selección de email */
+.submit-button {
+  width: 100%;
+  background-color: #8a9e7c;
+  color: white;
+  padding: 0.7rem 0;
+  border: none;
+  border-radius: 30px;
+  font-family: 'Goldman';
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  margin-top: 1rem;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #809671;
+  transform: translateY(-2px);
+}
+
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+/* Estilos para inputs de contraseña con toggle */
+.reset-password-input-group {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.reset-password-input-group input {
+  padding-right: 3rem !important;
+}
+
+.reset-password-toggle-btn {
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.reset-password-toggle-btn:hover:not(:disabled) {
+  color: #333;
+}
+
+.reset-password-toggle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Responsive para modal de recuperación */
 @media (max-width: 500px) {
   .modal-content {
     padding: 1.2rem 0.5rem 1.5rem 0.5rem;
@@ -187,6 +320,24 @@
   .login-form button[type="submit"] {
     font-size: 1rem;
     padding: 0.8rem 0;
+  }
+  
+  .forgot-description {
+    font-size: 0.9rem;
+  }
+  
+  .email-option {
+    padding: 0.6rem;
+    gap: 0.6rem;
+  }
+  
+  .email-text {
+    font-size: 0.9rem;
+  }
+  
+  .submit-button {
+    font-size: 1.2rem;
+    padding: 0.6rem 0;
   }
 }
 

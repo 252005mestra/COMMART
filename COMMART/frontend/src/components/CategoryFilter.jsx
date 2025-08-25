@@ -3,7 +3,7 @@ import axios from 'axios';
 import { LayoutGrid, ChevronLeft, ChevronRight } from 'lucide-react';
 import '../styles/categoryfilter.css';
 
-const CategoryFilter = ({ onStyleSelect, selectedStyle }) => {
+const CategoryFilter = ({ selectedStyle }) => {
   const [styles, setStyles] = useState([]);
   const [showAll, setShowAll] = useState(false);
   const [visibleCount, setVisibleCount] = useState(styles.length);
@@ -31,7 +31,6 @@ const CategoryFilter = ({ onStyleSelect, selectedStyle }) => {
       const container = containerRef.current;
       const containerWidth = container.offsetWidth;
       
-      // Crear un contenedor temporal para medir
       const tempContainer = document.createElement('div');
       tempContainer.style.position = 'absolute';
       tempContainer.style.visibility = 'hidden';
@@ -40,25 +39,23 @@ const CategoryFilter = ({ onStyleSelect, selectedStyle }) => {
       tempContainer.style.width = `${containerWidth}px`;
       document.body.appendChild(tempContainer);
 
-      // Agregar botón "Todos"
       const todosBtn = document.createElement('button');
       todosBtn.textContent = 'Todos';
       todosBtn.className = 'filter-button';
       tempContainer.appendChild(todosBtn);
 
-      let currentWidth = todosBtn.offsetWidth + 10; // Incluye gap
+      let currentWidth = todosBtn.offsetWidth + 10;
       let count = 0;
 
-      // Medir cada botón de estilo
       for (let i = 0; i < styles.length; i++) {
         const btn = document.createElement('button');
         btn.textContent = styles[i].name;
         btn.className = 'filter-button';
         tempContainer.appendChild(btn);
 
-        const btnWidth = btn.offsetWidth + 10; // Incluye gap
+        const btnWidth = btn.offsetWidth + 10;
         
-        if (currentWidth + btnWidth + 120 <= containerWidth) { // 120px para botones de navegación
+        if (currentWidth + btnWidth + 120 <= containerWidth) {
           currentWidth += btnWidth;
           count++;
         } else {
@@ -69,7 +66,6 @@ const CategoryFilter = ({ onStyleSelect, selectedStyle }) => {
       document.body.removeChild(tempContainer);
       setVisibleCount(count);
       
-      // Verificar si se puede deslizar
       setCanSlideLeft(slideOffset > 0);
       setCanSlideRight(slideOffset + count < styles.length);
     };
@@ -82,15 +78,21 @@ const CategoryFilter = ({ onStyleSelect, selectedStyle }) => {
   }, [styles, slideOffset]);
 
   const handleStyleClick = (style) => {
-    if (selectedStyle && selectedStyle.id === style.id) {
-      onStyleSelect(null);
-    } else {
-      onStyleSelect(style);
+    // Usar la función global expuesta por MainNav
+    if (window.mainNavStyleSelect) {
+      if (selectedStyle && selectedStyle.id === style.id) {
+        window.mainNavStyleSelect(null);
+      } else {
+        window.mainNavStyleSelect(style);
+      }
     }
   };
 
   const handleShowAllClick = () => {
-    onStyleSelect(null);
+    // Usar la función global para limpiar selección
+    if (window.mainNavStyleSelect) {
+      window.mainNavStyleSelect(null);
+    }
   };
 
   const slideLeft = () => {
@@ -140,7 +142,7 @@ const CategoryFilter = ({ onStyleSelect, selectedStyle }) => {
               className='filter-button show-more grid-button'
               onClick={() => {
                 setShowAll(!showAll);
-                if (!showAll) setSlideOffset(0); // Reset slide when showing all
+                if (!showAll) setSlideOffset(0);
               }}
               title={showAll ? 'Mostrar menos' : 'Mostrar todas las categorías'}
             >

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
@@ -8,137 +8,49 @@ import CategoryFilter from '../components/CategoryFilter';
 import '../styles/home.css';
 
 const Home = () => {
-  const [users, setUsers] = useState([]);
-  const [styles, setStyles] = useState([]);
+  const location = useLocation();
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStyle, setSelectedStyle] = useState(null);
+  const [showCarousel, setShowCarousel] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // Obtener todos los artistas al cargar
+  // Manejar navegación desde otras páginas con estado
   useEffect(() => {
-    const fetchArtists = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/auth/artists', {
-          withCredentials: true
-        });
-        setUsers(response.data);
-        setFilteredUsers(response.data);
-      } catch (error) {
-        setError('No autorizado o error al obtener artistas');
-        console.error('Error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArtists();
-  }, []);
-
-  // Obtener estilos
-  useEffect(() => {
-    const fetchStyles = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/auth/styles');
-        setStyles(response.data);
-      } catch (error) {
-        console.error('Error al obtener estilos:', error);
-      }
-    };
-    fetchStyles();
-  }, []);
-
-  const handleStyleSelect = (style) => {
-    setSelectedStyle(style);
-    setSearchTerm(''); 
-  };
-
-  useEffect(() => {
-    if (searchTerm && searchTerm.trim() !== '') {
-      setSelectedStyle(null);
+    if (location.state) {
+      const { searchTerm: incomingSearchTerm, selectedStyle: incomingStyle } = location.state;
       
-      // Buscar por artista
-      const filteredByArtist = users.filter(user =>
-        user.username.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-      // Buscar por estilo
-      const searchTermLower = searchTerm.toLowerCase();
-      const matchingStyles = styles.filter(style => 
-        style.name.toLowerCase().includes(searchTermLower)
-      );
-
-      let filteredByStyle = [];
-      if (matchingStyles.length > 0) {
-        filteredByStyle = users.filter(user => 
-          user.styles && user.styles.some(userStyle => 
-            matchingStyles.some(matchingStyle => 
-              userStyle.toLowerCase().includes(matchingStyle.name.toLowerCase())
-            )
-          )
-        );
+      if (incomingSearchTerm) {
+        setSearchTerm(incomingSearchTerm);
+        setShowCarousel(false);
       }
-
-      // Combinar resultados y eliminar duplicados
-      const combinedResults = [...filteredByArtist];
-      filteredByStyle.forEach(styleUser => {
-        if (!combinedResults.find(user => user.id === styleUser.id)) {
-          combinedResults.push(styleUser);
-        }
-      });
-
-      setFilteredUsers(combinedResults);
+      
+      if (incomingStyle) {
+        setSelectedStyle(incomingStyle);
+        setShowCarousel(true);
+      }
+      
+      // Limpiar el estado después de procesarlo
+      window.history.replaceState({}, document.title);
     }
-  }, [searchTerm, users, styles]);
+  }, [location.state]);
 
-  // Efecto para manejar filtro por estilo
-  useEffect(() => {
-    const applyStyleFilter = async () => {
-      if (!selectedStyle) {
-        if (!searchTerm || searchTerm.trim() === '') {
-          setFilteredUsers(users);
-        }
-        return;
-      }
+  // Usar useCallback para estabilizar las funciones callback
+  const handleSearchResults = useCallback((results, errorMsg, term) => {
+    setFilteredUsers(results);
+    setError(errorMsg || '');
+    setSearchTerm(term);
+  }, []);
 
-      try {
-        setLoading(true);
-        setError('');
-        const response = await axios.get(
-          `http://localhost:5000/api/auth/artists/style/${selectedStyle.id}`,
-          { withCredentials: true }
-        );
-        setFilteredUsers(response.data);
-      } catch (error) {
-        setError('Error al obtener artistas por estilo');
-        console.error('Error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleStyleFilter = useCallback((style, showCarouselFlag) => {
+    setSelectedStyle(style);
+    setShowCarousel(showCarouselFlag);
+  }, []);
 
-    if (users.length > 0 && (!searchTerm || searchTerm.trim() === '')) {
-      applyStyleFilter();
-    }
-  }, [selectedStyle, users, searchTerm]);
-
-  // Sugerencias de artistas
-  const artistSuggestions = users
-    .filter(user =>
-      searchTerm &&
-      user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .slice(0, 4); // Reducido para hacer espacio a los estilos
-
-  // Sugerencias de estilos
-  const styleSuggestions = styles
-    .filter(style =>
-      searchTerm &&
-      style.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .slice(0, 4); // Máximo 4 estilos
+  const handleCarouselVisibility = useCallback((visible) => {
+    setShowCarousel(visible);
+  }, []);
 
   // Obtener URL de imagen de portafolio
   const getPortfolioImageUrl = (imgPath) =>
@@ -148,18 +60,13 @@ const Home = () => {
   const getProfileImageUrl = (imgPath) =>
     imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
 
-  // Determinar si mostrar el carrusel (solo cuando no hay búsqueda activa)
-  const showCarousel = !searchTerm || searchTerm.trim() === '';
-
   return (
     <>
       <MainNav
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        artistSuggestions={artistSuggestions}
-        styleSuggestions={styleSuggestions}
-        getProfileImageUrl={getProfileImageUrl}
-        onStyleSelect={handleStyleSelect}
+        onSearchResults={handleSearchResults}
+        onStyleFilter={handleStyleFilter}
+        onCarouselVisibility={handleCarouselVisibility}
+        showCarouselByDefault={true}
       />
       
       <main className='main-content'>
@@ -171,7 +78,6 @@ const Home = () => {
 
         <section className='CategoryFilter'>
            <CategoryFilter 
-            onStyleSelect={handleStyleSelect}
             selectedStyle={selectedStyle}
           />
           

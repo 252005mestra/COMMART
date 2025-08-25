@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
 
@@ -23,19 +23,176 @@ import {
 import '../styles/navbar.css';
 
 const MainNav = ({ 
-  searchTerm, 
-  setSearchTerm, 
-  artistSuggestions,
-  styleSuggestions = [],
-  getProfileImageUrl,
-  onStyleSelect 
+  // Callbacks para comunicación con páginas específicas
+  onSearchResults,      // Para Home: envía resultados de búsqueda
+  onStyleFilter,        // Para Home: controla carrusel y filtro de categorías
+  onCarouselVisibility, // Para Home: controla visibilidad del carrusel
+  // Props de configuración
+  showCarouselByDefault = true
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile, logout } = useUser();
-  const [openMenu, setOpenMenu] = useState(null); 
+  
+  // Estados del componente
+  const [openMenu, setOpenMenu] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStyle, setSelectedStyle] = useState(null);
+  
+  // Estados para datos
+  const [users, setUsers] = useState([]);
+  const [styles, setStyles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+  
   const menuRef = useRef();
   const iconsRef = useRef();
+
+  // Verificar si estamos en Home
+  const isHomePage = location.pathname === '/home';
+
+  // Cargar datos iniciales (solo una vez)
+  useEffect(() => {
+    if (initialLoadDone) return;
+    
+    const fetchInitialData = async () => {
+      try {
+        setLoading(true);
+        const [usersRes, stylesRes] = await Promise.all([
+          axios.get('http://localhost:5000/api/auth/artists', { withCredentials: true }),
+          axios.get('http://localhost:5000/api/auth/styles')
+        ]);
+        
+        setUsers(usersRes.data);
+        setStyles(stylesRes.data);
+        setInitialLoadDone(true);
+        
+        // Solo enviar datos iniciales si estamos en Home
+        if (isHomePage && onSearchResults) {
+          onSearchResults(usersRes.data, null, '');
+        }
+      } catch (error) {
+        console.error('Error al cargar datos iniciales:', error);
+        if (isHomePage && onSearchResults) {
+          onSearchResults([], 'Error al cargar artistas', '');
+        }
+        setInitialLoadDone(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialData();
+  }, [initialLoadDone, isHomePage, onSearchResults]);
+
+  // Debounce para la búsqueda
+  const debounceSearchRef = useRef();
+  
+  const performSearch = useCallback((term, usersList, stylesList) => {
+    if (!isHomePage || !onSearchResults) return;
+    
+    if (!term || term.trim() === '') {
+      onSearchResults(usersList, null, '');
+      if (onCarouselVisibility) {
+        onCarouselVisibility(showCarouselByDefault);
+      }
+      return;
+    }
+
+    // Buscar por artista
+    const filteredByArtist = usersList.filter(user =>
+      user.username.toLowerCase().includes(term.toLowerCase())
+    );
+
+    // Buscar por estilo
+    const searchTermLower = term.toLowerCase();
+    const matchingStyles = stylesList.filter(style => 
+      style.name.toLowerCase().includes(searchTermLower)
+    );
+
+    let filteredByStyle = [];
+    if (matchingStyles.length > 0) {
+      filteredByStyle = usersList.filter(user => 
+        user.styles && user.styles.some(userStyle => 
+          matchingStyles.some(matchingStyle => 
+            userStyle.toLowerCase().includes(matchingStyle.name.toLowerCase())
+          )
+        )
+      );
+    }
+
+    // Combinar resultados y eliminar duplicados
+    const combinedResults = [...filteredByArtist];
+    filteredByStyle.forEach(styleUser => {
+      if (!combinedResults.find(user => user.id === styleUser.id)) {
+        combinedResults.push(styleUser);
+      }
+    });
+
+    onSearchResults(combinedResults, null, term);
+    
+    // Ocultar carrusel durante búsqueda
+    if (onCarouselVisibility) {
+      onCarouselVisibility(false);
+    }
+  }, [isHomePage, onSearchResults, onCarouselVisibility, showCarouselByDefault]);
+
+  // Lógica de búsqueda con debounce
+  useEffect(() => {
+    if (!initialLoadDone || !users.length || !styles.length) return;
+    
+    // Limpiar timeout anterior
+    if (debounceSearchRef.current) {
+      clearTimeout(debounceSearchRef.current);
+    }
+    
+    // Ejecutar búsqueda con delay
+    debounceSearchRef.current = setTimeout(() => {
+      setSelectedStyle(null);
+      performSearch(searchTerm, users, styles);
+    }, 300);
+
+    return () => {
+      if (debounceSearchRef.current) {
+        clearTimeout(debounceSearchRef.current);
+      }
+    };
+  }, [searchTerm, users, styles, initialLoadDone, performSearch]);
+
+  // Lógica de filtro por estilo
+  useEffect(() => {
+    if (!isHomePage || !onSearchResults || !initialLoadDone || !users.length) return;
+    if (searchTerm && searchTerm.trim() !== '') return; // No aplicar filtro si hay búsqueda activa
+    
+    const applyStyleFilter = async () => {
+      if (!selectedStyle) {
+        onSearchResults(users, null, '');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `http://localhost:5000/api/auth/artists/style/${selectedStyle.id}`,
+          { withCredentials: true }
+        );
+        
+        onSearchResults(response.data, null, '');
+        
+        if (onStyleFilter) {
+          onStyleFilter(selectedStyle, showCarouselByDefault);
+        }
+      } catch (error) {
+        console.error('Error al obtener artistas por estilo:', error);
+        onSearchResults([], 'Error al obtener artistas por estilo', '');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    applyStyleFilter();
+  }, [selectedStyle, users, searchTerm, isHomePage, onSearchResults, onStyleFilter, showCarouselByDefault, initialLoadDone]);
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -51,7 +208,36 @@ const MainNav = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Función para alternar menús y cerrar otros
+  // Función pública para que CategoryFilter pueda filtrar por estilo
+  const handleStyleSelect = useCallback((style) => {
+    setSelectedStyle(style);
+    setSearchTerm('');
+  }, []);
+
+  // Exponer función para uso externo (CategoryFilter)
+  useEffect(() => {
+    window.mainNavStyleSelect = handleStyleSelect;
+    return () => {
+      delete window.mainNavStyleSelect;
+    };
+  }, [handleStyleSelect]);
+
+  // Sugerencias dinámicas
+  const artistSuggestions = users
+    .filter(user =>
+      searchTerm &&
+      user.username.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .slice(0, 4);
+
+  const styleSuggestions = styles
+    .filter(style =>
+      searchTerm &&
+      style.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .slice(0, 4);
+
+  // Función para alternar menús
   const toggleMenu = (menu) => {
     setOpenMenu(openMenu === menu ? null : menu);
   };
@@ -60,7 +246,7 @@ const MainNav = ({
   const handleLogout = async () => {
     try {
       await logout();
-      window.location.href = '/'; // Redirige al landing y limpia el estado
+      window.location.href = '/';
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -71,17 +257,37 @@ const MainNav = ({
     const artist = artistSuggestions.find(u => u.username === username);
     if (artist) {
       navigate(`/artist/${artist.id}`);
-    } else {
-      setSearchTerm(username);
+      setSearchTerm('');
       setShowSuggestions(false);
     }
   };
 
   // Maneja selección de sugerencia de estilo
   const handleStyleSuggestionClick = (style) => {
-    setSearchTerm('');
-    setShowSuggestions(false);
-    onStyleSelect(style);
+    if (isHomePage) {
+      setSelectedStyle(style);
+      setSearchTerm('');
+      setShowSuggestions(false);
+    } else {
+      navigate('/home', { state: { selectedStyle: style } });
+    }
+  };
+
+  // Maneja el cambio en el input de búsqueda
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setShowSuggestions(true);
+  };
+
+  // Maneja el submit de búsqueda (Enter)
+  const handleSearchSubmit = (e) => {
+    if (e.key === 'Enter' && searchTerm.trim()) {
+      if (!isHomePage) {
+        navigate('/home', { state: { searchTerm: searchTerm.trim() } });
+      }
+      setShowSuggestions(false);
+    }
   };
 
   // Oculta sugerencias al perder foco
@@ -97,6 +303,10 @@ const MainNav = ({
     navigate('/profile');
   };
 
+  // Función para obtener URL de imagen de perfil
+  const getProfileImageUrl = (imgPath) =>
+    imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
+
   return (
     <>
       <nav className='navbar' aria-label='Navegación principal'>
@@ -110,10 +320,8 @@ const MainNav = ({
             type='text'
             placeholder='Buscar'
             value={searchTerm}
-            onChange={e => {
-              setSearchTerm(e.target.value);
-              setShowSuggestions(true);
-            }}
+            onChange={handleSearchChange}
+            onKeyDown={handleSearchSubmit}
             onFocus={() => setShowSuggestions(true)}
             onBlur={handleBlur}
             autoComplete='off'
@@ -128,7 +336,7 @@ const MainNav = ({
                   onMouseDown={() => handleArtistSuggestionClick(user.username)}
                 >
                   <img 
-                    src={getProfileImageUrl ? getProfileImageUrl(user.profile_image) : '/default-profile.jpg'} 
+                    src={getProfileImageUrl(user.profile_image)} 
                     alt={user.username}
                     className='suggestion-avatar'
                   />
@@ -185,7 +393,9 @@ const MainNav = ({
           <div className='menu-dropdown modern-dropdown'>
             <div className='menu-header'>Menú</div>
             <ul>
-              <li><House className='thick-icon' size={22} /> Inicio</li>
+              <li onClick={() => navigate('/home')} style={{ cursor: 'pointer' }}>
+                <House className='thick-icon' size={22} /> Inicio
+              </li>
               <li><Crown className='thick-icon' size={22} style={{ color: '#FFCD29' }} /> Premium</li>
               <li><Mail className='thick-icon' size={22} /> Buzón de sugerencias</li>
               <li><MessageSquareText className='thick-icon' size={22} /> Blog</li>
