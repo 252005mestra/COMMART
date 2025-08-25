@@ -3,24 +3,10 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    scroll-behavior: smooth; 
     box-sizing: border-box;
 }
 
-.landing-content {
-    height: 100vh;
-    overflow-y: scroll;
-    scroll-snap-type: y mandatory;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE y Edge antiguos */
-}
-.landing-content::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
-
 .section {
-    height: 100vh;
-    scroll-snap-align: start;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -436,7 +422,463 @@ html, body {
     top: 2rem;
 }
 
+/* ========== Scroll suave solo en desktop ========== */
+@media (hover: hover) and (pointer: fine) and (min-width: 769px) {
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    .landing-content {
+        height: 100vh;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .landing-content::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .section {
+        scroll-snap-align: start;
+        height: 100vh;
+    }
+}
+
+/* ========== Scroll libre en móviles (CORREGIDO) ========== */
+@media (max-width: 768px) {
+    html {
+        scroll-behavior: auto;
+        overflow-x: hidden;
+    }
+    
+    body {
+        overflow-x: hidden;
+    }
+    
+    .landing-content {
+        height: auto;
+        overflow-y: visible;
+        scroll-snap-type: none;
+        overflow-x: hidden;
+    }
+    
+    .landing-content::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .section {
+        height: auto;
+        min-height: auto;
+        padding: 2rem 0;
+        scroll-snap-align: none;
+        overflow-x: hidden;
+        width: 100vw;
+        box-sizing: border-box;
+    }
+}
+
+/* ========== Responsive Design ========== */
+@media (max-width: 768px) {
+    /* Banner móvil - AJUSTADO PARA SER VISIBLE */
+    .banner {
+        margin-top: 75px; /* Espacio para el menú */
+        padding: 1rem 0;
+    }
+    
+    .banner > div {
+        flex-direction: column;
+        gap: 2rem;
+        padding: 2rem 1rem;
+        border-radius: 20px;
+        width: 90%;
+        max-width: none;
+    }
+    
+    .slogan {
+        width: 100%;
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .slogan h1 {
+        font-size: 0.9rem;
+    }
+    
+    .slogan p:nth-of-type(1) {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .slogan p:nth-of-type(2) {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .slogan button {
+        font-size: 1rem;
+        padding: 0.8rem 1.5rem;
+    }
+    
+    .banner-cards {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        grid-template: none;
+    }
+    
+    .banner-cards .card {
+        width: 120px;
+        height: 160px;
+        aspect-ratio: auto;
+    }
+    
+    .banner-cards .card:first-child {
+        grid-row: auto;
+        width: 140px;
+        height: 180px;
+    }
+    
+    .banner-cards .card:nth-child(2),
+    .banner-cards .card:nth-child(3) {
+        width: 110px;
+        height: 140px;
+    }
+    
+    /* Info section móvil - MEJORADO */
+    .info-section {
+        background-color: #D2AB80;
+        width: 100vw;
+        padding: 2rem 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: auto;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+    
+    .info-section > div {
+        flex-direction: column;
+        gap: 2rem;
+        top: 0;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+    }
+    
+    .info-img {
+        width: 90%;
+        max-width: 400px;
+        order: 2;
+        background-color: transparent;
+    }
+    
+    .info-img img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+    
+    .info-text {
+        width: 85%;
+        max-width: 380px;
+        height: auto;
+        min-height: 350px;
+        margin: 0 auto;
+        padding: 2.5rem 2rem;
+        border-radius: 200px 200px 0 0;
+        position: relative;
+        top: 0;
+        order: 1;
+        border: solid 5px #593f28;
+        background-color: white;
+        background-image: url('../assets/FondoCommart.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+    
+    .info-text h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+    
+    .info-text p {
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-text h2,
+    .info-text p,
+    .info-text a {
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Find artists móvil - CON FONDO */
+    .find-artists {
+        padding: 2rem 1rem;
+        min-height: auto;
+        background-color: white;
+        background-image: url('../assets/FondoCommart.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 100vw;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+    
+    .find-artists > div {
+        text-align: center;
+        width: 100%;
+    }
+    
+    .find-artists h2 {
+        text-align: center;
+        margin: 0 auto 0.5rem auto;
+        font-size: 1.8rem;
+    }
+    
+    .find-artists p {
+        text-align: center;
+        margin: 0 auto 1.5rem auto;
+    }
+    
+    .artist-cards {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: auto;
+        padding: 1rem 0;
+    }
+    
+    .artist-cards .card {
+        width: 90%;
+        max-width: 300px;
+        min-width: 260px;
+        height: 380px;
+        margin: 0 auto;
+        transition: none;
+        cursor: default;
+    }
+    
+    .artist-cards .card:hover {
+        transform: none;
+        box-shadow: 0 4px 4px rgba(0, 0, 0, 0.459);
+    }
+    
+    .find-artists h3 {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 1.5rem;
+    }
+    
+    /* Suggestion box móvil - MEJORADO */
+    .suggestion-box.section {
+        min-height: 100vh;
+        padding: 2rem 0 0 0;
+        background-color: #B3B792;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100vw;
+        overflow-x: hidden;
+        box-sizing: border-box;
+        justify-content: space-between;
+    }
+    
+    .suggestion-box > div {
+        flex-direction: column;
+        gap: 2rem;
+        height: auto;
+        width: 100%;
+        align-items: center;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .suggestion-images {
+        width: 90%;
+        max-width: 200px;
+        display: block;
+    }
+    
+    .suggestion-images img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+    
+    .suggestion-text {
+        width: 85%;
+        max-width: 380px;
+        height: auto;
+        min-height: 350px;
+        margin: 0 auto;
+        padding: 2.5rem 2rem;
+        border-radius: 200px 200px 0 0;
+        position: relative;
+        top: 0;
+        border: solid 5px #593f28;
+        background-color: white;
+        background-image: url('../assets/FondoCommart.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+    
+    .suggestion-text h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+    
+    .suggestion-text p {
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+    
+    .suggestion-text h2,
+    .suggestion-text p,
+    .suggestion-text a {
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Footer corregido - PEGADO AL FONDO */
+    .suggestion-box .footer {
+        font-size: 0.8rem;
+        background-color: white;
+        width: 100%;
+        margin-top: 0;
+        padding: 1.5rem 0;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .suggestion-box .footer-content {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+    
+    .suggestion-box .footer-links {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .suggestion-box .footer-content p {
+        margin: 0;
+        font-size: 0.75rem;
+    }
+    
+    .suggestion-box .footer-links a {
+        font-size: 0.75rem;
+        margin: 0;
+    }
+    
+    /* Ocultar separadores innecesarios en móvil */
+    .section-separator-lino,
+    .section-separator-tiko,
+    .section-separator-lino-final,
+    .section-separator-tiko-final {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .section {
+        padding: 1.5rem 0;
+        width: 100vw;
+    }
+    
+    .banner {
+        margin-top: 60px; /* Ajuste para menús más pequeños */
+    }
+    
+    .slogan {
+        padding: 0.5rem;
+    }
+    
+    .slogan h1 {
+        font-size: 0.8rem;
+    }
+    
+    .slogan p:nth-of-type(1) {
+        font-size: 1.3rem;
+    }
+    
+    .banner-cards .card {
+        width: 100px;
+        height: 130px;
+    }
+    
+    .banner-cards .card:first-child {
+        width: 120px;
+        height: 150px;
+    }
+    
+    .info-text,
+    .suggestion-text {
+        padding: 2rem 1.5rem;
+        width: 90%;
+        max-width: 350px;
+        min-height: 330px;
+    }
+    
+    .info-text h2,
+    .suggestion-text h2 {
+        font-size: 1.3rem;
+    }
+    
+    .find-artists h2 {
+        font-size: 1.6rem;
+    }
+    
+    .find-artists h3 {
+        font-size: 1.3rem;
+    }
+    
+    .artist-cards .card {
+        max-width: 280px;
+        height: 360px;
+    }
+}
+
+/* Desktop (mantiene estilos existentes) - NO TOCAR */
+@media (min-width: 769px) {
+    .section {
+        height: 100vh;
+    }
+    
+    .section-separator-lino,
+    .section-separator-tiko,
+    .section-separator-lino-final,
+    .section-separator-tiko-final {
+        display: none;
+    }
+}
+
 /* ========== Estilos para móviles ========== */
 @media (max-width: 767px) {
-  
+  /* Este bloque ya existía, mantenerlo como está */
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Info, BookOpen, LogIn, UserPlus } from 'lucide-react';
 import logo from '../assets/LogoCOMMART.png';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
@@ -10,6 +11,7 @@ const LandingNav = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   // Función para abrir login desde registro
@@ -24,14 +26,20 @@ const LandingNav = () => {
     setTimeout(() => setIsRegisterModalOpen(true), 100);
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <>
       <nav className='landing-menu' aria-label='Menú principal'>
         <button onClick={() => navigate('/')} className='logo'>
             <img src={logo} alt='Logo COMMART'/>
-            <span>COMMART</span>
+            <span className='logo-text'>COMMART</span>
         </button>
-        <ul>
+        
+        {/* Menú desktop (existente) */}
+        <ul className='desktop-menu'>
             <li>
               <Link to=''>Info</Link>
             </li>
@@ -45,7 +53,49 @@ const LandingNav = () => {
               <button onClick={() => setIsRegisterModalOpen(true)}>Registrarse</button>
             </li>
         </ul>
+
+        {/* Botón hamburguesa para móvil */}
+        <button 
+          className={`mobile-menu-toggle ${isMobileMenuOpen ? 'active' : ''}`}
+          onClick={toggleMobileMenu}
+          aria-label="Abrir menú"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        {/* Menú móvil */}
+        <div className={`mobile-menu ${isMobileMenuOpen ? 'active' : ''}`}>
+          <ul>
+            <li>
+              <Link to="" onClick={toggleMobileMenu}>
+                <Info size={20} />
+                Info
+              </Link>
+            </li>
+            <li>
+              <Link to="" onClick={toggleMobileMenu}>
+                <BookOpen size={20} />
+                Blog
+              </Link>
+            </li>
+            <li>
+              <button onClick={() => { setIsLoginModalOpen(true); toggleMobileMenu(); }}>
+                <LogIn size={20} />
+                Iniciar Sesión
+              </button>
+            </li>
+            <li>
+              <button onClick={() => { setIsRegisterModalOpen(true); toggleMobileMenu(); }}>
+                <UserPlus size={20} />
+                Registrarse
+              </button>
+            </li>
+          </ul>
+        </div>
       </nav>
+
       {isLoginModalOpen && (
         <LoginModal
           onClose={() => setIsLoginModalOpen(false)}

@@ -48,17 +48,26 @@ const LandingPage = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setGridArtistIndex((prevIndex) => artistList.length > 0 ? (prevIndex + 4) % artistList.length : 0);
+      // En móvil cambia solo 1 artista, en desktop 4
+      const increment = window.innerWidth <= 768 ? 1 : 4;
+      setGridArtistIndex((prevIndex) => artistList.length > 0 ? (prevIndex + increment) % artistList.length : 0);
     }, 5000);
     return () => clearInterval(interval);
   }, [artistList]);
 
-  const visibleGridArtists = artistList.slice(gridArtistIndex, gridArtistIndex + 4).length === 4
-    ? artistList.slice(gridArtistIndex, gridArtistIndex + 4)
-    : [
-        ...artistList.slice(gridArtistIndex),
-        ...artistList.slice(0, 4 - (artistList.length - gridArtistIndex))
-      ];
+  const getArtistsToShow = () => {
+    const isMobile = window.innerWidth <= 768;
+    const count = isMobile ? 1 : 4;
+    
+    return artistList.slice(gridArtistIndex, gridArtistIndex + count).length === count
+      ? artistList.slice(gridArtistIndex, gridArtistIndex + count)
+      : [
+          ...artistList.slice(gridArtistIndex),
+          ...artistList.slice(0, count - (artistList.length - gridArtistIndex))
+        ];
+  };
+
+  const visibleGridArtists = getArtistsToShow();
 
   const getPortfolioImageUrl = (imgPath) =>
     imgPath ? `http://localhost:5000/${imgPath}` : '/default-artist.jpg';
@@ -106,6 +115,11 @@ const LandingPage = () => {
           </div>
         </section>
 
+        {/* Separador con imagen de Lino - solo móvil */}
+        <div className='section-separator-lino'>
+          <img src={Lino1} alt='Lino' />
+        </div>
+
         <section className='section info-section' aria-label='Información sobre monetización artística'>
           <div>
             <div className='info-img'>
@@ -119,10 +133,17 @@ const LandingPage = () => {
           </div>
         </section>
 
+        {/* Separador con imagen de Tiko - solo móvil */}
+        <div className='section-separator-tiko'>
+          <img src={Tiko1} alt='Tiko' />
+        </div>
+
         <section className='section find-artists' aria-label='Invitación a encontrar artistas'>
             <div>
               <h2>¿Tienes una idea en mente?</h2>
               <p>Hazla realidad con un artista único.</p>
+              
+              {/* Grid de artistas responsive */}
               <div className='artist-cards'>
                 {visibleGridArtists.map((artist) => (
                   <div className='card' key={artist.id}>
@@ -146,9 +167,15 @@ const LandingPage = () => {
                   </div>
                 ))}
               </div>
+              
               <h3>Conoce a todos nuestros artistas</h3>
             </div>
         </section>
+
+        {/* Separador con imagen de Lino final - solo móvil */}
+        <div className='section-separator-lino-final'>
+          <img src={Lino1} alt='Lino' />
+        </div>
 
         <section className='section suggestion-box' aria-label='Buzón de sugerencias y Términos y Condiciones'>
             <div>
@@ -166,6 +193,11 @@ const LandingPage = () => {
             </div>
             <Footer />
         </section>
+
+        {/* Separador con imagen de Tiko final - solo móvil */}
+        <div className='section-separator-tiko-final'>
+          <img src={Tiko1} alt='Tiko' />
+        </div>
       </main>
 
       {isRegisterModalOpen && (
