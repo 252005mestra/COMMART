@@ -6,8 +6,10 @@ import Footer from '../components/Footer';
 import Carousel from '../components/Carousel';
 import CategoryFilter from '../components/CategoryFilter';
 import '../styles/home.css';
+import { useUser } from '../context/UserContext';
 
 const Home = () => {
+  const { profile } = useUser(); // Obtener el perfil del usuario actual
   const location = useLocation();
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [error, setError] = useState('');
@@ -38,10 +40,12 @@ const Home = () => {
 
   // Usar useCallback para estabilizar las funciones callback
   const handleSearchResults = useCallback((results, errorMsg, term) => {
-    setFilteredUsers(results);
+    // Filtrar el perfil propio de los resultados
+    const filteredResults = results.filter(user => profile?.id !== user.id);
+    setFilteredUsers(filteredResults);
     setError(errorMsg || '');
     setSearchTerm(term);
-  }, []);
+  }, [profile?.id]);
 
   const handleStyleFilter = useCallback((style, showCarouselFlag) => {
     setSelectedStyle(style);
@@ -105,7 +109,7 @@ const Home = () => {
                   filteredUsers.map((user) => (
                     <div className='artist-card' key={user.id}>
                       <Link
-                        to={`/artist/${user.id}`}
+                        to={profile?.id === user.id ? '/profile' : `/artist/${user.id}`}
                         style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
                       >
                         <div className='card-image'>

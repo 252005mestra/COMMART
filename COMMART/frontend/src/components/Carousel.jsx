@@ -20,7 +20,7 @@ const slides = [
     character: Tiko2,
     title: '¿Deseas encargar una ilustración con temática +18?',
     desc: 'Activa esta opción y comisiona artistas que ofrecen este contenido.',
-    button: 'ACTÍVALO AQUÍ',
+    button: 'PROXIMAMENTE...',
     alt: '+18',
     characterPosition: 'left' // Tiko a la izquierda
   },
@@ -29,7 +29,7 @@ const slides = [
     character: Lino3,
     title: '¿Prefieres una navegación libre de anuncios?',
     desc: 'Adquiere nuestra membresía premium y elimina la publicidad de la página para siempre. ¡Disfruta de una sesión sin interrupciones!',
-    button: 'COMPRA AQUÍ',
+    button: 'PROXIMAMENTE...',
     alt: 'Sin anuncios',
     characterPosition: 'right' // Lino a la derecha
   },

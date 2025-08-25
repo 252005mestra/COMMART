@@ -310,7 +310,7 @@ export const getPublicArtistsController = async (req, res) => {
   try {
     const artists = await getArtistsBasicInfoModel();  // Usar directamente el nombre del modelo
     
-    // Sanitizar datos antes de enviar (usernames que se muestran al público)
+    // Sanitizar datos antes de enviarlos (usernames que se muestran al público)
     const sanitizedArtists = artists.map(artist => ({
       ...artist,
       username: sanitizeInput(artist.username)
@@ -326,14 +326,17 @@ export const getPublicArtistsController = async (req, res) => {
 // Obtener todos los artistas (con información completa)
 export const getAllArtistsController = async (req, res) => {
   try {
+    const currentUserId = req.user?.id; // Obtener ID del usuario actual
     const artists = await getArtistsBasicInfoModel();
 
-    // Sanitizar usernames para mostrar de forma segura
-    const sanitizedArtists = artists.map(artist => ({
-      ...artist,
-      username: sanitizeInput(artist.username),
-      description: artist.description ? sanitizeInput(artist.description) : null
-    }));
+    // Sanitizar usernames para mostrar de forma segura Y excluir perfil propio
+    const sanitizedArtists = artists
+      .filter(artist => artist.id !== currentUserId) // <-- Excluir perfil propio
+      .map(artist => ({
+        ...artist,
+        username: sanitizeInput(artist.username),
+        description: artist.description ? sanitizeInput(artist.description) : null
+      }));
     
     res.status(200).json(sanitizedArtists);
   } catch (error) {
@@ -346,14 +349,17 @@ export const getAllArtistsController = async (req, res) => {
 export const getArtistsByStyleController = async (req, res) => {
   const { styleId } = req.params;
   try {
+    const currentUserId = req.user?.id; // Obtener ID del usuario actual
     const artists = await getArtistsBasicInfoModel(parseInt(styleId));
 
-    // Sanitizar usernames para mostrar de forma segura
-    const sanitizedArtists = artists.map(artist => ({
-      ...artist,
-      username: sanitizeInput(artist.username),
-      description: artist.description ? sanitizeInput(artist.description) : null
-    }));
+    // Sanitizar usernames para mostrar de forma segura Y excluir perfil propio
+    const sanitizedArtists = artists
+      .filter(artist => artist.id !== currentUserId) // <-- Excluir perfil propio
+      .map(artist => ({
+        ...artist,
+        username: sanitizeInput(artist.username),
+        description: artist.description ? sanitizeInput(artist.description) : null
+      }));
     
     res.status(200).json(sanitizedArtists);
   } catch (error) {

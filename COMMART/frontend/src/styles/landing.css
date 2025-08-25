@@ -882,3 +882,67 @@ html, body {
 @media (max-width: 767px) {
   /* Este bloque ya existía, mantenerlo como está */
 }
+
+/* ================= Pantallas grandes (min-width: 1400px) ================= */
+@media (min-width: 1400px) {
+  /* Sección de información */
+  .info-img img {
+    max-width: 600px;
+  }
+  .info-text {
+    max-width: 700px; /* Aumenta el ancho máximo */
+    min-width: 450px; /* Evita que sea demasiado delgado */
+  }
+  .info-text h2 {
+    font-size: 2.5rem;
+  }
+  .info-text p {
+    font-size: 1.4rem;
+  }
+  .info-text a {
+    font-size: 1.2rem;
+    padding: 1rem 2.5rem;
+  }
+
+  /* Sección para encontrar artistas */
+  .artist-cards .card {
+    max-width: 380px; /* Aumenta el ancho máximo de las tarjetas */
+    height: 500px; /* Aumenta la altura */
+  }
+  .card-info .user-icon {
+    width: 60px;
+    height: 60px;
+  }
+  .card-info .profile-img {
+    width: 54px;
+    height: 54px;
+  }
+  .card-info .artist-name {
+    font-size: 1.1rem;
+  }
+  .card-info .followers {
+    font-size: 1rem;
+  }
+
+  /* Sección de sugerencias */
+  .suggestion-images {
+    max-width: 500px;
+  }
+  .suggestion-images img {
+    max-width: 100%;
+  }
+  .suggestion-text {
+    max-width: 700px; /* Aumenta el ancho máximo */
+    min-width: 450px; /* Evita que sea demasiado delgado */
+  }
+  .suggestion-text h2 {
+    font-size: 2.2rem;
+  }
+  .suggestion-text p {
+    font-size: 1.3rem;
+  }
+  .suggestion-text a {
+    font-size: 1.2rem;
+    padding: 0.8rem 2rem;
+  }
+}

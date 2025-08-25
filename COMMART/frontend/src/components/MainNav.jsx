@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../context/UserContext'; // <-- Asegurar que esté importado
 
 // Iconos
 import logo from '../assets/LogoCOMMART.png';
@@ -22,17 +22,17 @@ import {
 
 import '../styles/navbar.css';
 
-const MainNav = ({ 
+const MainNav = ({
   // Callbacks para comunicación con páginas específicas
   onSearchResults,      // Para Home: envía resultados de búsqueda
   onStyleFilter,        // Para Home: controla carrusel y filtro de categorías
   onCarouselVisibility, // Para Home: controla visibilidad del carrusel
   // Props de configuración
-  showCarouselByDefault = true
+  showCarouselByDefault = false
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, logout } = useUser();
+  const { profile, logout } = useUser(); // <-- Agregar logout aquí
   
   // Estados del componente
   const [openMenu, setOpenMenu] = useState(null);
@@ -93,19 +93,22 @@ const MainNav = ({
     if (!isHomePage || !onSearchResults) return;
     
     if (!term || term.trim() === '') {
-      onSearchResults(usersList, null, '');
+      // Filtrar el usuario actual de los resultados iniciales
+      const filteredUsers = usersList.filter(user => profile?.id !== user.id);
+      onSearchResults(filteredUsers, null, '');
       if (onCarouselVisibility) {
         onCarouselVisibility(showCarouselByDefault);
       }
       return;
     }
 
-    // Buscar por artista
+    // Buscar por artista - EXCLUIR PERFIL PROPIO
     const filteredByArtist = usersList.filter(user =>
-      user.username.toLowerCase().includes(term.toLowerCase())
+      user.username.toLowerCase().includes(term.toLowerCase()) &&
+      profile?.id !== user.id // <-- Excluir perfil propio
     );
 
-    // Buscar por estilo
+    // Buscar por estilo - EXCLUIR PERFIL PROPIO
     const searchTermLower = term.toLowerCase();
     const matchingStyles = stylesList.filter(style => 
       style.name.toLowerCase().includes(searchTermLower)
@@ -118,7 +121,8 @@ const MainNav = ({
           matchingStyles.some(matchingStyle => 
             userStyle.toLowerCase().includes(matchingStyle.name.toLowerCase())
           )
-        )
+        ) &&
+        profile?.id !== user.id // <-- Excluir perfil propio
       );
     }
 
@@ -136,7 +140,7 @@ const MainNav = ({
     if (onCarouselVisibility) {
       onCarouselVisibility(false);
     }
-  }, [isHomePage, onSearchResults, onCarouselVisibility, showCarouselByDefault]);
+  }, [isHomePage, onSearchResults, onCarouselVisibility, showCarouselByDefault, profile?.id]); // <-- Agregar profile?.id a las dependencias
 
   // Lógica de búsqueda con debounce
   useEffect(() => {
@@ -222,11 +226,12 @@ const MainNav = ({
     };
   }, [handleStyleSelect]);
 
-  // Sugerencias dinámicas
+  // Sugerencias dinámicas - EXCLUIR PERFIL PROPIO
   const artistSuggestions = users
     .filter(user =>
       searchTerm &&
-      user.username.toLowerCase().includes(searchTerm.toLowerCase())
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      profile?.id !== user.id // <-- Excluir perfil propio
     )
     .slice(0, 4);
 

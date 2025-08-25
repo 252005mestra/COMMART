@@ -8,7 +8,7 @@ const Profile = () => {
   if (loading) return <div>Cargando...</div>;
   if (!loading && !profile) return <div>No tienes acceso a esta vista.</div>;
 
-  return profile?.role === 'artist'
+  return profile?.is_artist || profile?.role === 'artist'
     ? <ArtistProfile />
     : <UserProfile />;
 };
