@@ -454,19 +454,19 @@ const EditProfile = () => {
               )}
 
               <div className="profile-image-container">
-                <div className="profile-image-preview">
+                <div 
+                  className="profile-image-preview"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Hacer click para cambiar foto de perfil"
+                >
                   {imagePreview ? (
                     <img src={imagePreview} alt="Profile" />
                   ) : (
                     <CircleUserRound size={60} />
                   )}
-                  <button
-                    type="button"
-                    className="edit-image-btn"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Camera size={16} />
-                  </button>
+                  <div className="camera-overlay">
+                    <Camera size={20} />
+                  </div>
                 </div>
                 <input
                   ref={fileInputRef}

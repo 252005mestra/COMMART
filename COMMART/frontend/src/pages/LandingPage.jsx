@@ -115,7 +115,6 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Separador con imagen de Lino - solo móvil */}
         <div className='section-separator-lino'>
           <img src={Lino1} alt='Lino' />
         </div>

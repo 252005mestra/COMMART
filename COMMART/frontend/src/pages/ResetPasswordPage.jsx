@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Eye, EyeOff } from 'lucide-react'; // Agregar estos imports
 import logo from '../assets/LogoCOMMART.png';
 import '../styles/modal.css';
 
@@ -119,7 +120,7 @@ const ResetPasswordPage = () => {
             <h2>Cambiar Contraseña</h2>
             <p className="forgot-description">Cambia tu contraseña para recuperar el acceso a tu cuenta.</p>
             <form className="login-form" onSubmit={handleSubmit}>
-              <div className="reset-password-input-group">
+              <div className="password-input-container">
                 <input
                   type={showNew ? 'text' : 'password'}
                   className={`${fieldErrors.newPassword ? 'input-error' : ''}`}
@@ -130,18 +131,19 @@ const ResetPasswordPage = () => {
                 />
                 <button
                   type="button"
-                  className="reset-password-toggle-btn"
+                  className="password-toggle-btn"
                   onClick={() => setShowNew(v => !v)}
                   tabIndex={-1}
                   disabled={loading}
                 >
-                  {showNew ? '🙈' : '👁️'}
+                  {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-                {fieldErrors.newPassword && (
-                  <span className="input-error-message">{fieldErrors.newPassword}</span>
-                )}
               </div>
-              <div className="reset-password-input-group">
+              {fieldErrors.newPassword && (
+                <span className="input-error-message">{fieldErrors.newPassword}</span>
+              )}
+              
+              <div className="password-input-container">
                 <input
                   type={showConfirm ? 'text' : 'password'}
                   className={`${fieldErrors.confirmPassword ? 'input-error' : ''}`}
@@ -152,21 +154,19 @@ const ResetPasswordPage = () => {
                 />
                 <button
                   type="button"
-                  className="reset-password-toggle-btn"
+                  className="password-toggle-btn"
                   onClick={() => setShowConfirm(v => !v)}
                   tabIndex={-1}
                   disabled={loading}
                 >
-                  {showConfirm ? '🙈' : '👁️'}
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-                {fieldErrors.confirmPassword && (
-                  <span className="input-error-message">{fieldErrors.confirmPassword}</span>
-                )}
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-              >
+              {fieldErrors.confirmPassword && (
+                <span className="input-error-message">{fieldErrors.confirmPassword}</span>
+              )}
+              
+              <button type="submit" disabled={loading}>
                 {loading ? <span className="spinner" /> : null}
                 Cambiar
               </button>

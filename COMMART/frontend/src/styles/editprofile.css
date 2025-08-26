@@ -1,3 +1,37 @@
+/* ========== Ocultar iconos predeterminados de contraseña ========== */
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+input[type="password"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+}
+
+input[type="password"]::-ms-reveal {
+  display: none !important;
+}
+
+input[type="password"]::-ms-clear {
+  display: none !important;
+}
+
+/* Para inputs que cambian de password a text */
+input[type="text"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+input[type="text"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+input[type="text"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+}
+
 /* ========== Layout principal ========== */
 .edit-profile-main {
   flex: 1;
@@ -94,7 +128,8 @@
 /* ========== Imagen de perfil ========== */
 .profile-image-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 2rem 0 1.5rem 0;
 }
 
@@ -109,33 +144,62 @@
   justify-content: center;
   overflow: hidden;
   color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image-preview:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .profile-image-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.edit-image-btn {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #333;
-  color: white;
-  border: 3px solid white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: all 0.3s ease;
 }
 
-.edit-image-btn:hover {
-  background: #555;
+/* Overlay con icono de cámara */
+.camera-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: white;
+}
+
+.profile-image-preview:hover .camera-overlay {
+  opacity: 1;
+}
+
+.profile-image-preview:hover img {
+  opacity: 0.7;
+}
+
+/* Error de imagen */
+.profile-image-container .field-error {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Remover estilos anteriores que ya no se usan */
+.profile-image-preview::before,
+.profile-image-preview::after {
+  display: none;
+}
+
+.edit-image-btn {
+  display: none;
 }
 
 /* ========== Formulario ========== */
@@ -387,8 +451,12 @@
   font-family: 'Nunito Sans';
   font-size: 1rem;
   color: #333;
+  cursor: text;
   box-sizing: border-box;
   transition: all 0.3s ease;
+  -webkit-appearance: none !important;
+  -moz-appearance: textfield !important;
+  appearance: none !important;
 }
 
 .password-input-group input:focus {
@@ -414,11 +482,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  padding: 0;
 }
 
 .password-toggle-btn:hover {
   color: #333;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+}
+
+.password-toggle-btn:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
 /* ========== Botones del modal de contraseña ========== */

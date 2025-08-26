@@ -1,3 +1,30 @@
+/* Ocultar iconos predeterminados de contraseña en todos los navegadores */
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+input[type="password"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+}
+
+input[type="password"]::-ms-reveal {
+  display: none;
+}
+
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+/* Para Edge y navegadores basados en Chromium */
+input[type="password"]::-webkit-inner-spin-button,
+input[type="password"]::-webkit-outer-spin-button {
+  display: none;
+}
+
 /* Estructura general del modal */
 .modal-overlay {
   position: fixed;
@@ -68,6 +95,13 @@
   transition: border 0.2s;
   color: #222;
   box-sizing: border-box;
+}
+
+/* Asegurar que los inputs de contraseña no muestren iconos predeterminados */
+.login-form input[type="password"] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
 }
 
 .login-form input:focus {
@@ -303,6 +337,80 @@
   opacity: 0.5;
 }
 
+/* Contenedor para inputs de contraseña con botón toggle */
+.password-input-container {
+  position: relative;
+  margin-top: 1.1rem;
+}
+
+.password-input-container input {
+  width: 100%;
+  padding: 0.5rem 3rem 0.5rem 1.2rem !important;
+  margin-top: 0 !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: textfield !important;
+  appearance: none !important;
+}
+
+/* Ocultar iconos predeterminados específicamente en contenedores de contraseña */
+.password-input-container input[type="password"]::-webkit-textfield-decoration-container,
+.password-input-container input[type="text"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+.password-input-container input[type="password"]::-webkit-credentials-auto-fill-button,
+.password-input_container input[type="text"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+.password-input-container input[type="password"]::-webkit-strong-password-auto-fill-button,
+.password-input_container input[type="text"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+}
+
+.password-input-container .password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.password-input-container .password-toggle-btn:hover:not(:disabled) {
+  color: #333;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.password-input-container .password-toggle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.password-input-container .password-toggle-btn:focus {
+  outline: none;
+}
+
+.password-input-container .password-toggle-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Ajustar el input-error-message para contenedores de contraseña */
+.password-input-container + .input-error-message {
+  margin-top: 0.25rem;
+}
+
 /* Responsive para modal de recuperación */
 @media (max-width: 500px) {
   .modal-content {
@@ -338,6 +446,17 @@
   .submit-button {
     font-size: 1.2rem;
     padding: 0.6rem 0;
+  }
+  
+  .password-input-container input {
+    padding: 0.8rem 2.5rem 0.8rem 0.9rem !important;
+    font-size: 1rem;
+  }
+  
+  .password-input-container .password-toggle-btn {
+    right: 0.5rem;
+    width: 28px;
+    height: 28px;
   }
 }
 

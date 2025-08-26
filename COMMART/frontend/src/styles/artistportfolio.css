@@ -1,9 +1,11 @@
 /* Artist Portfolio Styles - Diseño mejorado basado en Figma */
 .artist-portfolio-container {
-  width: 95vw;
+  width: 100%;
+  max-width: 1400px;
   margin: 15px auto;
   padding: 0 15px;
   font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
 }
 
 .artist-portfolio-profile {
@@ -12,18 +14,22 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   border: 3px solid #000;
-  max-height: 85vh;
+  min-height: 50vh;
+  height: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Header Section - Diseño más compacto */
+/* Header Section - Diseño más compacto + Responsive */
 .portfolio-header {
   display: flex;
-  padding: 16px 20px;
-  gap: 16px;
+  padding: clamp(12px, 2vw, 20px);
+  gap: clamp(12px, 2vw, 20px);
   background: white;
   border-bottom: 2px solid #e0e0e0;
   align-items: flex-start;
   position: relative;
+  flex-shrink: 0;
 }
 
 .artist-avatar-section {
@@ -36,8 +42,8 @@
 
 .artist-avatar {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: clamp(80px, 12vw, 120px);
+  height: clamp(80px, 12vw, 120px);
   border-radius: 50%;
   background: #333;
   display: flex;
@@ -87,7 +93,7 @@
 }
 
 .avatar-rating .rating-number {
-  font-size: 16px;
+  font-size: clamp(14px, 2vw, 16px);
   font-weight: 600;
   color: #000;
   font-family: 'Goldman';
@@ -99,7 +105,7 @@
 }
 
 .avatar-rating .star {
-  font-size: 14px;
+  font-size: clamp(12px, 1.5vw, 14px);
   color: #ddd;
 }
 
@@ -107,43 +113,47 @@
   color: #FFCD29;
 }
 
-/* Artist Info Section */
+/* Artist Info Section + Responsive */
 .portfolio-artist-info {
   flex: 1;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
+  min-width: 0;
 }
 
 .portfolio-main-info {
   flex: 1;
+  min-width: 0;
 }
 
-/* Nombre del artista */
+/* Nombre del artista + Responsive */
 .portfolio-artist-name {
   font-family: 'Goldman';
-  font-size: 1.6rem;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
   color: #000;
   margin: 0 0 6px 0;
   font-weight: normal;
   letter-spacing: 0.06em;
+  word-break: break-word;
 }
 
-/* Botones de seguir y favorito */
+/* Botones de seguir y favorito + Responsive */
 .portfolio-follow-favorite-buttons {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-/* Estadísticas en una línea */
-.portfolio-artist-stats-line {
-  display: flex;
-  gap: 16px;
+  gap: 6px;
   margin-bottom: 8px;
   flex-wrap: wrap;
-  font-size: 15px;
+}
+
+/* Estadísticas en una línea + Responsive */
+.portfolio-artist-stats-line {
+  display: flex;
+  gap: clamp(8px, 2vw, 16px);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  font-size: clamp(13px, 1.8vw, 15px);
   font-family: 'Nunito Sans', sans-serif;
 }
 
@@ -175,11 +185,11 @@
   font-weight: 600;
 }
 
-/* Estilos - Igual al home */
+/* Estilos - Igual al home + Responsive */
 .portfolio-artist-styles-section {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: clamp(4px, 0.5vw, 6px);
   margin-bottom: 8px;
   align-items: center;
 }
@@ -187,20 +197,21 @@
 .portfolio-artist-styles-section .style-tag-title {
   background: #7d5938;
   color: white;
-  font-size: 0.7rem;
-  padding: 4px 12px;
+  font-size: clamp(10px, 1.2vw, 12px);
+  padding: clamp(3px, 0.5vw, 4px) clamp(8px, 1.5vw, 12px);
   border-radius: 12px;
   display: flex;
   align-items: center;
   font-weight: 400;
   font-family: 'Nunito Sans', sans-serif;
+  white-space: nowrap;
 }
 
 .portfolio-artist-styles-section .style-tag-type {
   background: transparent;
   color: #7d5938;
-  font-size: 0.7rem;
-  padding: 4px 12px;
+  font-size: clamp(10px, 1.2vw, 12px);
+  padding: clamp(3px, 0.5vw, 4px) clamp(8px, 1.5vw, 12px);
   border: 2px solid #7d5938;
   border-radius: 12px;
   display: flex;
@@ -209,6 +220,7 @@
   font-weight: 400;
   font-family: 'Nunito Sans', sans-serif;
   position: relative;
+  white-space: nowrap;
 }
 
 .portfolio-artist-styles-section .style-tag-type .remove-style-btn {
@@ -237,14 +249,15 @@
   font-family: 'Nunito Sans', sans-serif;
 }
 
-/* Descripción */
+/* Descripción + Responsive */
 .portfolio-artist-description {
   color: #666;
   line-height: 1.4;
   margin-bottom: 8px;
-  font-size: 15px;
+  font-size: clamp(13px, 1.8vw, 15px);
   font-weight: 400;
   font-family: 'Nunito Sans', sans-serif;
+  word-break: break-word;
 }
 
 .portfolio-artist-description strong {
@@ -253,7 +266,7 @@
   font-weight: 600;
 }
 
-/* Textarea mejorado para descripción */
+/* Textarea mejorado para descripción + Responsive */
 .artist-description {
   display: flex;
   flex-direction: column;
@@ -264,12 +277,12 @@
   width: 100%;
   border: 2px solid #b3b792;
   border-radius: 10px;
-  padding: 8px 12px;
+  padding: clamp(6px, 1vw, 8px) clamp(8px, 1.5vw, 12px);
   font-family: 'Nunito Sans', sans-serif;
   resize: none;
-  min-height: 60px;
-  max-height: 60px;
-  font-size: 14px;
+  min-height: clamp(40px, 8vw, 60px);
+  max-height: clamp(40px, 8vw, 60px);
+  font-size: clamp(12px, 1.5vw, 14px);
   background: #f8f8f5;
   box-sizing: border-box;
   overflow-y: auto;
@@ -288,7 +301,7 @@
   margin-top: 2px;
 }
 
-/* Action Buttons */
+/* Action Buttons + Responsive */
 .portfolio-artist-actions {
   display: flex;
   flex-direction: column;
@@ -296,15 +309,15 @@
   align-items: flex-end;
   margin-left: 12px;
   position: absolute;
-  top: 16px;
-  right: 20px;
+  top: clamp(12px, 2vw, 16px);
+  right: clamp(12px, 2vw, 20px);
 }
 
 .btn-primary, .btn-secondary, .btn-edit, .btn-order {
   border: none;
   border-radius: 25px;
-  padding: 8px 20px;
-  font-size: 14px;
+  padding: clamp(6px, 1vw, 8px) clamp(12px, 2vw, 20px);
+  font-size: clamp(12px, 1.5vw, 14px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -312,8 +325,9 @@
   align-items: center;
   gap: 6px;
   font-family: 'Goldman';
-  min-width: 120px;
+  min-width: clamp(80px, 15vw, 120px);
   justify-content: center;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -362,28 +376,32 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Body Section */
+/* Body Section + Responsive */
 .artist-body {
   display: flex;
-  min-height: 400px;
-  max-height: 65vh;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* Portfolio Section */
+/* Portfolio Section + Responsive */
 .portfolio-section {
   flex: 2;
+  min-width: 0;
   position: relative;
   background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
   border-right: 2px solid #e0e0e0;
+  min-height: clamp(300px, 50vh, 600px);
+  max-height: 70vh;
 }
 
 .portfolio-carousel {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -392,10 +410,13 @@
 .portfolio-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 0;
+  max-width: 100%;
+  max-height: 100%;
 }
 
+/* Botones del carrusel + Responsive */
 .carousel-btn {
   position: absolute;
   top: 50%;
@@ -403,8 +424,8 @@
   background: rgba(255, 255, 255, 0.9);
   color: #7d5938;
   border: none;
-  width: 50px;
-  height: 50px;
+  width: clamp(40px, 6vw, 50px);
+  height: clamp(40px, 6vw, 50px);
   border-radius: 50%;
   cursor: pointer;
   z-index: 10;
@@ -422,22 +443,23 @@
 }
 
 .prev-btn {
-  left: 18px;
+  left: clamp(10px, 2vw, 18px);
 }
 
 .next-btn {
-  right: 18px;
+  right: clamp(10px, 2vw, 18px);
 }
 
+/* Remove/Add buttons + Responsive */
 .remove-image-btn {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: clamp(10px, 2vw, 20px);
+  right: clamp(10px, 2vw, 20px);
   background: rgba(255, 255, 255, 0.9);
   border: 2px solid #dc3545;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: clamp(30px, 4vw, 36px);
+  height: clamp(30px, 4vw, 36px);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -454,10 +476,10 @@
 
 .add-portfolio-btn {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 50px;
-  height: 50px;
+  bottom: clamp(10px, 2vw, 20px);
+  right: clamp(10px, 2vw, 20px);
+  width: clamp(40px, 6vw, 50px);
+  height: clamp(40px, 6vw, 50px);
   background: rgba(125, 89, 56, 0.9);
   color: white;
   border: none;
@@ -484,23 +506,24 @@
   font-style: italic;
   height: 100%;
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 18px;
+  font-size: clamp(14px, 2vw, 18px);
+  text-align: center;
+  padding: 20px;
 }
 
-/* Sidebar */
+/* Sidebar + Responsive */
 .sidebar {
-  flex: 0 0 280px;
-  padding: 20px 18px;
+  flex: 0 0 clamp(250px, 25vw, 320px);
+  padding: clamp(15px, 2vw, 20px);
   background: white;
-  min-width: 280px;
-  max-width: 280px;
-  max-height: 65vh;
+  max-height: 70vh;
   overflow-y: auto;
+  min-width: 0;
 }
 
 .sidebar-item {
-  margin-bottom: 20px;
-  padding-bottom: 16px;
+  margin-bottom: clamp(15px, 2vw, 20px);
+  padding-bottom: clamp(12px, 2vw, 16px);
 }
 
 .sidebar-item:not(:last-child) {
@@ -518,7 +541,7 @@
   color: #000;
   font-weight: 600;
   margin-bottom: 10px;
-  font-size: 16px;
+  font-size: clamp(14px, 2vw, 16px);
   font-family: 'Goldman';
 }
 
@@ -598,7 +621,7 @@
   background: #dc3545;
 }
 
-/* Languages Section */
+/* Languages Section + Responsive */
 .languages-edit {
   display: flex;
   flex-wrap: wrap;
@@ -657,7 +680,8 @@
 .language-list li {
   color: #666;
   padding: 3px 0;
-  font-size: 14px;
+  font-size: clamp(12px, 1.5vw, 14px);
+  line-height: 1.4;
   font-weight: 400;
   font-family: 'Nunito Sans', sans-serif;
 }
@@ -669,7 +693,7 @@
   font-weight: bold;
 }
 
-/* Price Policy */
+/* Price Policy + Responsive */
 .sidebar-item textarea {
   width: 100%;
   border: 2px solid #b3b792;
@@ -703,7 +727,7 @@
 .price-policy-list li {
   color: #666;
   padding: 4px 0;
-  font-size: 14px;
+  font-size: clamp(12px, 1.5vw, 14px);
   line-height: 1.4;
   font-weight: 400;
   font-family: 'Nunito Sans', sans-serif;
@@ -771,17 +795,117 @@ select:focus {
   color: white;
 }
 
-/* Responsive Design */
+/* ========== Avatar editable (modo edición) ========== */
+.artist-avatar.editable-avatar {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.artist-avatar.editable-avatar:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.artist-avatar.editable-avatar img {
+  transition: all 0.3s ease;
+}
+
+/* Overlay con icono de cámara - igual que EditProfile */
+.artist-avatar .camera-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: white;
+}
+
+.artist-avatar.editable-avatar:hover .camera-overlay {
+  opacity: 1;
+}
+
+.artist-avatar.editable-avatar:hover img {
+  opacity: 0.7;
+}
+
+/* Ocultar el botón de editar original */
+.artist-avatar .edit-avatar-btn {
+  display: none;
+}
+
+/* Mantener estilos originales para modo solo lectura */
+.artist-avatar:not(.editable-avatar) .edit-avatar-btn {
+  display: none; /* Ocultar siempre en vista de solo lectura */
+}
+
+.artist-avatar:not(.editable-avatar) .camera-overlay {
+  display: none; /* No mostrar overlay en vista de solo lectura */
+}
+
+/* ========== RESPONSIVE BREAKPOINTS ========== */
+@media (max-width: 1200px) {
+  .artist-portfolio-container {
+    width: 98%;
+    padding: 0 10px;
+  }
+  
+  .sidebar {
+    flex: 0 0 280px;
+  }
+  
+  .portfolio-section {
+    min-height: 40vh;
+    max-height: 60vh;
+  }
+}
+
+@media (max-width: 900px) {
+  .artist-body {
+    flex-direction: column;
+  }
+  
+  .portfolio-section {
+    flex: none;
+    border-right: none;
+    border-bottom: 2px solid #e0e0e0;
+    min-height: 50vh;
+    max-height: 60vh;
+  }
+  
+  .sidebar {
+    flex: none;
+    max-height: none;
+    padding: clamp(12px, 2vw, 18px);
+  }
+  
+  .portfolio-artist-actions {
+    position: static;
+    margin: 8px 0 0 0;
+    justify-content: center;
+    flex-direction: row;
+    gap: 10px;
+  }
+}
+
 @media (max-width: 768px) {
   .artist-portfolio-container {
-    padding: 0 10px;
+    padding: 0 8px;
     margin: 10px auto;
   }
   
   .portfolio-header {
     flex-direction: column;
     text-align: center;
-    padding: 16px;
+    align-items: center;
     gap: 12px;
   }
   
@@ -794,9 +918,10 @@ select:focus {
   
   .portfolio-artist-actions {
     position: static;
-    margin: 8px 0 0 0;
+    margin: 12px 0 0 0;
     justify-content: center;
     flex-direction: row;
+    gap: 8px;
   }
   
   .portfolio-artist-stats-line {
@@ -804,32 +929,87 @@ select:focus {
     gap: 12px;
   }
   
-  .artist-body {
-    flex-direction: column;
+  .portfolio-section {
+    min-height: 40vh;
+    max-height: 50vh;
   }
   
-  .sidebar {
-    border-left: none;
-    border-top: 2px solid #e0e0e0;
-    min-width: auto;
-    max-width: none;
-    flex: none;
+  .carousel-btn {
+    width: 35px;
+    height: 35px;
   }
   
-  .portfolio-carousel {
-    height: 300px;
+  .prev-btn {
+    left: 8px;
   }
   
-  .portfolio-image {
-    height: 300px;
+  .next-btn {
+    right: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .artist-portfolio-container {
+    padding: 0 5px;
+    margin: 8px auto;
   }
   
-  .portfolio-artist-name {
-    font-size: 1.4rem;
+  .portfolio-header {
+    padding: 12px;
   }
   
   .artist-avatar {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
+  }
+  
+  .portfolio-section {
+    min-height: 35vh;
+    max-height: 45vh;
+  }
+  
+  .sidebar {
+    padding: 12px;
+  }
+  
+  .btn-primary, .btn-secondary, .btn-edit, .btn-order {
+    min-width: 70px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .carousel-btn {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .prev-btn {
+    left: 5px;
+  }
+  
+  .next-btn {
+    right: 5px;
+  }
+}
+
+/* Modos de visualización especiales */
+@media (min-width: 1400px) {
+  .portfolio-section {
+    max-height: 75vh;
+  }
+  
+  .sidebar {
+    max-height: 75vh;
+  }
+}
+
+/* Para pantallas muy anchas */
+@media (min-width: 1920px) {
+  .artist-portfolio-container {
+    max-width: 1600px;
+  }
+  
+  .portfolio-section {
+    max-height: 80vh;
   }
 }

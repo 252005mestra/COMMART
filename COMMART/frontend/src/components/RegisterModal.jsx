@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Eye, EyeOff } from 'lucide-react'; // Agregar estos imports
 import '../styles/modal.css';
 import logo from '../assets/LogoCOMMART.png';
 
@@ -14,6 +15,8 @@ const RegisterModal = ({ onClose, onSwitchToLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // Agregar este estado
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Agregar este estado
   const [errorMessage, setErrorMessage] = useState('');
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -154,6 +157,7 @@ const RegisterModal = ({ onClose, onSwitchToLogin }) => {
             className={errors.username ? 'input-error' : ''}
           />
           {errors.username && <span className='input-error-message'>{errors.username}</span>}
+          
           <input
             type='email'
             placeholder='Correo Electrónico'
@@ -162,22 +166,43 @@ const RegisterModal = ({ onClose, onSwitchToLogin }) => {
             className={errors.email ? 'input-error' : ''}
           />
           {errors.email && <span className='input-error-message'>{errors.email}</span>}
-          <input
-            type='password'
-            placeholder='Contraseña'
-            value={password}
-            onChange={handleChange(setPassword, 'password')}
-            className={errors.password ? 'input-error' : ''}
-          />
+          
+          <div className="password-input-container">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder='Contraseña'
+              value={password}
+              onChange={handleChange(setPassword, 'password')}
+              className={errors.password ? 'input-error' : ''}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(prev => !prev)}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
           {errors.password && <span className='input-error-message'>{errors.password}</span>}
-          <input
-            type='password'
-            placeholder='Confirmar Contraseña'
-            value={confirmPassword}
-            onChange={handleChange(setConfirmPassword, 'confirmPassword')}
-            className={errors.confirmPassword ? 'input-error' : ''}
-          />
+          
+          <div className="password-input-container">
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder='Confirmar Contraseña'
+              value={confirmPassword}
+              onChange={handleChange(setConfirmPassword, 'confirmPassword')}
+              className={errors.confirmPassword ? 'input-error' : ''}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowConfirmPassword(prev => !prev)}
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
           {errors.confirmPassword && <span className='input-error-message'>{errors.confirmPassword}</span>}
+          
           <button type='submit'>CREAR</button>
         </form>
         <p>

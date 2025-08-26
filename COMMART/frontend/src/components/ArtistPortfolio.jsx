@@ -105,7 +105,11 @@ const ArtistPortfolio = ({
           {/* Header con información del artista */}
           <div className="portfolio-header">
             <div className="artist-avatar-section">
-              <div className="artist-avatar">
+              <div 
+                className="artist-avatar editable-avatar"
+                onClick={() => fileInputRef.current?.click()}
+                title="Hacer click para cambiar foto de perfil"
+              >
                 {profileImagePreview || artist?.profile_image ? (
                   <img
                     src={profileImagePreview || `http://localhost:5000/${artist.profile_image}`}
@@ -114,22 +118,17 @@ const ArtistPortfolio = ({
                 ) : (
                   <CircleUserRound size={60} />
                 )}
-                <button
-                  className="edit-avatar-btn"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Cambiar foto de perfil"
-                  type="button"
-                >
-                  <Camera size={16} />
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={handleProfileImageChange}
-                />
+                <div className="camera-overlay">
+                  <Camera size={20} />
+                </div>
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleProfileImageChange}
+              />
               
               <div className="avatar-rating">
                 <span className="rating-number">{artist?.rating || 4}</span>

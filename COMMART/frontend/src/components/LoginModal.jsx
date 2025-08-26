@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Eye, EyeOff } from 'lucide-react'; // Agregar estos imports
 import '../styles/modal.css';
 import logo from '../assets/LogoCOMMART.png';
 import { useUser } from '../context/UserContext';
@@ -8,6 +9,7 @@ import { useUser } from '../context/UserContext';
 const LoginModal = ({ onClose, onSwitchToRegister, onForgotPassword }) => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // Agregar este estado
   const [errorMessage, setErrorMessage] = useState('');
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -87,14 +89,25 @@ const LoginModal = ({ onClose, onSwitchToRegister, onForgotPassword }) => {
             className={errors.identifier ? 'input-error' : ''}
           />
           {errors.identifier && <span className='input-error-message'>{errors.identifier}</span>}
-          <input
-            type='password'
-            placeholder='Contraseña'
-            value={password}
-            onChange={handleChange(setPassword, 'password')}
-            className={errors.password ? 'input-error' : ''}
-          />
+          
+          <div className="password-input-container">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder='Contraseña'
+              value={password}
+              onChange={handleChange(setPassword, 'password')}
+              className={errors.password ? 'input-error' : ''}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(prev => !prev)}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
           {errors.password && <span className='input-error-message'>{errors.password}</span>}
+          
           <button
             type='button'
             className='forgot-password-link'

@@ -55,7 +55,6 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   align-items: stretch;
-  justify-items: center; /* Centra las cards cuando hay menos columnas */
 }
 
 .artist-card {
@@ -66,10 +65,10 @@
   transition: all 0.3s ease;
   cursor: pointer;
   border: 3px solid #000;
-  width: 100%; /* Ocupa todo el espacio disponible de la columna */
-  max-width: 340px; /* Pero no más de este ancho máximo */
-  min-width: 280px; /* Y no menos de este ancho mínimo */
-  height: 380px;
+  width: 100%; 
+  max-width: 340px; 
+  min-width: 280px; 
+  height: 400px;
   display: flex;
   flex-direction: column;
   margin: 0;
