@@ -190,59 +190,67 @@ export const getArtistFullProfileModel = (userId) => {
         ap.bio, ap.availability, ap.price_policy,
         (SELECT COUNT(*) FROM artist_followers WHERE artist_id = u.id) AS followers,
         (SELECT COUNT(*) FROM artist_followers WHERE follower_id = u.id) AS following,
-        (SELECT COUNT(*) FROM orders WHERE artist_id = u.id) AS sales,
+        (SELECT COUNT(*) FROM orders WHERE artist_id = u.id AND status = 'completed') AS sales,
         (SELECT COUNT(*) FROM orders WHERE client_id = u.id) AS purchases,
         (SELECT COUNT(*) FROM favorites WHERE artist_id = u.id) AS favorites,
         (SELECT COUNT(*) FROM reviews WHERE artist_id = u.id) AS reviews,
         (SELECT AVG(rating) FROM reviews WHERE artist_id = u.id) AS rating
       FROM users u
       LEFT JOIN artist_profiles ap ON u.id = ap.user_id
-      WHERE u.id = ?
+      WHERE u.id = ? AND u.is_artist = TRUE
     `;
+    
     dbConnection.query(query, [userId], async (err, results) => {
       if (err) return reject(err);
       if (!results[0]) return resolve(null);
+      
       const artist = results[0];
 
-      // Traer estilos
-      dbConnection.query(
-        `SELECT s.id, s.name FROM artist_styles ast
-         JOIN styles s ON ast.style_id = s.id
-         WHERE ast.artist_id = ?`,
-        [userId],
-        (err, styleRows) => {
-          if (err) return reject(err);
-
-          // Traer idiomas
+      try {
+        // Traer estilos
+        const styles = await new Promise((res, rej) => {
           dbConnection.query(
-            `SELECT l.id, l.name FROM artist_languages al
+            `SELECT s.name FROM artist_styles ast
+             JOIN styles s ON ast.style_id = s.id
+             WHERE ast.artist_id = ?`,
+            [userId],
+            (err, styleRows) => err ? rej(err) : res(styleRows.map(s => s.name))
+          );
+        });
+
+        // Traer idiomas
+        const languages = await new Promise((res, rej) => {
+          dbConnection.query(
+            `SELECT l.name FROM artist_languages al
              JOIN languages l ON al.language_id = l.id
              WHERE al.artist_id = ?`,
             [userId],
-            (err, langRows) => {
-              if (err) return reject(err);
-
-              // Traer portafolio
-              dbConnection.query(
-                `SELECT id, image_path FROM portfolios WHERE artist_id = ? ORDER BY created_at DESC LIMIT 6`,
-                [userId],
-                (err, portfolioRows) => {
-                  if (err) return reject(err);
-
-                  resolve({
-                    ...artist,
-                    styles: styleRows.map(s => s.name),
-                    style_ids: styleRows.map(s => s.id),
-                    languages: langRows.map(l => l.name),
-                    language_ids: langRows.map(l => l.id),
-                    portfolio: portfolioRows
-                  });
-                }
-              );
-            }
+            (err, langRows) => err ? rej(err) : res(langRows.map(l => l.name))
           );
-        }
-      );
+        });
+
+        // Traer portafolio
+        const portfolio = await new Promise((res, rej) => {
+          dbConnection.query(
+            `SELECT id, image_path FROM portfolios 
+             WHERE artist_id = ? 
+             ORDER BY created_at DESC LIMIT 6`,
+            [userId],
+            (err, portfolioRows) => err ? rej(err) : res(portfolioRows)
+          );
+        });
+
+        resolve({
+          ...artist,
+          styles,
+          languages,
+          portfolio,
+          rating: artist.rating ? parseFloat(artist.rating).toFixed(1) : 0
+        });
+
+      } catch (error) {
+        reject(error);
+      }
     });
   });
 };
@@ -477,34 +485,40 @@ export const updateArtistProfileModel = async ({
   languages,
   portfolioImages
 }) => {
-  // Actualizar tabla artist_profiles
+  console.log('Actualizando perfil con:', { userId, bio, availability, price_policy, styles, languages });
+
+  // Actualizar o crear perfil de artista
   await new Promise((resolve, reject) => {
     dbConnection.query(
-      `
-      INSERT INTO artist_profiles (user_id, bio, availability, price_policy)
-      VALUES (?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE bio = VALUES(bio), availability = VALUES(availability), price_policy = VALUES(price_policy)
-      `,
-      [userId, bio, availability, price_policy],
-      (err) => (err ? reject(err) : resolve())
+      `INSERT INTO artist_profiles (user_id, bio, availability, price_policy)
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE 
+         bio = VALUES(bio), 
+         availability = VALUES(availability), 
+         price_policy = VALUES(price_policy)`,
+      [userId, bio || null, availability ? 1 : 0, price_policy || null],
+      (err) => err ? reject(err) : resolve()
     );
   });
 
-  // Actualizar estilos
+  // Actualizar estilos - eliminar todos y volver a insertar
   await new Promise((resolve, reject) => {
     dbConnection.query('DELETE FROM artist_styles WHERE artist_id = ?', [userId], async (err) => {
       if (err) return reject(err);
+      
       if (Array.isArray(styles) && styles.length > 0) {
         try {
           for (const styleName of styles) {
-            await new Promise((res, rej) => {
-              dbConnection.query(
-                `INSERT INTO artist_styles (artist_id, style_id)
-                 SELECT ?, id FROM styles WHERE name = ?`,
-                [userId, styleName],
-                (err) => (err ? rej(err) : res())
-              );
-            });
+            if (styleName && styleName.trim()) {
+              await new Promise((res, rej) => {
+                dbConnection.query(
+                  `INSERT INTO artist_styles (artist_id, style_id)
+                   SELECT ?, id FROM styles WHERE name = ?`,
+                  [userId, styleName.trim()],
+                  (err) => err ? rej(err) : res()
+                );
+              });
+            }
           }
           resolve();
         } catch (err) {
@@ -516,21 +530,24 @@ export const updateArtistProfileModel = async ({
     });
   });
 
-  // Actualizar idiomas
+  // Actualizar idiomas - eliminar todos y volver a insertar
   await new Promise((resolve, reject) => {
     dbConnection.query('DELETE FROM artist_languages WHERE artist_id = ?', [userId], async (err) => {
       if (err) return reject(err);
+      
       if (Array.isArray(languages) && languages.length > 0) {
         try {
           for (const langName of languages) {
-            await new Promise((res, rej) => {
-              dbConnection.query(
-                `INSERT INTO artist_languages (artist_id, language_id)
-                 SELECT ?, id FROM languages WHERE name = ?`,
-                [userId, langName],
-                (err) => (err ? rej(err) : res())
-              );
-            });
+            if (langName && langName.trim()) {
+              await new Promise((res, rej) => {
+                dbConnection.query(
+                  `INSERT INTO artist_languages (artist_id, language_id)
+                   SELECT ?, id FROM languages WHERE name = ?`,
+                  [userId, langName.trim()],
+                  (err) => err ? rej(err) : res()
+                );
+              });
+            }
           }
           resolve();
         } catch (err) {
@@ -542,15 +559,29 @@ export const updateArtistProfileModel = async ({
     });
   });
 
-  // Guardar imágenes nuevas en portfolios
+  // Guardar nuevas imágenes de portafolio
   if (portfolioImages && portfolioImages.length > 0) {
     const values = portfolioImages.map(img => [userId, `uploads/${img.filename}`]);
     await new Promise((resolve, reject) => {
       dbConnection.query(
         'INSERT INTO portfolios (artist_id, image_path) VALUES ?',
         [values],
-        (err) => (err ? reject(err) : resolve())
+        (err) => err ? reject(err) : resolve()
       );
     });
   }
+};
+
+// Función para eliminar imagen de portafolio
+export const removePortfolioImageModel = (userId, imageId) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      'DELETE FROM portfolios WHERE id = ? AND artist_id = ?',
+      [imageId, userId],
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
+  });
 };

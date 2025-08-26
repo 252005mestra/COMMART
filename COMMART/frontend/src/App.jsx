@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import Home from './pages/Home'
 import EditProfile from './pages/EditProfile'
+import ArtistProfile from './pages/ArtistProfile'  // <-- Agregar esta importación
 import ResetPassword from './pages/ResetPasswordPage'; // o './pages/ResetPassword'
 import PrivateRoute from './components/PrivateRoute'
 import Profile from './components/Profile';
@@ -28,6 +29,16 @@ const App = () => {
           element={
             <PrivateRoute>
               <EditProfile />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Agregar ruta para perfil de artista propio */}
+        <Route
+          path='/artist-profile'
+          element={
+            <PrivateRoute>
+              <ArtistProfile />
             </PrivateRoute>
           }
         />

@@ -20,11 +20,14 @@ import {
     forgotPasswordController,
     resetPasswordController,
     getOwnArtistProfileController,
+    updateArtistProfileController,
     getPublicArtistProfileController,
     getAllStylesController,
-    getAllLanguagesController,
-    updateArtistProfileController
+    getAllLanguagesController
 } from '../controllers/authController.js';
+
+// Importar modelos directamente para la ruta de eliminar imagen
+import { removePortfolioImageModel, getArtistFullProfileModel, getAllStylesModel, getAllLanguagesModel } from '../models/userModel.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 import multer from 'multer';
 import path from 'path';
@@ -38,7 +41,16 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname))
+    
+    // Determinar prefijo según el campo
+    let prefix = 'file';
+    if (file.fieldname === 'profile_image') {
+      prefix = 'profile';
+    } else if (file.fieldname === 'portfolio_images') {
+      prefix = 'portfolio';
+    }
+    
+    cb(null, prefix + '-' + uniqueSuffix + path.extname(file.originalname))
   }
 });
 
@@ -71,7 +83,7 @@ router.get('/protected', verifyToken, (req, res) => {
 router.get('/public-artists', getPublicArtistsController);
 router.get('/artists', verifyToken, getAllArtistsController);
 router.get('/artists/style/:styleId', verifyToken, getArtistsByStyleController);
-router.get('/styles', getStylesController);
+router.get('/styles', getAllStylesController);
 
 // Rutas protegidas para usuarios (admin)
 router.get('/users', verifyToken, getUsersController);
@@ -91,19 +103,40 @@ router.post('/forgot-password', forgotPasswordController);
 router.post('/reset-password/:token', resetPasswordController);
 
 // Perfil propio de artista
-router.get('/artist/profile', verifyToken, getOwnArtistProfileController);
+router.get('/artist-profile', verifyToken, getOwnArtistProfileController);
+
+// Actualizar perfil de artista - usando fields para múltiples tipos de archivos
 router.put(
-  '/artist/profile',
+  '/artist-profile',
   verifyToken,
-  upload.array('portfolio_images', 6), // Para subir hasta 6 imágenes
+  upload.fields([
+    { name: 'portfolio_images', maxCount: 6 },
+    { name: 'profile_image', maxCount: 1 }
+  ]),
   updateArtistProfileController
 );
 
-// Perfil público de artista
+// Eliminar imagen de portafolio - corregido
+router.delete('/artist/portfolio/:imageId', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { imageId } = req.params;
+    
+    await removePortfolioImageModel(userId, imageId);
+    res.status(200).json({ message: 'Imagen eliminada exitosamente.' });
+  } catch (error) {
+    console.error('Error al eliminar imagen:', error);
+    res.status(500).json({ message: 'Error al eliminar imagen.' });
+  }
+});
+
+// Perfil público de artista por ID
 router.get('/artist/:id', getPublicArtistProfileController);
 
-// Catálogo de estilos e idiomas
+// Obtener todos los estilos
 router.get('/styles', getAllStylesController);
+
+// Obtener todos los idiomas
 router.get('/languages', getAllLanguagesController);
 
 export default router;

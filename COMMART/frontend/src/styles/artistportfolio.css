@@ -376,6 +376,24 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* Botón deshabilitado */
+.btn-disabled,
+.btn-order:disabled {
+  background: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-disabled:hover,
+.btn-order:disabled:hover {
+  background: #ccc !important;
+  color: #666 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 /* Body Section + Responsive */
 .artist-body {
   display: flex;

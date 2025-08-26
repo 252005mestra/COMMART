@@ -305,7 +305,12 @@ const MainNav = ({
 
   // Maneja el click en el perfil
   const handleProfileClick = () => {
-    navigate('/profile');
+    if (profile?.is_artist) {
+      navigate('/artist-profile');
+    } else {
+      navigate('/profile');
+    }
+    setOpenMenu(null);
   };
 
   // Función para obtener URL de imagen de perfil

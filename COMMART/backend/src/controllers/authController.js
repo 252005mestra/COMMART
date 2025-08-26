@@ -702,14 +702,19 @@ export const resetPasswordController = async (req, res) => {
   }
 };
 
-// Perfil propio (requiere autenticación)
+// Nuevo controlador para obtener perfil propio de artista
 export const getOwnArtistProfileController = async (req, res) => {
   try {
     const userId = req.user.id;
     const profile = await getArtistFullProfileModel(userId);
-    if (!profile) return res.status(404).json({ message: 'No eres artista.' });
-    res.json(profile);
+    
+    if (!profile) {
+      return res.status(404).json({ message: 'Perfil de artista no encontrado.' });
+    }
+    
+    res.status(200).json(profile);
   } catch (err) {
+    console.error('Error al obtener perfil de artista:', err);
     res.status(500).json({ message: 'Error al obtener perfil de artista.' });
   }
 };
@@ -722,6 +727,7 @@ export const getPublicArtistProfileController = async (req, res) => {
     if (!profile) return res.status(404).json({ message: 'Artista no encontrado.' });
     res.json(profile);
   } catch (err) {
+    console.error('Error al obtener perfil público:', err);
     res.status(500).json({ message: 'Error al obtener perfil público.' });
   }
 };
@@ -732,6 +738,7 @@ export const getAllStylesController = async (req, res) => {
     const styles = await getAllStylesModel();
     res.json(styles);
   } catch (err) {
+    console.error('Error al obtener estilos:', err);
     res.status(500).json({ message: 'Error al obtener estilos.' });
   }
 };
@@ -742,6 +749,7 @@ export const getAllLanguagesController = async (req, res) => {
     const languages = await getAllLanguagesModel();
     res.json(languages);
   } catch (err) {
+    console.error('Error al obtener idiomas:', err);
     res.status(500).json({ message: 'Error al obtener idiomas.' });
   }
 };
@@ -751,25 +759,86 @@ export const updateArtistProfileController = async (req, res) => {
   try {
     const userId = req.user.id;
     const { bio, availability, price_policy, styles = [], languages = [] } = req.body;
-    const portfolioImages = req.files || [];
+    
+    console.log('Datos recibidos:', { bio, availability, price_policy, styles, languages });
+    console.log('Archivos recibidos:', req.files);
 
-    // Validaciones aquí si quieres
+    // Validar que el usuario sea artista
+    const user = await findUserByIdModel(userId);
+    if (!user || !user.is_artist) {
+      return res.status(403).json({ message: 'Solo los artistas pueden actualizar este perfil.' });
+    }
 
+    // Manejar archivos correctamente
+    let portfolioImages = [];
+    let profileImage = null;
+
+    if (req.files) {
+      // Si req.files es un array (multer.array())
+      if (Array.isArray(req.files)) {
+        portfolioImages = req.files;
+      } 
+      // Si req.files es un objeto (multer.fields())
+      else if (typeof req.files === 'object') {
+        portfolioImages = req.files.portfolio_images || [];
+        profileImage = req.files.profile_image ? req.files.profile_image[0] : null;
+      }
+    }
+
+    // Actualizar imagen de perfil del usuario si se proporciona
+    if (profileImage) {
+      await updateUserModel(userId, { profile_image: `uploads/${profileImage.filename}` });
+    }
+
+    // Convertir strings de arrays si vienen como JSON strings
+    let stylesArray = [];
+    let languagesArray = [];
+
+    if (typeof styles === 'string') {
+      try {
+        stylesArray = JSON.parse(styles);
+      } catch (e) {
+        stylesArray = styles.split(',').map(s => s.trim()).filter(s => s);
+      }
+    } else if (Array.isArray(styles)) {
+      stylesArray = styles;
+    }
+
+    if (typeof languages === 'string') {
+      try {
+        languagesArray = JSON.parse(languages);
+      } catch (e) {
+        languagesArray = languages.split(',').map(l => l.trim()).filter(l => l);
+      }
+    } else if (Array.isArray(languages)) {
+      languagesArray = languages;
+    }
+
+    // Actualizar perfil de artista
     await updateArtistProfileModel({
       userId,
       bio,
-      availability,
+      availability: availability === 'true' || availability === true || availability === '1',
       price_policy,
-      styles,
-      languages,
+      styles: stylesArray,
+      languages: languagesArray,
       portfolioImages
     });
 
+    // Obtener perfil actualizado
     const updatedProfile = await getArtistFullProfileModel(userId);
-    res.status(200).json(updatedProfile);
+    
+    res.status(200).json({
+      message: 'Perfil de artista actualizado exitosamente.',
+      profile: updatedProfile
+    });
+
   } catch (err) {
     console.error('Error al actualizar perfil de artista:', err);
-    res.status(500).json({ message: 'Error al actualizar perfil de artista.' });
+    res.status(500).json({ 
+      message: 'Error al actualizar perfil de artista.',
+      error: err.message 
+    });
   }
 };
 

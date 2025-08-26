@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Edit2, Trash2, Plus, X, Camera, Star, StarOff, CircleUserRound, CircleArrowLeft, CircleArrowRight } from 'lucide-react';
+import axios from 'axios';
 import '../styles/artistportfolio.css';
 
 const ArtistPortfolio = ({
@@ -15,49 +16,104 @@ const ArtistPortfolio = ({
   isFavorite = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Estados locales para edición
-  const [bio, setBio] = useState(artist?.bio || '');
-  const [styles, setStyles] = useState(artist?.styles || []);
-  const [languages, setLanguages] = useState(artist?.languages || []);
-  const [availability, setAvailability] = useState(artist?.availability || false);
-  const [pricePolicy, setPricePolicy] = useState(artist?.price_policy || '');
-  const [portfolio, setPortfolio] = useState(artist?.portfolio || []);
-  const [newImage, setNewImage] = useState(null);
+  // Estados locales para edición - inicializar con datos del artista
+  const [bio, setBio] = useState('');
+  const [styles, setStyles] = useState([]);
+  const [languages, setLanguages] = useState([]);
+  const [availability, setAvailability] = useState(true);
+  const [pricePolicy, setPricePolicy] = useState('');
+  const [portfolio, setPortfolio] = useState([]);
+  const [newImages, setNewImages] = useState([]);
   const fileInputRef = useRef(null);
   const [profileImage, setProfileImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
 
   // Carrusel
   const [currentImg, setCurrentImg] = useState(0);
-  const handlePrev = () => setCurrentImg((currentImg - 1 + portfolio.length) % portfolio.length);
-  const handleNext = () => setCurrentImg((currentImg + 1) % portfolio.length);
 
-  // Handlers edición
-  const handleAddStyle = (style) => {
-    if (style && !styles.includes(style)) setStyles([...styles, style]);
-  };
-  const handleRemoveStyle = (style) => setStyles(styles.filter(s => s !== style));
-  const handleAddLanguage = (lang) => {
-    if (lang && !languages.includes(lang)) setLanguages([...languages, lang]);
-  };
-  const handleRemoveLanguage = (lang) => setLanguages(languages.filter(l => l !== lang));
+  // Inicializar estados cuando cambie el artista
+  useEffect(() => {
+    if (artist) {
+      setBio(artist.bio || '');
+      setStyles(artist.styles || []);
+      setLanguages(artist.languages || []);
+      setAvailability(artist.availability !== undefined ? artist.availability : true);
+      setPricePolicy(artist.price_policy || '');
+      setPortfolio(artist.portfolio || []);
+      setProfileImagePreview(null);
+      setProfileImage(null);
+      setNewImages([]);
+      setCurrentImg(0);
+    }
+  }, [artist]);
 
-  // Portafolio
-  const handleAddPortfolioImage = (e) => {
-    const file = e.target.files[0];
-    if (file && portfolio.length < 6) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setPortfolio([...portfolio, { image_path: ev.target.result, file }]);
-      reader.readAsDataURL(file);
-      setNewImage(null);
+  // Handlers del carrusel
+  const handlePrev = () => {
+    const totalImages = portfolio.length + newImages.length;
+    if (totalImages > 0) {
+      setCurrentImg((prev) => (prev - 1 + totalImages) % totalImages);
     }
   };
-  const handleRemovePortfolioImage = (idx) => setPortfolio(portfolio.filter((_, i) => i !== idx));
 
+  const handleNext = () => {
+    const totalImages = portfolio.length + newImages.length;
+    if (totalImages > 0) {
+      setCurrentImg((prev) => (prev + 1) % totalImages);
+    }
+  };
+
+  // Obtener imagen actual del carrusel
+  const getCurrentImage = () => {
+    const totalPortfolio = portfolio.length;
+    if (currentImg < totalPortfolio) {
+      return {
+        type: 'existing',
+        src: `http://localhost:5000/${portfolio[currentImg].image_path}`,
+        id: portfolio[currentImg].id
+      };
+    } else {
+      const newImageIndex = currentImg - totalPortfolio;
+      return {
+        type: 'new',
+        src: newImages[newImageIndex]?.preview,
+        file: newImages[newImageIndex]?.file,
+        index: newImageIndex
+      };
+    }
+  };
+
+  // Handlers de edición
+  const handleAddStyle = (style) => {
+    if (style && !styles.includes(style)) {
+      setStyles([...styles, style]);
+    }
+  };
+
+  const handleRemoveStyle = (style) => {
+    setStyles(styles.filter(s => s !== style));
+  };
+
+  const handleAddLanguage = (lang) => {
+    if (lang && !languages.includes(lang)) {
+      setLanguages([...languages, lang]);
+    }
+  };
+
+  const handleRemoveLanguage = (lang) => {
+    setLanguages(languages.filter(l => l !== lang));
+  };
+
+  // Manejar cambio de imagen de perfil
   const handleProfileImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen no puede ser mayor a 5MB');
+        return;
+      }
+      
       setProfileImage(file);
       const reader = new FileReader();
       reader.onload = (ev) => setProfileImagePreview(ev.target.result);
@@ -65,26 +121,133 @@ const ArtistPortfolio = ({
     }
   };
 
+  // Agregar imagen de portafolio
+  const handleAddPortfolioImage = (e) => {
+    const file = e.target.files[0];
+    const totalImages = portfolio.length + newImages.length;
+    
+    if (file && totalImages < 6) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen no puede ser mayor a 5MB');
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        alert('Solo se permiten archivos de imagen');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setNewImages(prev => [...prev, { file, preview: ev.target.result }]);
+      };
+      reader.readAsDataURL(file);
+    } else if (totalImages >= 6) {
+      alert('Máximo 6 imágenes en el portafolio');
+    }
+  };
+
+  // Eliminar imagen del portafolio
+  const handleRemoveImage = async () => {
+    const currentImage = getCurrentImage();
+    
+    if (currentImage.type === 'existing') {
+      // Eliminar imagen existente de la base de datos
+      try {
+        await axios.delete(`http://localhost:5000/api/auth/artist/portfolio/${currentImage.id}`, {
+          withCredentials: true
+        });
+        
+        // Actualizar estado local
+        const updatedPortfolio = portfolio.filter(img => img.id !== currentImage.id);
+        setPortfolio(updatedPortfolio);
+        
+        // Ajustar currentImg si es necesario
+        const totalImages = updatedPortfolio.length + newImages.length;
+        if (currentImg >= totalImages && totalImages > 0) {
+          setCurrentImg(totalImages - 1);
+        } else if (totalImages === 0) {
+          setCurrentImg(0);
+        }
+        
+      } catch (error) {
+        console.error('Error al eliminar imagen:', error);
+        alert('Error al eliminar la imagen');
+      }
+    } else if (currentImage.type === 'new') {
+      // Eliminar imagen nueva del estado local
+      const updatedNewImages = newImages.filter((_, index) => index !== currentImage.index);
+      setNewImages(updatedNewImages);
+      
+      // Ajustar currentImg
+      const totalImages = portfolio.length + updatedNewImages.length;
+      if (currentImg >= totalImages && totalImages > 0) {
+        setCurrentImg(totalImages - 1);
+      } else if (totalImages === 0) {
+        setCurrentImg(0);
+      }
+    }
+  };
+
   // Guardar cambios
   const handleSave = async () => {
     if (!onSave) return;
     
-    const formData = new FormData();
-    formData.append('bio', bio);
-    formData.append('availability', availability ? 1 : 0);
-    formData.append('price_policy', pricePolicy);
-    styles.forEach(s => formData.append('styles[]', s));
-    languages.forEach(l => formData.append('languages[]', l));
-    portfolio.forEach((img, idx) => {
-      if (img.file) formData.append('portfolio_images', img.file);
-    });
-    if (profileImage) formData.append('profile_image', profileImage);
+    try {
+      setLoading(true);
+      
+      const formData = new FormData();
+      formData.append('bio', bio);
+      formData.append('availability', availability);
+      formData.append('price_policy', pricePolicy);
+      
+      // Agregar estilos y idiomas como JSON strings
+      formData.append('styles', JSON.stringify(styles));
+      formData.append('languages', JSON.stringify(languages));
+      
+      // Agregar nuevas imágenes de portafolio
+      newImages.forEach(img => {
+        formData.append('portfolio_images', img.file);
+      });
+      
+      // Agregar imagen de perfil si se cambió
+      if (profileImage) {
+        formData.append('profile_image', profileImage);
+      }
+      
+      await onSave(formData);
+      
+      // Limpiar estado después de guardar exitosamente
+      setNewImages([]);
+      setProfileImage(null);
+      setProfileImagePreview(null);
+      setIsEditing(false);
+      
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      alert('Error al guardar los cambios');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    await onSave(formData);
+  // Cancelar edición
+  const handleCancel = () => {
+    // Restaurar estados originales
+    setBio(artist.bio || '');
+    setStyles(artist.styles || []);
+    setLanguages(artist.languages || []);
+    setAvailability(artist.availability !== undefined ? artist.availability : true);
+    setPricePolicy(artist.price_policy || '');
+    setPortfolio(artist.portfolio || []);
+    setNewImages([]);
+    setProfileImage(null);
+    setProfileImagePreview(null);
+    setCurrentImg(0);
     setIsEditing(false);
   };
 
-  // Renderiza estrellas de rating
+  // Renderizar estrellas
   const renderStars = (rating = 0) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -97,12 +260,30 @@ const ArtistPortfolio = ({
     return stars;
   };
 
+  // Obtener todas las imágenes para el carrusel
+  const getAllImages = () => {
+    const existingImages = portfolio.map(img => ({
+      type: 'existing',
+      src: `http://localhost:5000/${img.image_path}`,
+      id: img.id
+    }));
+    
+    const newImagesForCarousel = newImages.map((img, index) => ({
+      type: 'new',
+      src: img.preview,
+      index
+    }));
+    
+    return [...existingImages, ...newImagesForCarousel];
+  };
+
   // ========== VISTA EDICIÓN ==========
   if (isOwnProfile && isEditing) {
+    const allImages = getAllImages();
+
     return (
       <div className="artist-portfolio-container">
         <div className="artist-portfolio-profile">
-          {/* Header con información del artista */}
           <div className="portfolio-header">
             <div className="artist-avatar-section">
               <div 
@@ -110,9 +291,14 @@ const ArtistPortfolio = ({
                 onClick={() => fileInputRef.current?.click()}
                 title="Hacer click para cambiar foto de perfil"
               >
-                {profileImagePreview || artist?.profile_image ? (
+                {profileImagePreview ? (
                   <img
-                    src={profileImagePreview || `http://localhost:5000/${artist.profile_image}`}
+                    src={profileImagePreview}
+                    alt={artist?.username || 'Usuario'}
+                  />
+                ) : artist?.profile_image ? (
+                  <img
+                    src={`http://localhost:5000/${artist.profile_image}`}
                     alt={artist?.username || 'Usuario'}
                   />
                 ) : (
@@ -131,9 +317,9 @@ const ArtistPortfolio = ({
               />
               
               <div className="avatar-rating">
-                <span className="rating-number">{artist?.rating || 4}</span>
+                <span className="rating-number">{artist?.rating || 0}</span>
                 <div className="stars">
-                  {renderStars(artist?.rating || 4)}
+                  {renderStars(artist?.rating || 0)}
                 </div>
               </div>
             </div>
@@ -150,6 +336,7 @@ const ArtistPortfolio = ({
                   <span><strong>{artist?.favorites || 0}</strong> Favoritos</span>
                   <span><strong>{artist?.reviews || 0}</strong> Reseñas</span>
                 </div>
+
                 <div className="portfolio-artist-styles-section">
                   <span className="style-tag-title">Estilos:</span>
                   {styles.slice(0, 3).map((style, idx) => (
@@ -165,7 +352,12 @@ const ArtistPortfolio = ({
                   )}
                   <select 
                     className="add-style-select"
-                    onChange={e => { handleAddStyle(e.target.value); e.target.value=''; }}
+                    onChange={e => { 
+                      if (e.target.value) {
+                        handleAddStyle(e.target.value); 
+                        e.target.value = ''; 
+                      }
+                    }}
                   >
                     <option value="">+ Agregar</option>
                     {allStyles.filter(s => !styles.includes(s.name)).map((style, idx) => (
@@ -180,7 +372,7 @@ const ArtistPortfolio = ({
                     <textarea
                       value={bio}
                       onChange={e => setBio(e.target.value.substring(0, 120))}
-                      placeholder="Escribe una descripción (máx. 120 caracteres)..."
+                      placeholder="Escribe una descripción sobre ti (máx. 120 caracteres)..."
                       maxLength={120}
                     />
                     <div className="char-counter">{bio.length}/120</div>
@@ -189,35 +381,47 @@ const ArtistPortfolio = ({
               </div>
 
               <div className="portfolio-artist-actions">
-                <button className="btn-secondary" onClick={() => setIsEditing(false)}>
+                <button 
+                  className="btn-secondary" 
+                  onClick={handleCancel}
+                  disabled={loading}
+                >
                   Cancelar
                 </button>
-                <button className="btn-primary" onClick={handleSave}>
-                  Guardar
+                <button 
+                  className="btn-primary" 
+                  onClick={handleSave}
+                  disabled={loading}
+                >
+                  {loading ? 'Guardando...' : 'Guardar'}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Body con portfolio y sidebar */}
           <div className="artist-body">
             <div className="portfolio-section">
-              {portfolio.length > 0 ? (
+              {allImages.length > 0 ? (
                 <div className="portfolio-carousel">
-                  <button onClick={handlePrev} className="carousel-btn prev-btn">
-                    <CircleArrowLeft size={28} />
-                  </button>
+                  {allImages.length > 1 && (
+                    <button onClick={handlePrev} className="carousel-btn prev-btn">
+                      <CircleArrowLeft size={28} />
+                    </button>
+                  )}
                   <img
-                    src={portfolio[currentImg].image_path}
+                    src={allImages[currentImg]?.src}
                     alt={`Portfolio ${currentImg + 1}`}
                     className="portfolio-image"
                   />
-                  <button onClick={handleNext} className="carousel-btn next-btn">
-                    <CircleArrowRight size={28} />
-                  </button>
+                  {allImages.length > 1 && (
+                    <button onClick={handleNext} className="carousel-btn next-btn">
+                      <CircleArrowRight size={28} />
+                    </button>
+                  )}
                   <button
                     className="remove-image-btn"
-                    onClick={() => handleRemovePortfolioImage(currentImg)}
+                    onClick={handleRemoveImage}
+                    title="Eliminar imagen"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -228,8 +432,8 @@ const ArtistPortfolio = ({
                 </div>
               )}
               
-              {portfolio.length < 6 && (
-                <label className="add-portfolio-btn">
+              {allImages.length < 6 && (
+                <label className="add-portfolio-btn" title="Agregar imagen">
                   <Plus size={24} />
                   <input 
                     type="file" 
@@ -265,7 +469,12 @@ const ArtistPortfolio = ({
                     </span>
                   ))}
                   <select 
-                    onChange={e => { handleAddLanguage(e.target.value); e.target.value=''; }}
+                    onChange={e => { 
+                      if (e.target.value) {
+                        handleAddLanguage(e.target.value); 
+                        e.target.value = ''; 
+                      }
+                    }}
                   >
                     <option value="">+ Agregar</option>
                     {allLanguages.filter(l => !languages.includes(l.name)).map((lang, idx) => (
@@ -312,9 +521,9 @@ const ArtistPortfolio = ({
             </div>
             
             <div className="avatar-rating">
-              <span className="rating-number">{artist?.rating || 4}</span>
+              <span className="rating-number">{artist?.rating || 0}</span>
               <div className="stars">
-                {renderStars(artist?.rating || 4)}
+                {renderStars(artist?.rating || 0)}
               </div>
             </div>
           </div>
@@ -360,7 +569,9 @@ const ArtistPortfolio = ({
               </div>
               
               <div className="portfolio-artist-description">
-                <strong>Descripción:</strong> {(artist?.bio || artist?.description || 'Hago dibujos de estilo anime y manga, no dibujo realismo ni infantil.').substring(0, 120)}{(artist?.bio || artist?.description || '').length > 120 ? '...' : ''}
+                <strong>Descripción:</strong> {
+                  artist?.bio || 'Agrega una descripción sobre ti aquí...'
+                }
               </div>
             </div>
             
@@ -370,8 +581,13 @@ const ArtistPortfolio = ({
                   Editar
                 </button>
               ) : (
-                <button className="btn-order" onClick={onOrder}>
-                  HACER PEDIDO
+                <button 
+                  className={`btn-order ${!artist?.availability ? 'btn-disabled' : ''}`}
+                  onClick={artist?.availability ? onOrder : null}
+                  disabled={!artist?.availability}
+                  title={!artist?.availability ? 'El artista no está disponible' : 'Hacer pedido'}
+                >
+                  {!artist?.availability ? 'NO DISPONIBLE' : 'HACER PEDIDO'}
                 </button>
               )}
             </div>
@@ -382,17 +598,21 @@ const ArtistPortfolio = ({
           <div className="portfolio-section">
             {artist?.portfolio && artist.portfolio.length > 0 ? (
               <div className="portfolio-carousel">
-                <button onClick={handlePrev} className="carousel-btn prev-btn">
-                  <CircleArrowLeft size={28} />
-                </button>
+                {artist.portfolio.length > 1 && (
+                  <button onClick={handlePrev} className="carousel-btn prev-btn">
+                    <CircleArrowLeft size={28} />
+                  </button>
+                )}
                 <img
                   src={`http://localhost:5000/${artist.portfolio[currentImg].image_path}`}
                   alt={`Portfolio ${currentImg + 1}`}
                   className="portfolio-image"
                 />
-                <button onClick={handleNext} className="carousel-btn next-btn">
-                  <CircleArrowRight size={28} />
-                </button>
+                {artist.portfolio.length > 1 && (
+                  <button onClick={handleNext} className="carousel-btn next-btn">
+                    <CircleArrowRight size={28} />
+                  </button>
+                )}
               </div>
             ) : (
               <div className="empty-portfolio">
@@ -400,6 +620,7 @@ const ArtistPortfolio = ({
               </div>
             )}
           </div>
+          
           <div className="sidebar">
             <div className="sidebar-item">
               <strong>Estado:</strong>
@@ -418,18 +639,22 @@ const ArtistPortfolio = ({
                 {(artist?.languages || []).length > 4 && (
                   <li>+{(artist?.languages || []).length - 4} más</li>
                 )}
+                {(!artist?.languages || artist.languages.length === 0) && (
+                  <li style={{ color: '#999', fontStyle: 'italic' }}>Sin idiomas especificados</li>
+                )}
               </ul>
             </div>
 
             <div className="sidebar-item">
               <strong>Como manejo mis precios:</strong>
               <ul className="price-policy-list">
-                {artist?.price_policy
-                  ? artist.price_policy.substring(0, 300).split('\n').map((line, idx) => (
-                      <li key={idx}>{line}</li>
-                    ))
-                  : <li>Sin información.</li>
-                }
+                {artist?.price_policy ? (
+                  artist.price_policy.substring(0, 300).split('\n').map((line, idx) => (
+                    line.trim() && <li key={idx}>{line}</li>
+                  ))
+                ) : (
+                  <li style={{ color: '#999', fontStyle: 'italic' }}>Sin política de precios definida</li>
+                )}
                 {(artist?.price_policy || '').length > 300 && (
                   <li style={{ color: '#999', fontStyle: 'italic' }}>...</li>
                 )}
