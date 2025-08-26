@@ -13,18 +13,29 @@ const PublicArtistProfile = () => {
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [actionLoading, setActionLoading] = useState({ follow: false, favorite: false });
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const [profileRes, stylesRes, langsRes] = await Promise.all([
+        const [profileRes, stylesRes, langsRes, followRes, favoriteRes] = await Promise.all([
           axios.get(`http://localhost:5000/api/auth/artist/${id}`),
           axios.get('http://localhost:5000/api/auth/styles'),
-          axios.get('http://localhost:5000/api/auth/languages')
+          axios.get('http://localhost:5000/api/auth/languages'),
+          axios.get(`http://localhost:5000/api/auth/artists/${id}/follow-status`, {
+            withCredentials: true
+          }).catch(() => ({ data: { isFollowing: false } })),
+          axios.get(`http://localhost:5000/api/auth/artists/${id}/favorite-status`, {
+            withCredentials: true
+          }).catch(() => ({ data: { isFavorite: false } }))
         ]);
+        
         setArtist(profileRes.data);
         setAllStyles(stylesRes.data);
         setAllLanguages(langsRes.data);
+        setIsFollowing(followRes.data.isFollowing);
+        setIsFavorite(favoriteRes.data.isFavorite);
+        
       } catch (err) {
         console.error('Error al cargar perfil:', err);
       } finally {
@@ -38,16 +49,107 @@ const PublicArtistProfile = () => {
     alert('Funcionalidad de hacer pedido');
   };
 
-  const handleFollow = () => {
-    setIsFollowing((prev) => !prev);
+  const handleFollow = async () => {
+    if (actionLoading.follow) return;
+    
+    try {
+      setActionLoading(prev => ({ ...prev, follow: true }));
+      
+      const response = await axios.post(
+        `http://localhost:5000/api/auth/artists/${id}/follow`,
+        {},
+        { withCredentials: true }
+      );
+      
+      setIsFollowing(response.data.isFollowing);
+      
+      // Actualizar contador de seguidores del artista
+      setArtist(prev => ({
+        ...prev,
+        followers: response.data.isFollowing 
+          ? (prev.followers || 0) + 1 
+          : Math.max(0, (prev.followers || 0) - 1)
+      }));
+      
+    } catch (error) {
+      console.error('Error al seguir/dejar de seguir:', error);
+      alert('Error al procesar la acción. Inténtalo de nuevo.');
+    } finally {
+      setActionLoading(prev => ({ ...prev, follow: false }));
+    }
   };
 
-  const handleFavorite = () => {
-    setIsFavorite((prev) => !prev);
+  const handleFavorite = async () => {
+    if (actionLoading.favorite) return;
+    
+    try {
+      setActionLoading(prev => ({ ...prev, favorite: true }));
+      
+      const response = await axios.post(
+        `http://localhost:5000/api/auth/artists/${id}/favorite`,
+        {},
+        { withCredentials: true }
+      );
+      
+      setIsFavorite(response.data.isFavorite);
+      
+      // Actualizar contador de favoritos del artista
+      setArtist(prev => ({
+        ...prev,
+        favorites: response.data.isFavorite 
+          ? (prev.favorites || 0) + 1 
+          : Math.max(0, (prev.favorites || 0) - 1)
+      }));
+      
+    } catch (error) {
+      console.error('Error al manejar favorito:', error);
+      alert('Error al procesar la acción. Inténtalo de nuevo.');
+    } finally {
+      setActionLoading(prev => ({ ...prev, favorite: false }));
+    }
   };
 
-  if (loading) return <div>Cargando...</div>;
-  if (!artist) return <div>Artista no encontrado.</div>;
+  if (loading) {
+    return (
+      <>
+        <MainNav />
+        <main className="main-content">
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: '60vh',
+            fontSize: '18px',
+            color: '#666'
+          }}>
+            Cargando perfil del artista...
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+  
+  if (!artist) {
+    return (
+      <>
+        <MainNav />
+        <main className="main-content">
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: '60vh',
+            fontSize: '18px',
+            color: '#666'
+          }}>
+            Artista no encontrado.
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -65,6 +167,7 @@ const PublicArtistProfile = () => {
             onFavorite={handleFavorite}
             isFollowing={isFollowing}
             isFavorite={isFavorite}
+            actionLoading={actionLoading}
           />
         </section>
       </main>

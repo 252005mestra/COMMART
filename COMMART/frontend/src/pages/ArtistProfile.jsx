@@ -145,6 +145,8 @@ const ArtistProfile = () => {
             allLanguages={allLanguages}
             isOwnProfile={true}
             onSave={handleSave}
+            // AGREGAR: Props para modales en perfil propio
+            showModals={true} // Habilitar modales en perfil propio
           />
         </section>
       </main>

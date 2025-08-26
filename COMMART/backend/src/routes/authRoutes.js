@@ -23,11 +23,26 @@ import {
     updateArtistProfileController,
     getPublicArtistProfileController,
     getAllStylesController,
-    getAllLanguagesController
+    getAllLanguagesController,
+    toggleFollowArtistController,
+    checkFollowStatusController,
+    getUserFollowedArtistsController,
+    toggleFavoriteArtistController,
+    checkFavoriteStatusController,
+    getUserFavoriteArtistsController,
+    getArtistFollowersController,
+    getArtistFavoritedByController
 } from '../controllers/authController.js';
 
-// Importar modelos directamente para la ruta de eliminar imagen
-import { removePortfolioImageModel, getArtistFullProfileModel, getAllStylesModel, getAllLanguagesModel } from '../models/userModel.js';
+// Importar los nuevos modelos
+import { 
+    removePortfolioImageModel, 
+    getArtistFullProfileModel, 
+    getAllStylesModel, 
+    getAllLanguagesModel,
+    getArtistFollowersListModel,
+    getArtistFavoritedByListModel
+} from '../models/userModel.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 import multer from 'multer';
 import path from 'path';
@@ -138,5 +153,19 @@ router.get('/styles', getAllStylesController);
 
 // Obtener todos los idiomas
 router.get('/languages', getAllLanguagesController);
+
+// ========== RUTAS PARA SEGUIR ARTISTAS ==========
+router.post('/artists/:artistId/follow', verifyToken, toggleFollowArtistController);
+router.get('/artists/:artistId/follow-status', verifyToken, checkFollowStatusController);
+router.get('/user/followed-artists', verifyToken, getUserFollowedArtistsController);
+
+// ========== RUTAS PARA FAVORITOS ==========
+router.post('/artists/:artistId/favorite', verifyToken, toggleFavoriteArtistController);
+router.get('/artists/:artistId/favorite-status', verifyToken, checkFavoriteStatusController);
+router.get('/user/favorite-artists', verifyToken, getUserFavoriteArtistsController);
+
+// ========== RUTAS PARA LISTAS DETALLADAS ==========
+router.get('/artists/:artistId/followers', verifyToken, getArtistFollowersController);
+router.get('/artists/:artistId/favorited-by', verifyToken, getArtistFavoritedByController);
 
 export default router;

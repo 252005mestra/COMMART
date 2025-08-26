@@ -394,6 +394,22 @@
   box-shadow: none !important;
 }
 
+/* Estados de carga para botones de acción */
+.btn-loading {
+  background: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-loading:hover {
+  background: #ccc !important;
+  color: #666 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 /* Body Section + Responsive */
 .artist-body {
   display: flex;
@@ -1030,4 +1046,23 @@ select:focus {
   .portfolio-section {
     max-height: 80vh;
   }
+}
+
+/* Agregar al final del archivo */
+
+/* Estadísticas clickeables */
+.stat-clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.stat-clickable:hover {
+  color: #7d5938 !important;
+  background: rgba(125, 89, 56, 0.1);
+}
+
+.stat-clickable:hover strong {
+  color: #7d5938 !important;
 }

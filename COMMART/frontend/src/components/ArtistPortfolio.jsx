@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Edit2, Trash2, Plus, X, Camera, Star, StarOff, CircleUserRound, CircleArrowLeft, CircleArrowRight } from 'lucide-react';
 import axios from 'axios';
+import UserListModal from './UserListModal';
 import '../styles/artistportfolio.css';
 
 const ArtistPortfolio = ({
@@ -13,12 +14,13 @@ const ArtistPortfolio = ({
   onFollow,
   onFavorite,
   isFollowing = false,
-  isFavorite = false
+  isFavorite = false,
+  actionLoading = { follow: false, favorite: false }
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Estados locales para edición - inicializar con datos del artista
+  // Estados locales para edición
   const [bio, setBio] = useState('');
   const [styles, setStyles] = useState([]);
   const [languages, setLanguages] = useState([]);
@@ -32,6 +34,10 @@ const ArtistPortfolio = ({
 
   // Carrusel
   const [currentImg, setCurrentImg] = useState(0);
+
+  // Estados para modales
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
 
   // Inicializar estados cuando cambie el artista
   useEffect(() => {
@@ -109,6 +115,11 @@ const ArtistPortfolio = ({
   const handleProfileImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Solo se permiten archivos de imagen');
+        return;
+      }
+      
       if (file.size > 5 * 1024 * 1024) {
         alert('La imagen no puede ser mayor a 5MB');
         return;
@@ -247,6 +258,19 @@ const ArtistPortfolio = ({
     setIsEditing(false);
   };
 
+  // Manejar clicks en estadísticas para mostrar modales
+  const handleFollowersClick = () => {
+    if (artist?.followers > 0) {
+      setShowFollowersModal(true);
+    }
+  };
+
+  const handleFavoritesClick = () => {
+    if (artist?.peopleWhoFavoriteMe > 0) { // Para artistas: quién los tiene como favorito
+      setShowFavoritesModal(true);
+    }
+  };
+
   // Renderizar estrellas
   const renderStars = (rating = 0) => {
     const stars = [];
@@ -329,11 +353,21 @@ const ArtistPortfolio = ({
                 <h1 className="portfolio-artist-name">{artist?.username || 'Usuario'}</h1>
                 
                 <div className="portfolio-artist-stats-line">
-                  <span><strong>{artist?.followers || 0}</strong> Seguidores</span>
+                  <span 
+                    className={artist?.followers > 0 ? 'stat-clickable' : ''}
+                    onClick={handleFollowersClick}
+                  >
+                    <strong>{artist?.followers || 0}</strong> Seguidores
+                  </span>
                   <span><strong>{artist?.following || 0}</strong> Seguidos</span>
                   <span><strong>{artist?.sales || 0}</strong> Ventas</span>
                   <span><strong>{artist?.purchases || 0}</strong> Compras</span>
-                  <span><strong>{artist?.favorites || 0}</strong> Favoritos</span>
+                  <span 
+                    className={artist?.peopleWhoFavoriteMe > 0 ? 'stat-clickable' : ''}
+                    onClick={handleFavoritesClick}
+                  >
+                    <strong>{artist?.peopleWhoFavoriteMe || 0}</strong> Favoritos
+                  </span>
                   <span><strong>{artist?.reviews || 0}</strong> Reseñas</span>
                 </div>
 
@@ -499,6 +533,23 @@ const ArtistPortfolio = ({
             </div>
           </div>
         </div>
+
+        {/* Modales para modo edición */}
+        <UserListModal
+          isOpen={showFollowersModal}
+          onClose={() => setShowFollowersModal(false)}
+          artistId={artist?.id}
+          type="followers"
+          title="Seguidores"
+        />
+        
+        <UserListModal
+          isOpen={showFavoritesModal}
+          onClose={() => setShowFavoritesModal(false)}
+          artistId={artist?.id}
+          type="favorites"
+          title="Usuarios que favoritearon"
+        />
       </div>
     );
   }
@@ -535,26 +586,38 @@ const ArtistPortfolio = ({
               {!isOwnProfile && (
                 <div className="portfolio-follow-favorite-buttons">
                   <button
-                    className="btn-secondary"
+                    className={`btn-secondary ${actionLoading.follow ? 'btn-loading' : ''}`}
                     onClick={onFollow}
+                    disabled={actionLoading.follow}
                   >
-                    {isFollowing ? 'Siguiendo' : 'Seguir'}
+                    {actionLoading.follow ? 'Procesando...' : (isFollowing ? 'Siguiendo' : 'Seguir')}
                   </button>
                   <button
-                    className="btn-secondary"
+                    className={`btn-secondary ${actionLoading.favorite ? 'btn-loading' : ''}`}
                     onClick={onFavorite}
+                    disabled={actionLoading.favorite}
                   >
-                    {isFavorite ? '★' : '☆'} Favorito
+                    {actionLoading.favorite ? 'Procesando...' : (isFavorite ? '★ Favorito' : '☆ Favorito')}
                   </button>
                 </div>
               )}
               
               <div className="portfolio-artist-stats-line">
-                <span><strong>{artist?.followers || 0}</strong> Seguidores</span>
+                <span 
+                  className={artist?.followers > 0 ? 'stat-clickable' : ''}
+                  onClick={handleFollowersClick}
+                >
+                  <strong>{artist?.followers || 0}</strong> Seguidores
+                </span>
                 <span><strong>{artist?.following || 0}</strong> Seguidos</span>
                 <span><strong>{artist?.sales || 0}</strong> Ventas</span>
                 <span><strong>{artist?.purchases || 0}</strong> Compras</span>
-                <span><strong>{artist?.favorites || 0}</strong> Favoritos</span>
+                <span 
+                  className={artist?.peopleWhoFavoriteMe > 0 ? 'stat-clickable' : ''}
+                  onClick={handleFavoritesClick}
+                >
+                  <strong>{artist?.peopleWhoFavoriteMe || 0}</strong> Favoritos
+                </span>
                 <span><strong>{artist?.reviews || 0}</strong> Reseñas</span>
               </div>
               
@@ -578,6 +641,7 @@ const ArtistPortfolio = ({
             <div className="portfolio-artist-actions">
               {isOwnProfile ? (
                 <button className="btn-edit" onClick={() => setIsEditing(true)}>
+                  <Edit2 size={16} />
                   Editar
                 </button>
               ) : (
@@ -662,6 +726,23 @@ const ArtistPortfolio = ({
             </div>
           </div>
         </div>
+
+        {/* Modales */}
+        <UserListModal
+          isOpen={showFollowersModal}
+          onClose={() => setShowFollowersModal(false)}
+          artistId={artist?.id}
+          type="followers"
+          title="Seguidores"
+        />
+        
+        <UserListModal
+          isOpen={showFavoritesModal}
+          onClose={() => setShowFavoritesModal(false)}
+          artistId={artist?.id}
+          type="favorites"
+          title="Usuarios que favoritearon"
+        />
       </div>
     </div>
   );

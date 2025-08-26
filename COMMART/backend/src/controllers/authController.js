@@ -29,7 +29,19 @@ import {
   getArtistFavoritesCountModel,
   getArtistReviewsCountModel,
   getArtistRatingModel,
-  updateArtistProfileModel
+  updateArtistProfileModel,
+  checkIfFollowingModel,
+  followArtistModel,
+  unfollowArtistModel,
+  checkIfFavoriteModel,
+  addFavoriteArtistModel,
+  removeFavoriteArtistModel,
+  getUserFavoriteArtistsModel,
+  getUserFollowedArtistsModel,
+  getUserFavoriteArtistsCountModel,
+  getUserFollowedArtistsCountModel,
+  getArtistFollowersListModel,
+  getArtistFavoritedByListModel
 } from '../models/userModel.js';
 
 // Función para detectar caracteres peligrosos (para validación - rechazar entrada)
@@ -397,9 +409,13 @@ export const getUserProfileController = async (req, res) => {
     let following = 0;
     let sales = 0;
     let purchases = 0;
-    let favorites = 0;
+    let peopleWhoFavoriteMe = 0; // Cuántas personas ME tienen como favorito
     let reviews = 0;
     let rating = 0;
+    
+    // Para TODOS los usuarios (artistas y clientes)
+    let myFavoriteArtistsCount = 0; // Los artistas que YO tengo en favoritos
+    let followedArtistsCount = 0;   // Los artistas que YO sigo
 
     if (user.is_artist) {
       portfolio = await getArtistPortfolioModel(userId); 
@@ -409,10 +425,14 @@ export const getUserProfileController = async (req, res) => {
       following = await getArtistFollowingCountModel(userId);
       sales = await getArtistSalesCountModel(userId);
       purchases = await getArtistPurchasesCountModel(userId);
-      favorites = await getArtistFavoritesCountModel(userId);
+      peopleWhoFavoriteMe = await getArtistFavoritesCountModel(userId); // Cuántos usuarios ME tienen en favoritos
       reviews = await getArtistReviewsCountModel(userId);
       rating = await getArtistRatingModel(userId);
     }
+
+    // Para todos los usuarios (artistas y clientes)
+    myFavoriteArtistsCount = await getUserFavoriteArtistsCountModel(userId); // Mis artistas favoritos
+    followedArtistsCount = await getUserFollowedArtistsCountModel(userId);    // Artistas que sigo
 
     // Sanitizar y devolver todo
     res.status(200).json({
@@ -424,9 +444,12 @@ export const getUserProfileController = async (req, res) => {
       following,
       sales,
       purchases,
-      favorites,
+      favorites: myFavoriteArtistsCount, // CAMBIO: Ahora "favorites" son MIS favoritos
+      peopleWhoFavoriteMe, // Cuántos me tienen como favorito (solo para artistas)
       reviews,
-      rating
+      rating,
+      myFavoriteArtistsCount,
+      followedArtistsCount
     });
   } catch (error) {
     console.error('Error al obtener perfil:', error);
@@ -839,6 +862,204 @@ export const updateArtistProfileController = async (req, res) => {
       message: 'Error al actualizar perfil de artista.',
       error: err.message 
     });
+  }
+};
+
+// ========== CONTROLADORES PARA SEGUIR ARTISTAS ==========
+
+// Seguir/dejar de seguir artista
+export const toggleFollowArtistController = async (req, res) => {
+  try {
+    const followerId = req.user.id;
+    const { artistId } = req.params;
+
+    // Verificar que el artista existe y es artista
+    const artist = await findUserByIdModel(artistId);
+    if (!artist || !artist.is_artist) {
+      return res.status(404).json({ message: 'Artista no encontrado.' });
+    }
+
+    // No permitir seguirse a sí mismo
+    if (followerId == artistId) {
+      return res.status(400).json({ message: 'No puedes seguirte a ti mismo.' });
+    }
+
+    // Verificar si ya está siguiendo
+    const isFollowing = await checkIfFollowingModel(followerId, artistId);
+    
+    if (isFollowing) {
+      // Dejar de seguir
+      await unfollowArtistModel(followerId, artistId);
+      res.status(200).json({ 
+        message: 'Has dejado de seguir a este artista.',
+        isFollowing: false 
+      });
+    } else {
+      // Seguir
+      await followArtistModel(followerId, artistId);
+      res.status(200).json({ 
+        message: 'Ahora sigues a este artista.',
+        isFollowing: true 
+      });
+    }
+
+  } catch (error) {
+    console.error('Error al seguir/dejar de seguir artista:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Verificar si sigue a un artista específico
+export const checkFollowStatusController = async (req, res) => {
+  try {
+    const followerId = req.user.id;
+    const { artistId } = req.params;
+
+    const isFollowing = await checkIfFollowingModel(followerId, artistId);
+    res.status(200).json({ isFollowing });
+
+  } catch (error) {
+    console.error('Error al verificar estado de seguimiento:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// ========== CONTROLADORES PARA FAVORITOS ==========
+
+// Agregar/quitar de favoritos
+export const toggleFavoriteArtistController = async (req, res) => {
+  try {
+    const clientId = req.user.id;
+    const { artistId } = req.params;
+
+    // Verificar que el artista existe y es artista
+    const artist = await findUserByIdModel(artistId);
+    if (!artist || !artist.is_artist) {
+      return res.status(404).json({ message: 'Artista no encontrado.' });
+    }
+
+    // No permitir agregarse a sí mismo como favorito
+    if (clientId == artistId) {
+      return res.status(400).json({ message: 'No puedes agregarte a ti mismo como favorito.' });
+    }
+
+    // Verificar si ya está en favoritos
+    const isFavorite = await checkIfFavoriteModel(clientId, artistId);
+    
+    if (isFavorite) {
+      // Quitar de favoritos
+      await removeFavoriteArtistModel(clientId, artistId);
+      res.status(200).json({ 
+        message: 'Artista quitado de favoritos.',
+        isFavorite: false 
+      });
+    } else {
+      // Agregar a favoritos
+      await addFavoriteArtistModel(clientId, artistId);
+      res.status(200).json({ 
+        message: 'Artista agregado a favoritos.',
+        isFavorite: true 
+      });
+    }
+
+  } catch (error) {
+    console.error('Error al manejar favorito:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Verificar si un artista está en favoritos
+export const checkFavoriteStatusController = async (req, res) => {
+  try {
+    const clientId = req.user.id;
+    const { artistId } = req.params;
+
+    const isFavorite = await checkIfFavoriteModel(clientId, artistId);
+    res.status(200).json({ isFavorite });
+
+  } catch (error) {
+    console.error('Error al verificar estado de favorito:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Obtener artistas favoritos del usuario
+export const getUserFavoriteArtistsController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const favoriteArtists = await getUserFavoriteArtistsModel(userId);
+    
+    // Sanitizar datos
+    const sanitizedFavorites = favoriteArtists.map(artist => ({
+      ...artist,
+      username: sanitizeInput(artist.username)
+    }));
+    
+    res.status(200).json(sanitizedFavorites);
+
+  } catch (error) {
+    console.error('Error al obtener artistas favoritos:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Obtener artistas que sigue el usuario
+export const getUserFollowedArtistsController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const followedArtists = await getUserFollowedArtistsModel(userId);
+    
+    // Sanitizar datos
+    const sanitizedFollowed = followedArtists.map(artist => ({
+      ...artist,
+      username: sanitizeInput(artist.username)
+    }));
+    
+    res.status(200).json(sanitizedFollowed);
+
+  } catch (error) {
+    console.error('Error al obtener artistas seguidos:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Obtener lista de seguidores de un artista (para modal)
+export const getArtistFollowersController = async (req, res) => {
+  try {
+    const { artistId } = req.params;
+    const followers = await getArtistFollowersListModel(artistId);
+    
+    // Sanitizar datos
+    const sanitizedFollowers = followers.map(follower => ({
+      ...follower,
+      username: sanitizeInput(follower.username)
+    }));
+    
+    res.status(200).json(sanitizedFollowers);
+
+  } catch (error) {
+    console.error('Error al obtener seguidores:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Obtener lista de usuarios que tienen al artista en favoritos (para modal)
+export const getArtistFavoritedByController = async (req, res) => {
+  try {
+    const { artistId } = req.params;
+    const favoritedBy = await getArtistFavoritedByListModel(artistId);
+    
+    // Sanitizar datos
+    const sanitizedFavoritedBy = favoritedBy.map(user => ({
+      ...user,
+      username: sanitizeInput(user.username)
+    }));
+    
+    res.status(200).json(sanitizedFavoritedBy);
+
+  } catch (error) {
+    console.error('Error al obtener usuarios que favoritearon:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
   }
 };
 

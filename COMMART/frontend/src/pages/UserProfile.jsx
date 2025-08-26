@@ -2,8 +2,7 @@ import { useUser } from '../context/UserContext';
 import { Link } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
-import { CircleUserRound, Settings, Star } from 'lucide-react';
-// Importar estilos apropiados
+import { CircleUserRound, Settings, Star, Heart } from 'lucide-react';
 
 const UserProfile = () => {
   const { profile } = useUser();
@@ -51,10 +50,26 @@ const UserProfile = () => {
           <div className="stats-container">
             <div className="stat-card">
               <Star className="stat-icon" />
-              <h3>Artistas Favoritos</h3>
-              <p>0</p>
+              <h3>Mis Artistas Favoritos</h3>
+              <p>{profile?.favorites || 0}</p>
+              <span className="stat-description">Artistas que agregaste a tus favoritos</span>
             </div>
-            {/* Más estadísticas */}
+            
+            <div className="stat-card">
+              <Heart className="stat-icon" />
+              <h3>Artistas que Sigo</h3>
+              <p>{profile?.followedArtistsCount || 0}</p>
+              <span className="stat-description">Artistas que sigues</span>
+            </div>
+
+            {profile?.is_artist && (
+              <div className="stat-card">
+                <Star className="stat-icon artist-stat" />
+                <h3>Me Tienen de Favorito</h3>
+                <p>{profile?.peopleWhoFavoriteMe || 0}</p>
+                <span className="stat-description">Personas que te tienen como favorito</span>
+              </div>
+            )}
           </div>
         </section>
       </main>
