@@ -1,12 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import ArtistPortfolio from '../components/ArtistPortfolio';
+import { useUser } from '../context/UserContext'; // Asegúrate de tener este hook
 
 const PublicArtistProfile = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { profile } = useUser(); // Obtén el usuario autenticado
+
+  // Redirigir si el usuario intenta ver su propio perfil público
+  useEffect(() => {
+    if (profile && String(profile.id) === String(id)) {
+      navigate('/artist-profile', { replace: true });
+    }
+  }, [profile, id, navigate]);
+
   const [artist, setArtist] = useState(null);
   const [allStyles, setAllStyles] = useState([]);
   const [allLanguages, setAllLanguages] = useState([]);

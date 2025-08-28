@@ -460,3 +460,34 @@ input[type="password"]::-webkit-outer-spin-button {
   }
 }
 
+/* Estilos adicionales */
+.modal-overlay,
+.modal-content,
+.modal-header,
+.modal-footer,
+.modal-title {
+  cursor: default;
+}
+
+button,
+.link-button,
+.forgot-password-link,
+.submit-button {
+  cursor: pointer;
+}
+
+button:disabled,
+.submit-button:disabled {
+  cursor: not-allowed;
+}
+
+input:not([disabled]),
+textarea:not([disabled]) {
+  cursor: text;
+}
+
+input[disabled],
+textarea[disabled] {
+  cursor: not-allowed;
+}
+

@@ -882,3 +882,27 @@ html, body {
 @media (max-width: 767px) {
   /* Este bloque ya existía, mantenerlo como está */
 }
+
+.card,
+.card img,
+.banner-cards .card,
+.suggestion-box .footer-links a,
+.suggestion-box .footer-links button,
+.info-section a,
+.slogan button,
+.suggestion-text a {
+  cursor: pointer;
+}
+
+.card[disabled],
+.banner-cards .card[disabled] {
+  cursor: not-allowed;
+}
+
+.find-artists h2,
+.find-artists h3,
+.find-artists p,
+.card-info .artist-name,
+.card-info .followers {
+  cursor: default;
+}

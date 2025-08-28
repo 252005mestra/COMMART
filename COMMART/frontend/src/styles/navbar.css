@@ -237,5 +237,32 @@
   cursor: pointer;
 }
 
+.navbar a,
+.navbar .menu,
+.navbar .profile,
+.navbar .notifications,
+.navbar .arrow,
+.menu-dropdown li,
+.profile-dropdown li,
+.notifications-dropdown li {
+  cursor: pointer;
+}
+
+.navbar input,
+.navbar-search input {
+  cursor: text;
+}
+
+.navbar .logo,
+.navbar .logo span {
+  cursor: pointer;
+}
+
+.menu-dropdown li[disabled],
+.profile-dropdown li[disabled],
+.notifications-dropdown li[disabled] {
+  cursor: not-allowed;
+}
+
 
 

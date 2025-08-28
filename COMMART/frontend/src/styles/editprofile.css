@@ -686,3 +686,47 @@ input[type="text"]::-webkit-strong-password-auto-fill-button {
   width: 90%; /* Cambiado de 100% a 90% */
 }
 
+/* Botones */
+button,
+.back-btn,
+.save-btn,
+.cancel-btn,
+.edit-avatar-btn,
+.password-toggle-btn,
+.continue-modal-btn,
+.cancel-modal-btn {
+  cursor: pointer;
+}
+
+button:disabled,
+.save-btn:disabled,
+.cancel-btn:disabled,
+.edit-avatar-btn:disabled,
+.password-toggle-btn:disabled,
+.continue-modal-btn:disabled,
+.cancel-modal-btn:disabled {
+  cursor: not-allowed !important;
+}
+
+/* Inputs y textareas editables */
+input:not([disabled]),
+textarea:not([disabled]) {
+  cursor: text;
+}
+
+/* Inputs y textareas deshabilitados */
+input[disabled],
+textarea[disabled],
+input.disabled-field,
+textarea.disabled-field {
+  cursor: not-allowed;
+}
+
+/* Elementos no interactivos */
+.edit-profile-header h1,
+.edit-profile-header h2,
+.form-field label,
+.profile-image-preview:not(:hover) {
+  cursor: default;
+}
+

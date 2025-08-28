@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { X, Search, Users, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { X, Search, Users, Star, CircleUserRound } from 'lucide-react';
 import axios from 'axios';
 import '../styles/userlistmodal.css';
 
@@ -12,7 +12,7 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isOpen && artistId) {
+    if (isOpen) {
       fetchUsers();
     } else {
       // Limpiar datos cuando se cierra
@@ -20,6 +20,7 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
       setFilteredUsers([]);
       setSearchTerm('');
     }
+    // eslint-disable-next-line
   }, [isOpen, artistId, type]);
 
   // Filtrar usuarios cuando cambie el término de búsqueda
@@ -93,39 +94,40 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="user-list-modal" onClick={e => e.stopPropagation()}>
-        {/* Header mejorado con icono */}
-        <div className="modal-header">
-          <div className="modal-title-section">
-            <div className="modal-icon">
+    <div className="artistlist-modal-overlay" onClick={onClose}>
+      <div className="artistlist-modal" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="artistlist-modal-header">
+          <div className="artistlist-modal-title-section">
+            <div className="artistlist-modal-icon">
               {getModalIcon()}
             </div>
-            <h2 className="modal-title">{title}</h2>
-            <div className="modal-count">
+            <h2 className="artistlist-modal-title">{title}</h2>
+            <div className="artistlist-modal-count">
               ({loading ? '...' : filteredUsers.length})
             </div>
           </div>
-          <button className="modal-close-btn" onClick={onClose}>
+          <button className="artistlist-modal-close-btn" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
 
-        {/* Search bar mejorada */}
-        <div className="modal-search-section">
-          <div className="search-container">
-            <Search size={18} className="search-icon" />
+        {/* Search bar */}
+        <div className="artistlist-modal-search-section">
+          <div className="artistlist-modal-search-container">
+            <Search size={18} className="artistlist-modal-search-icon" />
             <input
               type="text"
               placeholder={`Buscar entre ${users.length} usuario${users.length !== 1 ? 's' : ''}...`}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="search-input"
+              className="artistlist-modal-search-input"
             />
             {searchTerm && (
-              <button 
-                className="clear-search-btn"
+              <button
+                className="artistlist-modal-clear-search-btn"
                 onClick={() => setSearchTerm('')}
+                tabIndex={-1}
               >
                 <X size={16} />
               </button>
@@ -133,68 +135,39 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
           </div>
         </div>
 
-        {/* Content con scroll personalizado */}
-        <div className="modal-content">
-          {loading ? (
-            <div className="modal-loading">
-              <div className="loading-spinner"></div>
-              <p>Cargando usuarios...</p>
-            </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="modal-empty">
-              <div className="empty-icon">
-                {type === 'followers' ? <Users size={48} /> : <Star size={48} />}
-              </div>
-              <p className="empty-title">{getEmptyText()}</p>
-              {searchTerm && (
-                <button 
-                  className="clear-search-link"
-                  onClick={() => setSearchTerm('')}
-                >
-                  Limpiar búsqueda
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="users-list">
-              {filteredUsers.map(user => (
-                <div 
-                  key={user.id}
-                  className="user-item"
-                  onClick={() => handleUserClick(user.id)}
-                >
-                  <div className="user-avatar">
-                    {user.profile_image ? (
-                      <img 
-                        src={getProfileImageUrl(user.profile_image)} 
-                        alt={user.username}
-                      />
-                    ) : (
-                      <CircleUserRound size={40} className="default-avatar" />
-                    )}
-                  </div>
-                  <div className="user-info">
-                    <h4 className="user-name">{user.username}</h4>
-                    <span className="user-type">Artista</span>
-                  </div>
-                  <div className="user-actions">
-                    <div className="view-profile-btn">
-                      Ver perfil
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Footer con información adicional */}
-        {!loading && filteredUsers.length > 0 && (
-          <div className="modal-footer">
-            <span className="result-count">
-              {searchTerm ? `${filteredUsers.length} de ${users.length}` : `${users.length} total`}
-            </span>
+        {/* Lista de usuarios */}
+        {loading ? (
+          <div className="artistlist-modal-loading">
+            <div className="artistlist-modal-loading-spinner" />
+            <span>Cargando...</span>
           </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="artistlist-modal-empty">
+            <div className="artistlist-modal-empty-icon">
+              <Users size={36} />
+            </div>
+            <div className="artistlist-modal-empty-title">{getEmptyText()}</div>
+          </div>
+        ) : (
+          <ul className="artistlist-modal-users-list">
+            {filteredUsers.map(user => (
+              <li
+                key={user.id}
+                className="artistlist-modal-user-item"
+                onClick={() => handleUserClick(user.id)}
+              >
+                <div className="artistlist-modal-user-avatar">
+                  <img src={getProfileImageUrl(user.profile_image)} alt={user.username} />
+                </div>
+                <div className="artistlist-modal-user-info">
+                  <span className="artistlist-modal-user-name">{user.username}</span>
+                  {user.type && (
+                    <span className="artistlist-modal-user-type">{user.type}</span>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>
@@ -202,3 +175,4 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
 };
 
 export default UserListModal;
+

@@ -439,18 +439,41 @@
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.portfolio-image {
+.portfolio-slide-track {
+  display: flex;
   width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* No uses transform aquí, cada imagen se mueve individualmente */
+}
+
+.portfolio-image {
+  min-width: 100%;
+  max-width: 100%;
   height: 100%;
   object-fit: contain;
   border-radius: 0;
-  max-width: 100%;
-  max-height: 100%;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s;
+  opacity: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.portfolio-image.active {
+  opacity: 1;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+  transform: translateX(0%);
 }
 
 /* Botones del carrusel + Responsive */
@@ -1136,4 +1159,59 @@ select:focus {
 
 .stat-clickable:hover strong {
   color: #7d5938 !important;
+}
+
+/* Botones y elementos clickeables */
+button,
+.btn-follow,
+.btn-favorite,
+.btn-order,
+.stat-clickable,
+.carousel-btn,
+.remove-style-btn,
+.add-style-select,
+.status-btn,
+.portfolio-artist-styles-section .style-tag-type,
+.sidebar-item .language-tag,
+.sidebar-item .language-tag button,
+.sidebar-item .price-policy-list li,
+.artist-header-row .btn-favorite,
+.artist-header-row .btn-follow {
+  cursor: pointer;
+}
+
+/* Botones deshabilitados */
+button:disabled,
+.btn-disabled,
+.btn-order:disabled,
+.btn-loading {
+  cursor: not-allowed !important;
+}
+
+/* Inputs y textareas editables */
+input:not([disabled]),
+textarea:not([disabled]) {
+  cursor: text;
+}
+
+/* Inputs y textareas deshabilitados */
+input[disabled],
+textarea[disabled],
+input.disabled-field,
+textarea.disabled-field {
+  cursor: not-allowed;
+}
+
+/* Elementos no interactivos */
+.portfolio-artist-name,
+.portfolio-section-title,
+.portfolio-artist-description,
+.portfolio-artist-stats-line span:not(.stat-clickable),
+.style-tag-title {
+  cursor: default;
+}
+
+/* Fila de usuario en modales (clickeable) */
+.artistlist-modal-user-item {
+  cursor: pointer;
 }

@@ -38,6 +38,7 @@ const ArtistPortfolio = ({
   // Estados para modales
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showMyFavoritesModal, setShowMyFavoritesModal] = useState(false);
+  const [showMyFollowingModal, setShowMyFollowingModal] = useState(false);
 
   // Inicializar estados cuando cambie el artista
   useEffect(() => {
@@ -376,7 +377,12 @@ const ArtistPortfolio = ({
                   >
                     <strong>{artist?.followers || 0}</strong> Seguidores
                   </span>
-                  <span><strong>{artist?.following || 0}</strong> Seguidos</span>
+                  <span
+                    className={artist?.following > 0 ? 'stat-clickable' : ''}
+                    onClick={() => artist?.following > 0 && setShowMyFollowingModal(true)}
+                  >
+                    <strong>{artist?.following || 0}</strong> Seguidos
+                  </span>
                   <span><strong>{artist?.sales || 0}</strong> Ventas</span>
                   <span><strong>{artist?.purchases || 0}</strong> Compras</span>
                   <span
@@ -565,6 +571,12 @@ const ArtistPortfolio = ({
           type="my-favorites"
           title="Favoritos"
         />
+        <UserListModal
+          isOpen={showMyFollowingModal}
+          onClose={() => setShowMyFollowingModal(false)}
+          type="my-following"
+          title="Seguidos"
+        />
       </div>
     );
   }
@@ -628,7 +640,12 @@ const ArtistPortfolio = ({
                 >
                   <strong>{artist?.followers || 0}</strong> Seguidores
                 </span>
-                <span><strong>{artist?.following || 0}</strong> Seguidos</span>
+                <span
+                  className={artist?.following > 0 ? 'stat-clickable' : ''}
+                  onClick={() => artist?.following > 0 && setShowMyFollowingModal(true)}
+                >
+                  <strong>{artist?.following || 0}</strong> Seguidos
+                </span>
                 <span><strong>{artist?.sales || 0}</strong> Ventas</span>
                 <span><strong>{artist?.purchases || 0}</strong> Compras</span>
                 <span
@@ -686,11 +703,19 @@ const ArtistPortfolio = ({
                     <CircleArrowLeft size={28} />
                   </button>
                 )}
-                <img
-                  src={`http://localhost:5000/${artist.portfolio[currentImg].image_path}`}
-                  alt={`Portfolio ${currentImg + 1}`}
-                  className="portfolio-image"
-                />
+                <div className="portfolio-slide-track">
+                  {artist.portfolio.map((img, idx) => (
+                    <img
+                      key={img.id}
+                      src={`http://localhost:5000/${img.image_path}`}
+                      alt={`Portfolio ${idx + 1}`}
+                      className={`portfolio-image${currentImg === idx ? ' active' : ''}`}
+                      style={{
+                        transform: `translateX(${(idx - currentImg) * 100}%)`
+                      }}
+                    />
+                  ))}
+                </div>
                 {artist.portfolio.length > 1 && (
                   <button onClick={handleNext} className="carousel-btn next-btn">
                     <CircleArrowRight size={28} />
@@ -759,6 +784,12 @@ const ArtistPortfolio = ({
           onClose={() => setShowMyFavoritesModal(false)}
           type="my-favorites"
           title="Favoritos"
+        />
+        <UserListModal
+          isOpen={showMyFollowingModal}
+          onClose={() => setShowMyFollowingModal(false)}
+          type="my-following"
+          title="Seguidos"
         />
       </div>
     </div>
