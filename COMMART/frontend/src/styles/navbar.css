@@ -7,7 +7,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: relative;
+  position: sticky;   /* Cambia de relative a sticky */
+  top: 0;             /* Fija arriba */
   z-index: 100;
   background: #fff;
 }
@@ -166,14 +167,14 @@
 .menu-dropdown,
 .profile-dropdown,
 .notifications-dropdown {
-  position: absolute;
-  top: 70px;
+  position: fixed;
+  top: 70px;         /* Debe coincidir con la altura de .navbar */
   right: 2rem;
   background: #fff;
   border: 3px solid #7d5938;
   border-radius: 18px;
   min-width: 260px;
-  z-index: 200;
+  z-index: 9999;
   padding-bottom: 1rem;
 }
 

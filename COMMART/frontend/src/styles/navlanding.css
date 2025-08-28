@@ -36,13 +36,7 @@
 
 /* Botones del menú */
 .landing-menu a,
-.landing-menu button,
-.slogan a,
-.slogan button,
-.info-section a,
-.info-section button,
-.suggestion-box a,
-.suggestion-box button {
+.landing-menu button {
     text-decoration: none;
     font-family: 'Goldman';
     transition: all 0.3s ease;

@@ -93,14 +93,6 @@ const PublicArtistProfile = () => {
       
       setIsFavorite(response.data.isFavorite);
       
-      // Actualizar contador de favoritos del artista
-      setArtist(prev => ({
-        ...prev,
-        favorites: response.data.isFavorite 
-          ? (prev.favorites || 0) + 1 
-          : Math.max(0, (prev.favorites || 0) - 1)
-      }));
-      
     } catch (error) {
       console.error('Error al manejar favorito:', error);
       alert('Error al procesar la acción. Inténtalo de nuevo.');

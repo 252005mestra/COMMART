@@ -37,7 +37,7 @@ const ArtistPortfolio = ({
 
   // Estados para modales
   const [showFollowersModal, setShowFollowersModal] = useState(false);
-  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
+  const [showMyFavoritesModal, setShowMyFavoritesModal] = useState(false);
 
   // Inicializar estados cuando cambie el artista
   useEffect(() => {
@@ -265,12 +265,6 @@ const ArtistPortfolio = ({
     }
   };
 
-  const handleFavoritesClick = () => {
-    if (artist?.peopleWhoFavoriteMe > 0) { // Para artistas: quién los tiene como favorito
-      setShowFavoritesModal(true);
-    }
-  };
-
   // Renderizar estrellas
   const renderStars = (rating = 0) => {
     const stars = [];
@@ -350,7 +344,30 @@ const ArtistPortfolio = ({
             
             <div className="portfolio-artist-info">
               <div className="portfolio-main-info">
-                <h1 className="portfolio-artist-name">{artist?.username || 'Usuario'}</h1>
+                <div className="artist-header-row">
+                  <h1 className="portfolio-artist-name">{artist?.username || 'Usuario'}</h1>
+                  {!isOwnProfile && (
+                    <>
+                      <button
+                        className={`btn-follow ${actionLoading.follow ? 'btn-loading' : ''}`}
+                        onClick={onFollow}
+                        disabled={actionLoading.follow}
+                      >
+                        {actionLoading.follow ? 'Procesando...' : (isFollowing ? 'Siguiendo' : 'Seguir')}
+                      </button>
+                      <button
+                        className="btn-favorite"
+                        onClick={onFavorite}
+                        disabled={actionLoading.favorite}
+                        title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                      >
+                        {isFavorite
+                          ? <Star size={26} fill="#FFD700" stroke="#FFD700" />
+                          : <Star size={26} stroke="#FFD700" />}
+                      </button>
+                    </>
+                  )}
+                </div>
                 
                 <div className="portfolio-artist-stats-line">
                   <span 
@@ -362,11 +379,11 @@ const ArtistPortfolio = ({
                   <span><strong>{artist?.following || 0}</strong> Seguidos</span>
                   <span><strong>{artist?.sales || 0}</strong> Ventas</span>
                   <span><strong>{artist?.purchases || 0}</strong> Compras</span>
-                  <span 
-                    className={artist?.peopleWhoFavoriteMe > 0 ? 'stat-clickable' : ''}
-                    onClick={handleFavoritesClick}
+                  <span
+                    className={artist?.favorites > 0 ? 'stat-clickable' : ''}
+                    onClick={() => setShowMyFavoritesModal(true)}
                   >
-                    <strong>{artist?.peopleWhoFavoriteMe || 0}</strong> Favoritos
+                    <strong>{artist?.favorites || 0}</strong> Favoritos
                   </span>
                   <span><strong>{artist?.reviews || 0}</strong> Reseñas</span>
                 </div>
@@ -401,7 +418,7 @@ const ArtistPortfolio = ({
                 </div>
 
                 <div className="portfolio-artist-description">
-                  <strong>Descripción:</strong>
+                  <span className="portfolio-section-title">Descripción:</span>
                   <div className="artist-description">
                     <textarea
                       value={bio}
@@ -481,7 +498,7 @@ const ArtistPortfolio = ({
 
             <div className="sidebar">
               <div className="sidebar-item">
-                <strong>Estado:</strong>
+                <span className="portfolio-section-title">Estado:</span>
                 <button
                   className={`status-btn ${availability ? 'available' : 'unavailable'}`}
                   onClick={() => setAvailability(!availability)}
@@ -492,7 +509,7 @@ const ArtistPortfolio = ({
               </div>
 
               <div className="sidebar-item">
-                <strong>Idioma:</strong>
+                <span className="portfolio-section-title">Idioma:</span>
                 <div className="languages-edit">
                   {languages.map((lang, idx) => (
                     <span key={idx} className="language-tag">
@@ -519,7 +536,7 @@ const ArtistPortfolio = ({
               </div>
 
               <div className="sidebar-item">
-                <strong>Como manejo mis precios:</strong>
+                <span className="portfolio-section-title">Como manejo mis precios:</span>
                 <textarea
                   value={pricePolicy}
                   onChange={e => setPricePolicy(e.target.value.substring(0, 300))}
@@ -542,13 +559,11 @@ const ArtistPortfolio = ({
           type="followers"
           title="Seguidores"
         />
-        
         <UserListModal
-          isOpen={showFavoritesModal}
-          onClose={() => setShowFavoritesModal(false)}
-          artistId={artist?.id}
-          type="favorites"
-          title="Usuarios que favoritearon"
+          isOpen={showMyFavoritesModal}
+          onClose={() => setShowMyFavoritesModal(false)}
+          type="my-favorites"
+          title="Favoritos"
         />
       </div>
     );
@@ -581,26 +596,30 @@ const ArtistPortfolio = ({
           
           <div className="portfolio-artist-info">
             <div className="portfolio-main-info">
-              <h1 className="portfolio-artist-name">{artist?.username || 'Usuario'}</h1>
-              
-              {!isOwnProfile && (
-                <div className="portfolio-follow-favorite-buttons">
-                  <button
-                    className={`btn-secondary ${actionLoading.follow ? 'btn-loading' : ''}`}
-                    onClick={onFollow}
-                    disabled={actionLoading.follow}
-                  >
-                    {actionLoading.follow ? 'Procesando...' : (isFollowing ? 'Siguiendo' : 'Seguir')}
-                  </button>
-                  <button
-                    className={`btn-secondary ${actionLoading.favorite ? 'btn-loading' : ''}`}
-                    onClick={onFavorite}
-                    disabled={actionLoading.favorite}
-                  >
-                    {actionLoading.favorite ? 'Procesando...' : (isFavorite ? '★ Favorito' : '☆ Favorito')}
-                  </button>
-                </div>
-              )}
+              <div className="artist-header-row">
+                <h1 className="portfolio-artist-name">{artist?.username || 'Usuario'}</h1>
+                {!isOwnProfile && (
+                  <>
+                    <button
+                      className={`btn-follow ${actionLoading.follow ? 'btn-loading' : ''}`}
+                      onClick={onFollow}
+                      disabled={actionLoading.follow}
+                    >
+                      {actionLoading.follow ? 'Procesando...' : (isFollowing ? 'Siguiendo' : 'Seguir')}
+                    </button>
+                    <button
+                      className="btn-favorite"
+                      onClick={onFavorite}
+                      disabled={actionLoading.favorite}
+                      title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                    >
+                      {isFavorite
+                        ? <Star size={26} fill="#FFD700" stroke="#FFD700" />
+                        : <Star size={26} stroke="#FFD700" />}
+                    </button>
+                  </>
+                )}
+              </div>
               
               <div className="portfolio-artist-stats-line">
                 <span 
@@ -612,11 +631,11 @@ const ArtistPortfolio = ({
                 <span><strong>{artist?.following || 0}</strong> Seguidos</span>
                 <span><strong>{artist?.sales || 0}</strong> Ventas</span>
                 <span><strong>{artist?.purchases || 0}</strong> Compras</span>
-                <span 
-                  className={artist?.peopleWhoFavoriteMe > 0 ? 'stat-clickable' : ''}
-                  onClick={handleFavoritesClick}
+                <span
+                  className={artist?.favorites > 0 ? 'stat-clickable' : ''}
+                  onClick={() => setShowMyFavoritesModal(true)}
                 >
-                  <strong>{artist?.peopleWhoFavoriteMe || 0}</strong> Favoritos
+                  <strong>{artist?.favorites || 0}</strong> Favoritos
                 </span>
                 <span><strong>{artist?.reviews || 0}</strong> Reseñas</span>
               </div>
@@ -632,7 +651,7 @@ const ArtistPortfolio = ({
               </div>
               
               <div className="portfolio-artist-description">
-                <strong>Descripción:</strong> {
+                <span className="portfolio-section-title">Descripción:</span> {
                   artist?.bio || 'Agrega una descripción sobre ti aquí...'
                 }
               </div>
@@ -687,7 +706,7 @@ const ArtistPortfolio = ({
           
           <div className="sidebar">
             <div className="sidebar-item">
-              <strong>Estado:</strong>
+              <span className="portfolio-section-title">Estado:</span>
               <div className={`status-info ${artist?.availability ? 'available' : 'unavailable'}`}>
                 {artist?.availability ? 'Disponible' : 'No disponible'}
                 <span className={`status-dot ${artist?.availability ? 'available' : 'unavailable'}`}></span>
@@ -695,7 +714,7 @@ const ArtistPortfolio = ({
             </div>
 
             <div className="sidebar-item">
-              <strong>Idioma:</strong>
+              <span className="portfolio-section-title">Idioma:</span>
               <ul className="language-list">
                 {(artist?.languages || []).slice(0, 4).map((lang, idx) => (
                   <li key={idx}>{lang}</li>
@@ -710,7 +729,7 @@ const ArtistPortfolio = ({
             </div>
 
             <div className="sidebar-item">
-              <strong>Como manejo mis precios:</strong>
+              <span className="portfolio-section-title">Como manejo mis precios:</span>
               <ul className="price-policy-list">
                 {artist?.price_policy ? (
                   artist.price_policy.substring(0, 300).split('\n').map((line, idx) => (
@@ -735,13 +754,11 @@ const ArtistPortfolio = ({
           type="followers"
           title="Seguidores"
         />
-        
         <UserListModal
-          isOpen={showFavoritesModal}
-          onClose={() => setShowFavoritesModal(false)}
-          artistId={artist?.id}
-          type="favorites"
-          title="Usuarios que favoritearon"
+          isOpen={showMyFavoritesModal}
+          onClose={() => setShowMyFavoritesModal(false)}
+          type="my-favorites"
+          title="Favoritos"
         />
       </div>
     </div>

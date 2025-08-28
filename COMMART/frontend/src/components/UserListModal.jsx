@@ -42,8 +42,6 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
       
       if (type === 'followers') {
         endpoint = `/api/auth/artists/${artistId}/followers`;
-      } else if (type === 'favorites') {
-        endpoint = `/api/auth/artists/${artistId}/favorited-by`; // Quién tiene al artista como favorito
       } else if (type === 'my-favorites') {
         endpoint = '/api/auth/user/favorite-artists'; // Mis artistas favoritos
       } else if (type === 'my-following') {
@@ -83,8 +81,6 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
     switch(type) {
       case 'followers':
         return 'Este artista aún no tiene seguidores';
-      case 'favorites':
-        return 'Este artista aún no está en favoritos de nadie';
       case 'my-favorites':
         return 'Aún no tienes artistas favoritos';
       case 'my-following':

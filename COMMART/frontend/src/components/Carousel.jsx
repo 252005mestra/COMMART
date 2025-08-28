@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // <-- Agrega esto
 import { CircleArrowLeft, CircleArrowRight } from 'lucide-react';
 import '../styles/carousel.css';
 
@@ -57,6 +58,7 @@ const Carousel = () => {
   const [current, setCurrent] = useState(0);
   const autoPlayRef = useRef();
   const touchStartX = useRef(null);
+  const navigate = useNavigate(); // <-- Agrega esto
 
   // Carrusel automático
   useEffect(() => {
@@ -111,6 +113,11 @@ const Carousel = () => {
     setParticles(arr);
   }, []);
 
+  // Handler para el botón de "ACTÍVALO AQUÍ"
+  const handleActivateArtistClick = () => {
+    navigate('/edit-profile', { state: { scrollTo: 'artist-activation-title' } });
+  };
+
   return (
     <section className='carousel-home'>
       <div
@@ -160,11 +167,20 @@ const Carousel = () => {
                 <div className='slide-text-col'>
                   <h2>{slide.title}</h2>
                   <p>{slide.desc}</p>
-                  <button 
-                    className={`slide-btn ${slide.character.includes('Tiko') ? 'tiko-btn' : 'lino-btn'}`}
-                  >
-                    {slide.button}
-                  </button>
+                  {slide.button === 'ACTÍVALO AQUÍ' ? (
+                    <button
+                      className={`slide-btn ${slide.character.includes('Tiko') ? 'tiko-btn' : 'lino-btn'}`}
+                      onClick={handleActivateArtistClick}
+                    >
+                      {slide.button}
+                    </button>
+                  ) : (
+                    <button
+                      className={`slide-btn ${slide.character.includes('Tiko') ? 'tiko-btn' : 'lino-btn'}`}
+                    >
+                      {slide.button}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -57,152 +57,6 @@
   align-items: stretch;
 }
 
-.artist-card {
-  background: white;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: 3px solid #000;
-  width: 100%; 
-  max-width: 340px; 
-  min-width: 280px; 
-  height: 400px;
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-}
-
-/* ========== Imagen del artista ========== */
-.card-image {
-  width: 100%;
-  height: 200px;
-  overflow: hidden;
-  position: relative;
-}
-
-.card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.artist-card:hover .card-image img {
-  transform: scale(1.05);
-}
-
-/* ========== Información del artista ========== */
-.card-footer {
-  padding: 16px;
-  background: white;
-  position: relative;
-  border-top: 2px solid #e0e0e0;
-  flex: 1; /* Ocupa el espacio restante disponible */
-  display: flex;
-  flex-direction: column;
-  min-height: 0; /* Permite que el contenido se contraiga si es necesario */
-}
-
-.artist-info {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  height: 100%; /* Ocupa toda la altura disponible del card-footer */
-}
-
-.profile-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  background: white;
-}
-
-.artist-details {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* Alinea el contenido al inicio */
-  height: 100%;
-}
-
-.artist-name {
-  margin: 0 0 4px 0;
-  font-size: 1rem;
-  font-weight: normal;
-  color: #000;
-  font-family: 'Goldman';
-  line-height: 1.2;
-}
-
-.artist-followers {
-  margin: 0 0 8px 0;
-  font-size: 0.85rem;
-  color: #666;
-  font-family: 'Nunito Sans', sans-serif;
-  font-weight: 400;
-}
-
-.artist-description {
-  margin: 8px 0 0 0;
-  font-size: 0.9rem;
-  color: #333;
-  line-height: 1.3;
-  font-family: 'Nunito Sans', sans-serif;
-  font-weight: 400;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  text-overflow: ellipsis;
-}
-
-/* ========== Estilos del artista ========== */
-.artist-styles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 8px;
-}
-
-.style-tag {
-  background: #7d5938;
-  color: white;
-  font-size: 0.7rem;
-  padding: 4px 12px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  font-weight: 400;
-  font-family: 'Nunito Sans', sans-serif;
-}
-
-.style-tag-types {
-  background: transparent;
-  color: #7d5938;
-  font-size: 0.7rem;
-  padding: 4px 12px;
-  border: 2px solid #7d5938;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  font-weight: 400;
-  font-family: 'Nunito Sans', sans-serif;
-}
-
-.style-more {
-  background: #ccc;
-  color: #666;
-  font-size: 0.7rem;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-weight: 500;
-  font-family: 'Nunito Sans', sans-serif;
-}
-
 /* ========== Estados de carga ========== */
 .loading {
   text-align: center;
@@ -217,10 +71,6 @@
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 18px;
   }
-  
-  .artist-card {
-    max-width: 320px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -232,32 +82,12 @@
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
   }
-
-  .artist-card {
-    max-width: 100%;
-    min-width: 280px;
-  }
-
-  .card-image {
-    height: 180px;
-  }
 }
 
 @media (max-width: 480px) {
   .artists-grid {
-    grid-template-columns: 1fr; /* Una sola columna en móvil */
+    grid-template-columns: 1fr;
     gap: 16px;
     padding: 0 10px;
-  }
-
-  .artist-card {
-    width: 100%;
-    max-width: 100%;
-    min-width: 260px;
-    height: 360px; /* Altura ligeramente menor en móvil */
-  }
-
-  .card-image {
-    height: 160px;
   }
 }

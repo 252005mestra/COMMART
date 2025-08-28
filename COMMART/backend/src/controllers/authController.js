@@ -444,8 +444,7 @@ export const getUserProfileController = async (req, res) => {
       following,
       sales,
       purchases,
-      favorites: myFavoriteArtistsCount, // CAMBIO: Ahora "favorites" son MIS favoritos
-      peopleWhoFavoriteMe, // Cuántos me tienen como favorito (solo para artistas)
+      favorites: myFavoriteArtistsCount, 
       reviews,
       rating,
       myFavoriteArtistsCount,
@@ -996,7 +995,6 @@ export const getUserFavoriteArtistsController = async (req, res) => {
     }));
     
     res.status(200).json(sanitizedFavorites);
-
   } catch (error) {
     console.error('Error al obtener artistas favoritos:', error);
     res.status(500).json({ message: 'Error del servidor.' });

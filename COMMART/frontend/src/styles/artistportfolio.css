@@ -105,7 +105,7 @@
 }
 
 .avatar-rating .star {
-  font-size: clamp(12px, 1.5vw, 14px);
+  font-size: clamp(20px, 2.5vw, 28px); /* Más grandes */
   color: #ddd;
 }
 
@@ -126,12 +126,15 @@
 .portfolio-main-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Agrega separación entre filas */
 }
 
 /* Nombre del artista + Responsive */
 .portfolio-artist-name {
   font-family: 'Goldman';
-  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-size: clamp(1.05rem, 2vw, 1.25rem); /* Más pequeño */
   color: #000;
   margin: 0 0 6px 0;
   font-weight: normal;
@@ -883,6 +886,74 @@ select:focus {
 
 .artist-avatar:not(.editable-avatar) .camera-overlay {
   display: none; /* No mostrar overlay en vista de solo lectura */
+}
+
+/* Nueva clase para títulos de secciones en el portfolio */
+.portfolio-section-title {
+  font-family: 'Goldman';
+  font-weight: normal;
+  color: #000;
+  font-size: clamp(14px, 2vw, 16px);
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* Fila para nombre y botones */
+.artist-header-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+.portfolio-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* Agrega separación entre filas */
+}
+
+/* Botón seguir estilo outline */
+.btn-follow {
+  border: 2px solid #7d5938;
+  background: #fff;
+  color: #7d5938;
+  border-radius: 10px;
+  padding: 4px 22px;
+  font-family: 'Goldman';
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: normal;
+  margin-left: 8px;
+  min-width: 90px;
+}
+
+.btn-follow:hover, .btn-follow:focus {
+  background: #7d5938;
+  color: #fff;
+  border-color: #593f28;
+}
+
+/* Botón favorito solo icono */
+.btn-favorite {
+  background: none;
+  border: none;
+  padding: 0 0 0 8px;
+  margin-left: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.btn-favorite svg {
+  display: block;
+  transition: fill 0.2s, stroke 0.2s;
+}
+
+.btn-favorite:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ========== RESPONSIVE BREAKPOINTS ========== */

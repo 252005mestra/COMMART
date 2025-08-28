@@ -61,15 +61,6 @@ const UserProfile = () => {
               <p>{profile?.followedArtistsCount || 0}</p>
               <span className="stat-description">Artistas que sigues</span>
             </div>
-
-            {profile?.is_artist && (
-              <div className="stat-card">
-                <Star className="stat-icon artist-stat" />
-                <h3>Me Tienen de Favorito</h3>
-                <p>{profile?.peopleWhoFavoriteMe || 0}</p>
-                <span className="stat-description">Personas que te tienen como favorito</span>
-              </div>
-            )}
           </div>
         </section>
       </main>

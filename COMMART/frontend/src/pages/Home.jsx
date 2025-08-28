@@ -7,6 +7,7 @@ import Carousel from '../components/Carousel';
 import CategoryFilter from '../components/CategoryFilter';
 import '../styles/home.css';
 import { useUser } from '../context/UserContext';
+import InfoCard from '../components/InfoCard';
 
 const Home = () => {
   const { profile } = useUser(); // Obtener el perfil del usuario actual
@@ -107,46 +108,17 @@ const Home = () => {
               <div className='artists-grid'>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
-                    <div className='artist-card' key={user.id}>
-                      <Link
-                        to={profile?.id === user.id ? '/profile' : `/artist/${user.id}`}
-                        style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
-                      >
-                        <div className='card-image'>
-                          <img
-                            src={getPortfolioImageUrl(user.portfolio_image)}
-                            alt={`Portfolio de ${user.username}`}
-                          />
-                        </div>
-                        <div className='card-footer'>
-                          <div className='artist-info'>
-                            <img
-                              src={getProfileImageUrl(user.profile_image)}
-                              alt={user.username}
-                              className='profile-avatar'
-                            />
-                            <div className='artist-details'>
-                              <h4 className='artist-name'>{user.username}</h4>
-                              <p className='artist-followers'>{user.followers || 0} Followers</p>
-                              {user.styles && user.styles.length > 0 && (
-                                <div className='artist-styles'>
-                                  <span className='style-tag'>Estilos:</span>
-                                  {user.styles.slice(0, 2).map((style, index) => (
-                                    <span key={index} className='style-tag-types'>{style}</span>
-                                  ))}
-                                  {user.styles.length > 2 && <span className='style-more'>+{user.styles.length - 2}</span>}
-                                </div>
-                              )}
-                              {user.description && (
-                                <p className='artist-description'>
-                                  {user.description}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
+                    <InfoCard
+                      key={user.id}
+                      image={getPortfolioImageUrl(user.portfolio_image)}
+                      avatar={getProfileImageUrl(user.profile_image)}
+                      title={user.username}
+                      subtitle={`${user.followers || 0} Followers`}
+                      tags={user.styles || []}
+                      description={user.description}
+                      link={profile?.id === user.id ? '/profile' : `/artist/${user.id}`}
+                      asLink={true}
+                    />
                   ))
                 ) : (
                   <div className='loading'>

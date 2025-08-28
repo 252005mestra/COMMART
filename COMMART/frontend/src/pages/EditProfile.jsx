@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
@@ -7,6 +7,7 @@ import { CircleUserRound, Camera, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import '../styles/editprofile.css';
 
 const EditProfile = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   
@@ -71,6 +72,15 @@ const EditProfile = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (location.state?.scrollTo) {
+      const el = document.getElementById(location.state.scrollTo);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [location.state]);
+  
   // Verificar si hay cambios
   const hasChanges = () => {
     return (
@@ -563,7 +573,7 @@ const EditProfile = () => {
                 <ArrowLeft size={20} />
                 Volver
               </button>
-              <h2>Activar cuenta de artista</h2>
+              <h2 id="artist-activation-title">Activar cuenta de artista</h2>
             </div>
             <div className="edit-profile-card">
               <div className="artist-activation-content">
