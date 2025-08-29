@@ -1,0 +1,153 @@
+/* Contenedor principal */
+.user-profile-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 15px auto;
+  padding: 0 15px;
+  font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.user-profile-header {
+  display: flex;
+  gap: clamp(12px, 2vw, 20px);
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 3px solid #000;
+  padding: clamp(12px, 2vw, 20px);
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+/* Avatar */
+.user-profile-avatar {
+  position: relative;
+  width: clamp(80px, 12vw, 120px);
+  height: clamp(80px, 12vw, 120px);
+  border-radius: 50%;
+  background: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: white;
+  flex-shrink: 0;
+}
+
+.user-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Avatar editable y overlay de cámara */
+.user-profile-avatar.editable-avatar {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.user-profile-avatar.editable-avatar:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.user-profile-avatar .camera-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: white;
+  pointer-events: none;
+}
+
+.user-profile-avatar.editable-avatar:hover .camera-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.user-profile-avatar.editable-avatar:hover img {
+  opacity: 0.7;
+}
+
+/* Info */
+.user-profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.user-profile-info h1 {
+  font-family: 'Goldman';
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: #000;
+  margin: 0 0 6px 0;
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  word-break: break-word;
+}
+
+/* Stats */
+.user-profile-stats {
+  display: flex;
+  gap: clamp(8px, 2vw, 16px);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  font-size: clamp(13px, 1.8vw, 15px);
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.user-profile-stats span {
+  color: #666;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.user-profile-stats strong {
+  color: #000;
+  font-weight: 600;
+}
+
+/* Modal title */
+.modal-title-goldman {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.15rem;
+  color: #7d5938;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .user-profile-header {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 12px;
+  }
+  .user-profile-info {
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+  .user-profile-stats {
+    justify-content: center;
+    gap: 12px;
+  }
+  .user-profile-avatar {
+    width: 70px;
+    height: 70px;
+  }
+}

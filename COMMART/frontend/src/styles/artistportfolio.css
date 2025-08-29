@@ -513,62 +513,48 @@
 /* Remove/Add buttons + Responsive */
 .remove-image-btn {
   position: absolute;
-  top: clamp(10px, 2vw, 20px);
-  right: clamp(10px, 2vw, 20px);
-  background: rgba(255, 255, 255, 0.9);
-  border: 2px solid #dc3545;
+  top: 16px;
+  right: 16px;
+  z-index: 20; /* Asegura que esté por encima de las imágenes */
+  background: #fff;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
   border-radius: 50%;
-  width: clamp(30px, 4vw, 36px);
-  height: clamp(30px, 4vw, 36px);
-  cursor: pointer;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  color: #dc3545;
+  transition: background 0.2s;
 }
 
 .remove-image-btn:hover {
-  background: #dc3545;
-  color: white;
-  transform: scale(1.1);
+  background: #e74c3c;
+  color: #fff;
 }
 
 .add-portfolio-btn {
   position: absolute;
-  bottom: clamp(10px, 2vw, 20px);
-  right: clamp(10px, 2vw, 20px);
-  width: clamp(40px, 6vw, 50px);
-  height: clamp(40px, 6vw, 50px);
-  background: rgba(125, 89, 56, 0.9);
-  color: white;
-  border: none;
+  bottom: 16px;
+  right: 16px;
+  z-index: 20; /* Asegura que esté por encima de las imágenes */
+  background: #fff;
+  border: 2px dashed #7d5938;
+  color: #7d5938;
   border-radius: 50%;
-  cursor: pointer;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
 }
 
 .add-portfolio-btn:hover {
   background: #7d5938;
-  transform: scale(1.1);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-.empty-portfolio {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  font-style: italic;
-  height: 100%;
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: clamp(14px, 2vw, 18px);
-  text-align: center;
-  padding: 20px;
+  color: #fff;
+  border-color: #7d5938;
 }
 
 /* Sidebar + Responsive */
@@ -1214,4 +1200,14 @@ textarea.disabled-field {
 /* Fila de usuario en modales (clickeable) */
 .artistlist-modal-user-item {
   cursor: pointer;
+}
+
+/* Nueva clase para títulos de modales */
+.modal-title-goldman {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.15rem;
+  color: #7d5938;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
 }

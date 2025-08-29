@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { X, Search, Users, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useUser } from '../context/UserContext';
 import '../styles/userlistmodal.css';
 
 const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
+  const { profile } = useUser();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -64,7 +66,12 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
 
   const handleUserClick = (userId) => {
     onClose();
-    navigate(`/artist/${userId}`);
+    if (profile && String(profile.id) === String(userId)) {
+      // Redirigir a tu propio perfil (cliente o artista)
+      navigate('/profile');
+    } else {
+      navigate(`/artist/${userId}`);
+    }
   };
 
   const getProfileImageUrl = (imgPath) =>

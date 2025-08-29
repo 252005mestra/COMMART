@@ -3,13 +3,19 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
-import { CircleUserRound, Camera, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Camera, CircleUserRound, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import '../styles/editprofile.css';
 
 const EditProfile = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+
+  // Estados para imagen y modal de confirmación
+  const [imagePreview, setImagePreview] = useState(null);
+  const [pendingImage, setPendingImage] = useState(null);
+  const [pendingImageUrl, setPendingImageUrl] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
   
   // Estados del formulario
   const [formData, setFormData] = useState({
@@ -28,7 +34,6 @@ const EditProfile = () => {
   });
   
   // Estados adicionales
-  const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [initialData, setInitialData] = useState({});
@@ -108,7 +113,7 @@ const EditProfile = () => {
     }
   };
 
-  // Manejar cambio de imagen
+  // Manejar cambio de imagen (con preview y confirmación)
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -124,24 +129,32 @@ const EditProfile = () => {
         return;
       }
       
-      setSelectedFile(file);
-      
-      // Crear preview
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
+      reader.onload = (ev) => {
+        setPendingImage(file);
+        setPendingImageUrl(ev.target.result);
+        setShowConfirm(true);
       };
       reader.readAsDataURL(file);
-      
-      // Limpiar error de imagen si existe
-      if (errors.image) {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.image;
-          return newErrors;
-        });
-      }
     }
+  };
+
+  // Confirmar cambio de imagen
+  const handleConfirmChange = () => {
+    setSelectedFile(pendingImage);
+    setImagePreview(pendingImageUrl);
+    setShowConfirm(false);
+    setPendingImage(null);
+    setPendingImageUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // Cancelar cambio de imagen
+  const handleCancelChange = () => {
+    setPendingImage(null);
+    setPendingImageUrl(null);
+    setShowConfirm(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   // Manejar cambios en inputs de contraseña
@@ -208,7 +221,7 @@ const EditProfile = () => {
       case 'confirm_password':
         if (isRequired && !value) {
           newErrors.confirm_password = 'Confirma tu nueva contraseña';
-        } else if (value && value !== passwordData.new_password) {
+        } else if (isRequired && value !== passwordData.new_password) {
           newErrors.confirm_password = 'Las contraseñas no coinciden';
         } else {
           delete newErrors.confirm_password;
@@ -464,31 +477,31 @@ const EditProfile = () => {
               )}
 
               <div className="profile-image-container">
-                <div 
+                <div
                   className="profile-image-preview"
                   onClick={() => fileInputRef.current?.click()}
                   title="Hacer click para cambiar foto de perfil"
                 >
                   {imagePreview ? (
-                    <img src={imagePreview} alt="Profile" />
+                    <img src={imagePreview} alt="Vista previa" />
                   ) : (
                     <CircleUserRound size={60} />
                   )}
                   <div className="camera-overlay">
                     <Camera size={20} />
                   </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleImageChange}
+                  />
                 </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  style={{ display: 'none' }}
-                />
-                {errors.image && (
-                  <span className="field-error">{errors.image}</span>
-                )}
               </div>
+              {errors.image && (
+                <span className="field-error">{errors.image}</span>
+              )}
 
               <form onSubmit={handleSubmit} className="profile-form">
                 <div className="form-field">
@@ -757,6 +770,26 @@ const EditProfile = () => {
               <button className="continue-modal-btn" onClick={handleArtistActivation}>
                 Aceptar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de imagen */}
+      {showConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: 350, textAlign: 'center' }}>
+            <h3 className="modal-title-goldman">¿Deseas cambiar tu foto de perfil?</h3>
+            <div style={{ margin: '1rem 0' }}>
+              <img
+                src={pendingImageUrl}
+                alt="Vista previa"
+                style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '3px solid #b3b792' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button className="cancel-btn" onClick={handleCancelChange}>Cancelar</button>
+              <button className="save-btn" onClick={handleConfirmChange}>Confirmar</button>
             </div>
           </div>
         </div>

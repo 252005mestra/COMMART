@@ -730,3 +730,12 @@ textarea.disabled-field {
   cursor: default;
 }
 
+.modal-title-goldman {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.15rem;
+  color: #7d5938;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+

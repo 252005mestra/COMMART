@@ -19,6 +19,9 @@ const ArtistPortfolio = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingImage, setPendingImage] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
 
   // Estados locales para edición
   const [bio, setBio] = useState('');
@@ -30,7 +33,6 @@ const ArtistPortfolio = ({
   const [newImages, setNewImages] = useState([]);
   const fileInputRef = useRef(null);
   const [profileImage, setProfileImage] = useState(null);
-  const [profileImagePreview, setProfileImagePreview] = useState(null);
 
   // Carrusel
   const [currentImg, setCurrentImg] = useState(0);
@@ -126,11 +128,27 @@ const ArtistPortfolio = ({
         return;
       }
       
-      setProfileImage(file);
       const reader = new FileReader();
-      reader.onload = (ev) => setProfileImagePreview(ev.target.result);
+      reader.onload = (ev) => {
+        setPendingImage(file);
+        setProfileImagePreview(ev.target.result);
+        setShowConfirm(true);
+      };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleConfirmChange = () => {
+    setProfileImage(pendingImage);
+    setShowConfirm(false);
+    setPendingImage(null);
+    // profileImagePreview ya está seteada
+  };
+
+  const handleCancelChange = () => {
+    setPendingImage(null);
+    setProfileImagePreview(null);
+    setShowConfirm(false);
   };
 
   // Agregar imagen de portafolio
@@ -287,10 +305,11 @@ const ArtistPortfolio = ({
       id: img.id
     }));
     
-    const newImagesForCarousel = newImages.map((img, index) => ({
+    // Usar un id único para cada imagen nueva
+    const newImagesForCarousel = newImages.map((img, idx) => ({
       type: 'new',
       src: img.preview,
-      index
+      id: img.file?.name + '-' + idx // <-- key único
     }));
     
     return [...existingImages, ...newImagesForCarousel];
@@ -465,11 +484,19 @@ const ArtistPortfolio = ({
                       <CircleArrowLeft size={28} />
                     </button>
                   )}
-                  <img
-                    src={allImages[currentImg]?.src}
-                    alt={`Portfolio ${currentImg + 1}`}
-                    className="portfolio-image"
-                  />
+                  <div className="portfolio-slide-track">
+                    {allImages.map((img, idx) => (
+                      <img
+                        key={img.id}
+                        src={img.src}
+                        alt={`Portfolio ${idx + 1}`}
+                        className={`portfolio-image${currentImg === idx ? ' active' : ''}`}
+                        style={{
+                          transform: `translateX(${(idx - currentImg) * 100}%)`
+                        }}
+                      />
+                    ))}
+                  </div>
                   {allImages.length > 1 && (
                     <button onClick={handleNext} className="carousel-btn next-btn">
                       <CircleArrowRight size={28} />
@@ -577,6 +604,31 @@ const ArtistPortfolio = ({
           type="my-following"
           title="Seguidos"
         />
+
+        {showConfirm && (
+          <div className="modal-overlay">
+            <div className="modal-content" style={{ maxWidth: 350, textAlign: 'center' }}>
+              <h3 className="modal-title-goldman">¿Deseas cambiar tu foto de perfil?</h3>
+              <div style={{ margin: '1rem 0' }}>
+                <img
+                  src={profileImagePreview}
+                  alt="Vista previa"
+                  style={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '3px solid #b3b792'
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <button className="cancel-btn" onClick={handleCancelChange}>Cancelar</button>
+                <button className="save-btn" onClick={handleConfirmChange}>Confirmar</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
