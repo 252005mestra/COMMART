@@ -395,64 +395,79 @@ export const getStylesController = async (req, res) => {
 export const getUserProfileController = async (req, res) => {
   try {
     const userId = req.user.id;
-    const user = await findUserByIdModel(userId, true);
-
+    
+    // Obtener datos básicos del usuario
+    const user = await findUserByIdModel(userId);
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
 
-    // Si es artista, traer datos relacionados
-    let portfolio = [];
-    let styles = [];
-    let languages = [];
-    let followers = 0;
-    let following = 0;
-    let sales = 0;
-    let purchases = 0;
-    let peopleWhoFavoriteMe = 0; // Cuántas personas ME tienen como favorito
-    let reviews = 0;
-    let rating = 0;
-    
     // Para TODOS los usuarios (artistas y clientes)
-    let myFavoriteArtistsCount = 0; // Los artistas que YO tengo en favoritos
-    let followedArtistsCount = 0;   // Los artistas que YO sigo
+    const myFavoriteArtistsCount = await getUserFavoriteArtistsCountModel(userId);
+    const followedArtistsCount = await getUserFollowedArtistsCountModel(userId);
 
     if (user.is_artist) {
-      portfolio = await getArtistPortfolioModel(userId); 
-      styles = await getArtistStylesModel(userId); 
-      languages = await getArtistLanguagesModel(userId); 
-      followers = await getArtistFollowersCountModel(userId);
-      following = await getArtistFollowingCountModel(userId);
-      sales = await getArtistSalesCountModel(userId);
-      purchases = await getArtistPurchasesCountModel(userId);
-      peopleWhoFavoriteMe = await getArtistFavoritesCountModel(userId); // Cuántos usuarios ME tienen en favoritos
-      reviews = await getArtistReviewsCountModel(userId);
-      rating = await getArtistRatingModel(userId);
+      // Obtener información adicional para artistas
+      const artistInfo = await getArtistFullProfileModel(userId);
+      let portfolio = [], styles = [], languages = [], followers = 0, following = 0;
+      let sales = 0, purchases = 0, reviews = 0, rating = 0, peopleWhoFavoriteMe = 0;
+
+      if (artistInfo) {
+        ({ portfolio, styles, languages, followers, following, sales, purchases, reviews, rating } = artistInfo);
+      }
+
+      // Obtener contadores específicos para artistas
+      peopleWhoFavoriteMe = await getArtistFavoritesCountModel(userId);
+
+      // Obtener listas
+      const favoritesList = await getUserFavoriteArtistsModel(userId);
+      const followedList = await getUserFollowedArtistsModel(userId);
+      
+      // Responder con datos de artista
+      res.status(200).json({
+        ...user,
+        portfolio,
+        styles,
+        languages,
+        followers, // Seguidores del artista
+        following, // Artistas que sigue el artista
+        sales,
+        purchases,
+        favorites: myFavoriteArtistsCount, // MIS artistas favoritos
+        peopleWhoFavoriteMe, // Cuántos usuarios ME tienen como favorito
+        reviews,
+        rating,
+        myFavoriteArtistsCount,
+        followedArtistsCount,
+        favoritesList,
+        followedList,
+        packagesList: [],
+        salesList: [],
+        purchasesList: [],
+        reviewsList: []
+      });
+    } else {
+      // Para usuarios clientes
+      const favoritesList = await getUserFavoriteArtistsModel(userId);
+      const followedList = await getUserFollowedArtistsModel(userId);
+      
+      res.status(200).json({
+        ...user,
+        favorites: myFavoriteArtistsCount, // MIS artistas favoritos
+        myFavoriteArtistsCount,
+        followedArtistsCount,
+        purchases: 0, // Implementar cuando tengas compras
+        reviews: 0,   // Implementar cuando tengas reviews
+        favoritesList,
+        followedList,
+        purchasesList: [],
+        reviewsList: []
+      });
     }
 
-    // Para todos los usuarios (artistas y clientes)
-    myFavoriteArtistsCount = await getUserFavoriteArtistsCountModel(userId); // Mis artistas favoritos
-    followedArtistsCount = await getUserFollowedArtistsCountModel(userId);    // Artistas que sigo
-
-    // Sanitizar y devolver todo
-    res.status(200).json({
-      ...user,
-      portfolio,
-      styles,
-      languages,
-      followers,
-      following,
-      sales,
-      purchases,
-      favorites: myFavoriteArtistsCount, 
-      reviews,
-      rating,
-      myFavoriteArtistsCount,
-      followedArtistsCount
-    });
   } catch (error) {
-    console.error('Error al obtener perfil:', error);
-    res.status(500).json({ message: 'Error del servidor.' });
+    console.error('Error al obtener perfil de usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 
@@ -733,11 +748,33 @@ export const getOwnArtistProfileController = async (req, res) => {
     if (!profile) {
       return res.status(404).json({ message: 'Perfil de artista no encontrado.' });
     }
+
+    // Agregar contadores correctos
+    const myFavoriteArtistsCount = await getUserFavoriteArtistsCountModel(userId);
+    const followedArtistsCount = await getUserFollowedArtistsCountModel(userId);
+    const peopleWhoFavoriteMe = await getArtistFavoritesCountModel(userId);
+
+    // Agregar listas
+    const favoritesList = await getUserFavoriteArtistsModel(userId);
+    const followedList = await getUserFollowedArtistsModel(userId);
     
-    res.status(200).json(profile);
+    res.json({
+      ...profile,
+      favorites: myFavoriteArtistsCount, // MIS favoritos
+      peopleWhoFavoriteMe, // Cuántos me tienen como favorito
+      myFavoriteArtistsCount,
+      followedArtistsCount,
+      favoritesList,
+      followedList,
+      packagesList: [],
+      salesList: [],
+      purchasesList: [],
+      reviewsList: []
+    });
+
   } catch (err) {
-    console.error('Error al obtener perfil de artista:', err);
-    res.status(500).json({ message: 'Error al obtener perfil de artista.' });
+    console.error('Error al obtener perfil propio de artista:', err);
+    res.status(500).json({ message: 'Error al obtener perfil.' });
   }
 };
 
@@ -747,7 +784,22 @@ export const getPublicArtistProfileController = async (req, res) => {
     const { id } = req.params;
     const profile = await getArtistFullProfileModel(id);
     if (!profile) return res.status(404).json({ message: 'Artista no encontrado.' });
-    res.json(profile);
+    
+    // Calcular contadores correctos para vista pública
+    const myFavoriteArtistsCount = await getUserFavoriteArtistsCountModel(id);
+    const followedArtistsCount = await getUserFollowedArtistsCountModel(id);
+    
+    // Agregar listas para vista pública
+    const favoritesList = await getUserFavoriteArtistsModel(id);
+    
+    res.json({
+      ...profile,
+      favorites: myFavoriteArtistsCount, // Sus favoritos
+      myFavoriteArtistsCount,
+      followedArtistsCount,
+      favoritesList,
+      reviewsList: []
+    });
   } catch (err) {
     console.error('Error al obtener perfil público:', err);
     res.status(500).json({ message: 'Error al obtener perfil público.' });
@@ -949,20 +1001,20 @@ export const toggleFavoriteArtistController = async (req, res) => {
       // Quitar de favoritos
       await removeFavoriteArtistModel(clientId, artistId);
       res.status(200).json({ 
-        message: 'Artista quitado de favoritos.',
+        message: 'Has quitado este artista de tus favoritos.',
         isFavorite: false 
       });
     } else {
       // Agregar a favoritos
       await addFavoriteArtistModel(clientId, artistId);
       res.status(200).json({ 
-        message: 'Artista agregado a favoritos.',
+        message: 'Este artista ha sido agregado a tus favoritos.',
         isFavorite: true 
       });
     }
 
   } catch (error) {
-    console.error('Error al manejar favorito:', error);
+    console.error('Error al agregar/quitar de favoritos:', error);
     res.status(500).json({ message: 'Error del servidor.' });
   }
 };
@@ -1057,6 +1109,42 @@ export const getArtistFavoritedByController = async (req, res) => {
 
   } catch (error) {
     console.error('Error al obtener usuarios que favoritearon:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Obtener perfil público de usuario (cliente)
+export const getPublicUserProfileController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await findUserByIdModel(id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+
+    // Calcular contadores correctos
+    const followedArtistsCount = await getUserFollowedArtistsCountModel(id);
+    const myFavoriteArtistsCount = await getUserFavoriteArtistsCountModel(id);
+    
+    // Obtener listas
+    const favoritesList = await getUserFavoriteArtistsModel(id);
+    const reviewsList = [];
+    
+    res.status(200).json({
+      id: user.id,
+      username: user.username,
+      profile_image: user.profile_image,
+      followedArtistsCount, // Conteo correcto
+      favorites: myFavoriteArtistsCount, // Conteo correcto
+      purchases: 0,
+      reviews: 0,
+      favoritesList,
+      reviewsList
+    });
+
+  } catch (error) {
+    console.error('Error al obtener perfil público de usuario:', error);
     res.status(500).json({ message: 'Error del servidor.' });
   }
 };

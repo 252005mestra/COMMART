@@ -31,7 +31,8 @@ import {
     checkFavoriteStatusController,
     getUserFavoriteArtistsController,
     getArtistFollowersController,
-    getArtistFavoritedByController
+    getArtistFavoritedByController,
+    getPublicUserProfileController
 } from '../controllers/authController.js';
 
 // Importar los nuevos modelos
@@ -167,5 +168,8 @@ router.get('/user/favorite-artists', verifyToken, getUserFavoriteArtistsControll
 // ========== RUTAS PARA LISTAS DETALLADAS ==========
 router.get('/artists/:artistId/followers', verifyToken, getArtistFollowersController);
 router.get('/artists/:artistId/favorited-by', verifyToken, getArtistFavoritedByController);
+
+// Nueva ruta para obtener perfil público de usuario por ID
+router.get('/public-user/:id', getPublicUserProfileController);
 
 export default router;

@@ -25,12 +25,22 @@ export const UserProvider = ({ children }) => {
     setProfile(null);
   };
 
+  const addFavoriteArtist = async (artistId) => {
+    await axios.post(`http://localhost:5000/api/auth/artists/${artistId}/favorite`, {}, { withCredentials: true });
+    await fetchProfile(); // <-- Refresca el perfil global, incluyendo favoritos y conteo
+  };
+
+  const removeFavoriteArtist = async (artistId) => {
+    await axios.post(`http://localhost:5000/api/auth/artists/${artistId}/favorite`, {}, { withCredentials: true });
+    await fetchProfile();
+  };
+
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
 
   return (
-    <UserContext.Provider value={{ profile, loading, fetchProfile, logout }}>
+    <UserContext.Provider value={{ profile, loading, fetchProfile, logout, addFavoriteArtist, removeFavoriteArtist }}>
       {children}
     </UserContext.Provider>
   );

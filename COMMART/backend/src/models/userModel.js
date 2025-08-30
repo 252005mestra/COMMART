@@ -637,6 +637,7 @@ export const getUserFollowedArtistsModel = (userId) => {
         u.id, 
         u.username, 
         u.profile_image,
+        u.is_artist, 
         ap.bio as description,
         (SELECT COUNT(*) FROM artist_followers WHERE artist_id = u.id) AS followers,
         (SELECT image_path FROM portfolios WHERE artist_id = u.id ORDER BY created_at DESC LIMIT 1) AS portfolio_image,
@@ -647,6 +648,88 @@ export const getUserFollowedArtistsModel = (userId) => {
       WHERE af.follower_id = ?
       ORDER BY af.followed_at DESC`,
       [userId],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
+      }
+    );
+  });
+};
+
+// Obtener artistas favoritos de un usuario
+export const getUserFavoriteArtistsModel = (userId) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      `SELECT 
+        u.id, 
+        u.username, 
+        u.profile_image,
+        u.is_artist, 
+        ap.bio as description,
+        (SELECT COUNT(*) FROM artist_followers WHERE artist_id = u.id) AS followers,
+        (SELECT COUNT(*) FROM favorites WHERE artist_id = u.id) AS favorites,
+        (SELECT image_path FROM portfolios WHERE artist_id = u.id ORDER BY created_at DESC LIMIT 1) AS portfolio_image,
+        GROUP_CONCAT(s.name SEPARATOR ', ') AS styles_string
+      FROM favorites f
+      JOIN users u ON f.artist_id = u.id
+      LEFT JOIN artist_profiles ap ON u.id = ap.user_id
+      LEFT JOIN artist_styles ast ON u.id = ast.artist_id
+      LEFT JOIN styles s ON ast.style_id = s.id
+      WHERE f.client_id = ?
+      GROUP BY u.id, u.username, u.profile_image, u.is_artist, ap.bio, portfolio_image
+      ORDER BY u.username ASC`,
+      [userId],
+      (err, results) => {
+        if (err) return reject(err);
+        
+        // Procesar los resultados para convertir los estilos en arrays
+        const processedResults = results.map(favorite => ({
+          ...favorite,
+          styles: favorite.styles_string ? favorite.styles_string.split(', ') : []
+        }));
+        
+        resolve(processedResults);
+      }
+    );
+  });
+};
+
+// Obtener lista detallada de seguidores de un artista
+export const getArtistFollowersListModel = (artistId) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      `SELECT 
+        u.id, 
+        u.username, 
+        u.profile_image,
+        u.is_artist 
+      FROM artist_followers af
+      JOIN users u ON af.follower_id = u.id
+      WHERE af.artist_id = ?
+      ORDER BY af.followed_at DESC`,
+      [artistId],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
+      }
+    );
+  });
+};
+
+// Obtener lista detallada de usuarios que tienen al artista en favoritos
+export const getArtistFavoritedByListModel = (artistId) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      `SELECT 
+        u.id, 
+        u.username, 
+        u.profile_image,
+        u.is_artist 
+      FROM favorites f
+      JOIN users u ON f.client_id = u.id
+      WHERE f.artist_id = ?
+      ORDER BY u.username ASC`,
+      [artistId],
       (err, results) => {
         if (err) return reject(err);
         resolve(results);
@@ -699,35 +782,7 @@ export const removeFavoriteArtistModel = (clientId, artistId) => {
   });
 };
 
-// Obtener artistas favoritos de un usuario
-export const getUserFavoriteArtistsModel = (userId) => {
-  return new Promise((resolve, reject) => {
-    dbConnection.query(
-      `SELECT 
-        u.id, 
-        u.username, 
-        u.profile_image,
-        ap.bio as description,
-        (SELECT COUNT(*) FROM artist_followers WHERE artist_id = u.id) AS followers,
-        (SELECT COUNT(*) FROM favorites WHERE artist_id = u.id) AS favorites,
-        (SELECT image_path FROM portfolios WHERE artist_id = u.id ORDER BY created_at DESC LIMIT 1) AS portfolio_image
-      FROM favorites f
-      JOIN users u ON f.artist_id = u.id
-      LEFT JOIN artist_profiles ap ON u.id = ap.user_id
-      WHERE f.client_id = ?
-      ORDER BY u.username ASC`,
-      [userId],
-      (err, results) => {
-        if (err) return reject(err);
-        resolve(results);
-      }
-    );
-  });
-};
-
-// ========== ACTUALIZAR MODELOS EXISTENTES ==========
-
-// Actualizar el conteo de favoritos para el perfil (agregar al getUserProfileController)
+// Contar cuántos artistas tiene un usuario en favoritos
 export const getUserFavoriteArtistsCountModel = (userId) => {
   return new Promise((resolve, reject) => {
     dbConnection.query(
@@ -735,13 +790,13 @@ export const getUserFavoriteArtistsCountModel = (userId) => {
       [userId],
       (err, results) => {
         if (err) return reject(err);
-        resolve(results[0].count);
+        resolve(parseInt(results[0].count) || 0); // Asegurar que sea número
       }
     );
   });
 };
 
-// Actualizar el conteo de artistas seguidos para el perfil
+// Contar cuántos usuarios siguen a un usuario específico (artistas seguidos por él)
 export const getUserFollowedArtistsCountModel = (userId) => {
   return new Promise((resolve, reject) => {
     dbConnection.query(
@@ -749,103 +804,8 @@ export const getUserFollowedArtistsCountModel = (userId) => {
       [userId],
       (err, results) => {
         if (err) return reject(err);
-        resolve(results[0].count);
+        resolve(parseInt(results[0].count) || 0); // Asegurar que sea número
       }
     );
   });
-};
-
-// ========== MODELOS PARA LISTAS DE SEGUIDORES Y FAVORITOS ==========
-
-// Obtener lista detallada de seguidores de un artista
-export const getArtistFollowersListModel = (artistId) => {
-  return new Promise((resolve, reject) => {
-    dbConnection.query(
-      `SELECT 
-        u.id, 
-        u.username, 
-        u.profile_image
-      FROM artist_followers af
-      JOIN users u ON af.follower_id = u.id
-      WHERE af.artist_id = ?
-      ORDER BY af.followed_at DESC`,
-      [artistId],
-      (err, results) => {
-        if (err) return reject(err);
-        resolve(results);
-      }
-    );
-  });
-};
-
-// Obtener lista detallada de usuarios que tienen al artista en favoritos
-export const getArtistFavoritedByListModel = (artistId) => {
-  return new Promise((resolve, reject) => {
-    dbConnection.query(
-      `SELECT 
-        u.id, 
-        u.username, 
-        u.profile_image
-      FROM favorites f
-      JOIN users u ON f.client_id = u.id
-      WHERE f.artist_id = ?
-      ORDER BY u.username ASC`, // Cambiar a ordenar por username ya que no hay created_at
-      [artistId],
-      (err, results) => {
-        if (err) return reject(err);
-        resolve(results);
-      }
-    );
-  });
-};
-
-// Controller para obtener el perfil de usuario (incluyendo datos de artista si aplica)
-export const getUserProfileController = async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    // 1. Encontrar usuario por ID
-    const user = await findUserByIdModel(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-
-    // 2. Si es artista, obtener información adicional
-    let portfolio = [], styles = [], languages = [], followers = 0, following = 0, sales = 0, purchases = 0, reviews = 0, rating = 0, peopleWhoFavoriteMe = 0;
-    let myFavoriteArtistsCount = 0, followedArtistsCount = 0;
-
-    if (user.is_artist) {
-      // Información del artista
-      const artistInfo = await getArtistFullProfileModel(userId);
-      if (artistInfo) {
-        ({ portfolio, styles, languages, followers, following, sales, purchases, reviews, rating, peopleWhoFavoriteMe } = artistInfo);
-      }
-
-      // Contar mis artistas favoritos y artistas seguidos
-      myFavoriteArtistsCount = await getUserFavoriteArtistsCountModel(userId); // Mis artistas favoritos
-      followedArtistsCount = await getUserFollowedArtistsCountModel(userId); // Artistas que sigo
-    }
-
-    // Responder con la información del usuario y datos adicionales
-    res.status(200).json({
-      ...user,
-      portfolio,
-      styles,
-      languages,
-      followers,
-      following,
-      sales,
-      purchases,
-      favorites: myFavoriteArtistsCount, // <-- FAVORITOS QUE YO TENGO
-      peopleWhoFavoriteMe, // <-- SOLO PARA ARTISTAS: cuántos me tienen a mí
-      reviews,
-      rating,
-      myFavoriteArtistsCount,
-      followedArtistsCount
-    });
-
-  } catch (error) {
-    console.error('Error al obtener perfil de usuario:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
 };

@@ -7,6 +7,7 @@ import ResetPassword from './pages/ResetPasswordPage'; // o './pages/ResetPasswo
 import PrivateRoute from './components/PrivateRoute'
 import Profile from './components/Profile';
 import PublicArtistProfile from './pages/PublicArtistProfile';
+import PublicUserProfile from './pages/PublicUserProfile';
 
 
 const App = () => {
@@ -33,7 +34,6 @@ const App = () => {
           }
         />
 
-        {/* Agregar ruta para perfil de artista propio */}
         <Route
           path='/artist-profile'
           element={
@@ -43,7 +43,10 @@ const App = () => {
           }
         />
 
-        <Route path='/reset-password/:token' element={<ResetPassword />} />
+        <Route
+          path='/reset-password/:token'
+          element={<ResetPassword />}
+        />
 
         <Route
           path="/profile"
@@ -54,7 +57,19 @@ const App = () => {
           }
         />
 
-        <Route path="/artist/:id" element={<PublicArtistProfile />} />
+        <Route
+          path="/artist/:id"
+          element={<PublicArtistProfile />}
+        />
+
+        <Route
+          path='/user/:id'
+          element={
+            <PrivateRoute>
+              <PublicUserProfile />
+            </PrivateRoute>
+          }
+        />
 
       </Routes>
     </>

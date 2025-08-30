@@ -4,16 +4,18 @@ import axios from 'axios';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import ArtistPortfolio from '../components/ArtistPortfolio';
+import ProfileTabsSection from '../components/ProfileTabsSection';
 import { useUser } from '../context/UserContext'; // Asegúrate de tener este hook
 
 const PublicArtistProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { profile } = useUser(); // Obtén el usuario autenticado
+  const { profile, fetchProfile } = useUser(); // Obtén el usuario autenticado
 
   // Redirigir si el usuario intenta ver su propio perfil público
   useEffect(() => {
     if (profile && String(profile.id) === String(id)) {
+      // Redirigir a vista privada si intentas ver tu propio perfil público
       navigate('/artist-profile', { replace: true });
     }
   }, [profile, id, navigate]);
@@ -96,13 +98,14 @@ const PublicArtistProfile = () => {
     try {
       setActionLoading(prev => ({ ...prev, favorite: true }));
       
-      const response = await axios.post(
+      await axios.post(
         `http://localhost:5000/api/auth/artists/${id}/favorite`,
         {},
         { withCredentials: true }
       );
       
-      setIsFavorite(response.data.isFavorite);
+      setIsFavorite(prev => !prev);
+      await fetchProfile(); // <-- Refresca el perfil global
       
     } catch (error) {
       console.error('Error al manejar favorito:', error);
@@ -173,6 +176,20 @@ const PublicArtistProfile = () => {
             actionLoading={actionLoading}
           />
         </section>
+
+        {/* Sección de pestañas para artista - VISTA PÚBLICA */}
+        {artist && (
+          <ProfileTabsSection
+            data={{
+              packages: artist.packagesList || [],
+              favorites: artist.favoritesList || [],
+              reviews: artist.reviewsList || [],
+              // NO incluir sales ni purchases en vista pública
+            }}
+            isArtist={true}
+            isPublicView={true} // Vista pública
+          />
+        )}
       </main>
 
       <Footer />

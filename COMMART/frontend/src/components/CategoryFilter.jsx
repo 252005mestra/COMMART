@@ -97,13 +97,17 @@ const CategoryFilter = ({ selectedStyle }) => {
 
   const slideLeft = () => {
     if (canSlideLeft) {
-      setSlideOffset(Math.max(0, slideOffset - Math.ceil(visibleCount / 2)));
+      // Mover una página completa hacia la izquierda
+      const newOffset = Math.max(0, slideOffset - visibleCount);
+      setSlideOffset(newOffset);
     }
   };
 
   const slideRight = () => {
     if (canSlideRight) {
-      setSlideOffset(Math.min(styles.length - visibleCount, slideOffset + Math.ceil(visibleCount / 2)));
+      // Mover una página completa hacia la derecha
+      const newOffset = Math.min(styles.length - visibleCount, slideOffset + visibleCount);
+      setSlideOffset(newOffset);
     }
   };
 

@@ -66,11 +66,24 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
 
   const handleUserClick = (userId) => {
     onClose();
+    
     if (profile && String(profile.id) === String(userId)) {
-      // Redirigir a tu propio perfil (cliente o artista)
-      navigate('/profile');
+      // Es tu propio perfil - redirigir a vista privada
+      if (profile.is_artist) {
+        navigate('/artist-profile');  // Vista privada de artista
+      } else {
+        navigate('/profile');         // Vista privada de cliente
+      }
     } else {
-      navigate(`/artist/${userId}`);
+      // Es perfil de otro usuario - mostrar vista pública
+      const user = users.find(u => u.id === userId);
+      
+      // Usar is_artist del usuario obtenido del backend
+      if (user && user.is_artist) {
+        navigate(`/artist/${userId}`);  // Vista pública de artista
+      } else {
+        navigate(`/user/${userId}`);    // Vista pública de cliente
+      }
     }
   };
 

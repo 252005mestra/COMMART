@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
@@ -12,6 +12,7 @@ import InfoCard from '../components/InfoCard';
 const Home = () => {
   const { profile } = useUser(); // Obtener el perfil del usuario actual
   const location = useLocation();
+  const navigate = useNavigate();
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,6 +65,25 @@ const Home = () => {
   // Obtener URL de imagen de perfil
   const getProfileImageUrl = (imgPath) =>
     imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
+
+  // Manejar clic en el perfil de un usuario
+  const handleUserProfileClick = (user) => {
+    if (profile && String(profile.id) === String(user.id)) {
+      // Es tu propio perfil - ir a vista privada
+      if (profile.is_artist) {
+        navigate('/artist-profile');
+      } else {
+        navigate('/profile');
+      }
+    } else {
+      // Es perfil de otro usuario - ir a vista pública
+      if (user.is_artist) {
+        navigate(`/artist/${user.id}`);
+      } else {
+        navigate(`/user/${user.id}`);
+      }
+    }
+  };
 
   return (
     <>
@@ -118,6 +138,7 @@ const Home = () => {
                       description={user.description}
                       link={profile?.id === user.id ? '/profile' : `/artist/${user.id}`}
                       asLink={true}
+                      onClick={() => handleUserProfileClick(user)} // Agregar onClick aquí
                     />
                   ))
                 ) : (

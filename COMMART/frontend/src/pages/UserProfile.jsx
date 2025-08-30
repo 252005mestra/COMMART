@@ -6,9 +6,11 @@ import MainNav from '../components/MainNav';
 import '../styles/userprofile.css';
 import axios from 'axios';
 import UserListModal from '../components/UserListModal';
+import ProfileTabsSection from '../components/ProfileTabsSection';
+import Footer from '../components/Footer'; // Agregar import
 
 const UserProfile = () => {
-  const { profile, fetchProfile } = useUser();
+  const { profile, removeFavoriteArtist, fetchProfile } = useUser();
   const fileInputRef = useRef(null);
 
   // Imagen actual y preview
@@ -78,85 +80,87 @@ const UserProfile = () => {
   return (
     <>
       <MainNav />
-      <section className="user-profile-section">
-        <div className="user-profile-header">
-          <div
-            className="user-profile-avatar editable-avatar"
-            onClick={() => fileInputRef.current?.click()}
-            title="Hacer click para cambiar foto de perfil"
-            style={{ cursor: 'pointer' }}
-          >
-            {imagePreview ? (
-              <img src={getProfileImageUrl()} alt={profile?.username || 'Usuario'} />
-            ) : (
-              <CircleUserRound size={60} />
-            )}
-            <div className="camera-overlay">
-              <Camera size={20} />
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleProfileImageChange}
-            />
-          </div>
-          <div className="user-profile-info">
-            <h1>{profile?.username}</h1>
-            <div className="user-profile-stats">
-              <span
-                className="stat-clickable"
-                onClick={() => setShowFollowingModal(true)}
-              >
-                <strong>{profile?.followedArtistsCount || 0}</strong> Seguidos
-              </span>
-              <span
-                className="stat-clickable"
-                onClick={() => setShowFavoritesModal(true)}
-              >
-                <strong>{profile?.favorites || 0}</strong> Favoritos
-              </span>
-              <span><strong>{profile?.purchases || 0}</strong> Compras</span>
-              <span><strong>{profile?.reviews || 0}</strong> Reseñas</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Modal de confirmación de imagen */}
-      {showConfirm && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: 350, textAlign: 'center' }}>
-            <h3 className="modal-title-goldman">¿Deseas cambiar tu foto de perfil?</h3>
-            <div style={{ margin: '1rem 0' }}>
-              <img
-                src={pendingImageUrl}
-                alt="Vista previa"
-                style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '3px solid #b3b792' }}
+      
+      <main className="main-content">
+        <section className="user-profile-section">
+          <div className="user-profile-header">
+            <div
+              className="user-profile-avatar editable-avatar"
+              onClick={() => fileInputRef.current?.click()}
+              title="Hacer click para cambiar foto de perfil"
+              style={{ cursor: 'pointer' }}
+            >
+              {imagePreview ? (
+                <img src={getProfileImageUrl()} alt={profile?.username || 'Usuario'} />
+              ) : (
+                <CircleUserRound size={60} />
+              )}
+              <div className="camera-overlay">
+                <Camera size={20} />
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleProfileImageChange}
               />
             </div>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <button className="cancel-btn" onClick={handleCancelChange}>Cancelar</button>
-              <button className="save-btn" onClick={handleConfirmChange}>Confirmar</button>
+            <div className="user-profile-info">
+              <h1>{profile?.username}</h1>
+              <div className="user-profile-stats">
+                <span
+                  className="stat-clickable"
+                  onClick={() => setShowFollowingModal(true)}
+                >
+                  <strong>{profile?.followedArtistsCount || 0}</strong> Seguidos
+                </span>
+                <span
+                  className="stat-clickable"
+                  onClick={() => setShowFavoritesModal(true)}
+                >
+                  <strong>{profile?.favorites || 0}</strong> Favoritos
+                </span>
+                <span><strong>{profile?.purchases || 0}</strong> Compras</span>
+                <span><strong>{profile?.reviews || 0}</strong> Reseñas</span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        </section>
 
-      {/* Modales para seguidos y favoritos */}
-      <UserListModal
-        isOpen={showFollowingModal}
-        onClose={() => setShowFollowingModal(false)}
-        type="my-following"
-        title="Seguidos"
-      />
-      <UserListModal
-        isOpen={showFavoritesModal}
-        onClose={() => setShowFavoritesModal(false)}
-        type="my-favorites"
-        title="Favoritos"
-      />
+        {/* Sección de pestañas de perfil - INCLUIR COMPRAS en versión privada */}
+        {profile && (
+          <ProfileTabsSection
+            data={{
+              purchases: profile.purchasesList || [],
+              favorites: profile.favoritesList || [],
+              reviews: profile.reviewsList || [],
+            }}
+            isArtist={profile.is_artist}
+            isPublicView={false}
+            onFavoriteToggle={async (artist) => {
+              await removeFavoriteArtist(artist.id);
+              await fetchProfile();
+            }}
+          />
+        )}
+
+        {/* Modales para seguidos y favoritos */}
+        <UserListModal
+          isOpen={showFollowingModal}
+          onClose={() => setShowFollowingModal(false)}
+          type="my-following"
+          title="Seguidos"
+        />
+        <UserListModal
+          isOpen={showFavoritesModal}
+          onClose={() => setShowFavoritesModal(false)}
+          type="my-favorites"
+          title="Favoritos"
+        />
+      </main>
+
+      <Footer />
     </>
   );
 };

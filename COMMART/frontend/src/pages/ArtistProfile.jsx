@@ -4,9 +4,10 @@ import axios from 'axios';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import ArtistPortfolio from '../components/ArtistPortfolio';
+import ProfileTabsSection from '../components/ProfileTabsSection';
 
 const ArtistProfile = () => {
-  const { profile, fetchProfile } = useUser();
+  const { profile, removeFavoriteArtist, fetchProfile } = useUser();
   const [allStyles, setAllStyles] = useState([]);
   const [allLanguages, setAllLanguages] = useState([]);
   const [artistData, setArtistData] = useState(null);
@@ -140,15 +141,35 @@ const ArtistProfile = () => {
       <main className="main-content">
         <section className="artist-profile-section">
           <ArtistPortfolio
-            artist={artistData || profile}
+            artist={{
+              ...(artistData || profile),
+              // favorites: localFavoriteCount // ⭐ USAR CONTEO LOCAL
+            }}
             allStyles={allStyles}
             allLanguages={allLanguages}
             isOwnProfile={true}
             onSave={handleSave}
-            // AGREGAR: Props para modales en perfil propio
-            showModals={true} // Habilitar modales en perfil propio
           />
         </section>
+
+        {/* Sección de pestañas para artista - VISTA PRIVADA */}
+        {(artistData || profile) && (
+          <ProfileTabsSection
+            data={{
+              packages: (artistData || profile).packagesList || [],
+              sales: (artistData || profile).salesList || [],
+              purchases: (artistData || profile).purchasesList || [],
+              favorites: (artistData || profile).favoritesList || [],
+              reviews: (artistData || profile).reviewsList || [],
+            }}
+            isArtist={true}
+            isPublicView={false}
+            onFavoriteToggle={async (artist) => {
+              await removeFavoriteArtist(artist.id);
+              await fetchProfile();
+            }}
+          />
+        )}
       </main>
 
       <Footer />

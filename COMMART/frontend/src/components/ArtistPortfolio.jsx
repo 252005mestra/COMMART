@@ -381,9 +381,11 @@ const ArtistPortfolio = ({
                         disabled={actionLoading.favorite}
                         title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                       >
-                        {isFavorite
-                          ? <Star size={26} fill="#FFD700" stroke="#FFD700" />
-                          : <Star size={26} stroke="#FFD700" />}
+                        {isFavorite ? (
+                          <Star size={26} fill="#FFD700" stroke="#000" strokeWidth={2} />
+                        ) : (
+                          <Star size={26} stroke="#000" strokeWidth={2} fill="none" />
+                        )}
                       </button>
                     </>
                   )}
@@ -416,7 +418,7 @@ const ArtistPortfolio = ({
                 <div className="portfolio-artist-styles-section">
                   <span className="style-tag-title">Estilos:</span>
                   {styles.slice(0, 3).map((style, idx) => (
-                    <span className="style-tag-type" key={idx}>
+                    <span className="style-tag-type" key={`edit-style-${idx}-${style}`}>
                       {style}
                       <button className="remove-style-btn" onClick={() => handleRemoveStyle(style)}>
                         <X size={10} />
@@ -437,7 +439,7 @@ const ArtistPortfolio = ({
                   >
                     <option value="">+ Agregar</option>
                     {allStyles.filter(s => !styles.includes(s.name)).map((style, idx) => (
-                      <option key={idx} value={style.name}>{style.name}</option>
+                      <option key={`option-style-${style.id || idx}`} value={style.name}>{style.name}</option>
                     ))}
                   </select>
                 </div>
@@ -545,7 +547,7 @@ const ArtistPortfolio = ({
                 <span className="portfolio-section-title">Idioma:</span>
                 <div className="languages-edit">
                   {languages.map((lang, idx) => (
-                    <span key={idx} className="language-tag">
+                    <span key={`edit-lang-${idx}-${lang}`} className="language-tag">
                       {lang}
                       <button onClick={() => handleRemoveLanguage(lang)}>
                         <X size={10} />
@@ -562,7 +564,7 @@ const ArtistPortfolio = ({
                   >
                     <option value="">+ Agregar</option>
                     {allLanguages.filter(l => !languages.includes(l.name)).map((lang, idx) => (
-                      <option key={idx} value={lang.name}>{lang.name}</option>
+                      <option key={`option-lang-${lang.id || idx}`} value={lang.name}>{lang.name}</option>
                     ))}
                   </select>
                 </div>
@@ -677,9 +679,11 @@ const ArtistPortfolio = ({
                       disabled={actionLoading.favorite}
                       title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                     >
-                      {isFavorite
-                        ? <Star size={26} fill="#FFD700" stroke="#FFD700" />
-                        : <Star size={26} stroke="#FFD700" />}
+                      {isFavorite ? (
+                        <Star size={26} fill="#FFD700" stroke="#000" strokeWidth={2} />
+                      ) : (
+                        <Star size={26} stroke="#000" strokeWidth={2} fill="none" />
+                      )}
                     </button>
                   </>
                 )}
@@ -712,7 +716,7 @@ const ArtistPortfolio = ({
               <div className="portfolio-artist-styles-section">
                 <span className="style-tag-title">Estilos:</span>
                 {(artist?.styles || []).slice(0, 3).map((style, idx) => (
-                  <span className="style-tag-type" key={idx}>{style}</span>
+                  <span className="style-tag-type" key={`style-${idx}-${style}`}>{style}</span>
                 ))}
                 {(artist?.styles || []).length > 3 && (
                   <span className="style-more">+{(artist?.styles || []).length - 3}</span>
@@ -758,7 +762,7 @@ const ArtistPortfolio = ({
                 <div className="portfolio-slide-track">
                   {artist.portfolio.map((img, idx) => (
                     <img
-                      key={img.id}
+                      key={`portfolio-${img.id || idx}`}
                       src={`http://localhost:5000/${img.image_path}`}
                       alt={`Portfolio ${idx + 1}`}
                       className={`portfolio-image${currentImg === idx ? ' active' : ''}`}
@@ -794,7 +798,7 @@ const ArtistPortfolio = ({
               <span className="portfolio-section-title">Idioma:</span>
               <ul className="language-list">
                 {(artist?.languages || []).slice(0, 4).map((lang, idx) => (
-                  <li key={idx}>{lang}</li>
+                  <li key={`lang-${idx}-${lang}`}>{lang}</li>
                 ))}
                 {(artist?.languages || []).length > 4 && (
                   <li>+{(artist?.languages || []).length - 4} más</li>
@@ -810,10 +814,10 @@ const ArtistPortfolio = ({
               <ul className="price-policy-list">
                 {artist?.price_policy ? (
                   artist.price_policy.substring(0, 300).split('\n').map((line, idx) => (
-                    line.trim() && <li key={idx}>{line}</li>
+                    line.trim() && <li key={`price-${idx}`}>{line}</li>
                   ))
                 ) : (
-                  <li style={{ color: '#999', fontStyle: 'italic' }}>Sin política de precios definida</li>
+                  <li key="no-policy" style={{ color: '#999', fontStyle: 'italic' }}>Sin política de precios definida</li>
                 )}
                 {(artist?.price_policy || '').length > 300 && (
                   <li style={{ color: '#999', fontStyle: 'italic' }}>...</li>

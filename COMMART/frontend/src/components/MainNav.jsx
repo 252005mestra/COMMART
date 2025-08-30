@@ -317,6 +317,27 @@ const MainNav = ({
   const getProfileImageUrl = (imgPath) =>
     imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
 
+  // En la función que maneja el click en resultados de búsqueda
+  const handleArtistClick = (artistId) => {
+    if (profile && String(profile.id) === String(artistId)) {
+      // Es tu propio perfil - redirigir a vista privada
+      if (profile.is_artist) {
+        navigate('/artist-profile');
+      } else {
+        navigate('/profile');
+      }
+    } else {
+      // Es perfil de otro usuario - mostrar vista pública
+      // En búsqueda solo aparecen artistas, pero verificar por seguridad
+      const foundUser = users.find(user => user.id === artistId);
+      if (foundUser && foundUser.is_artist) {
+        navigate(`/artist/${artistId}`);
+      } else {
+        navigate(`/user/${artistId}`); // Por si acaso
+      }
+    }
+  };
+
   return (
     <>
       <nav className='navbar' aria-label='Navegación principal'>

@@ -1,0 +1,409 @@
+/* Contenedor principal - SIN fondo naranja */
+.profile-tabs-section-bg {
+  margin: 2rem 0;
+  min-height: 600px;
+  background: transparent; /* Sin fondo aquí */
+  border-radius: 0;
+}
+
+/* Header de títulos con línea más cerca */
+.profile-tabs-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Reducido de 1rem a 0.5rem para compactar más */
+  background: transparent;
+  padding: 1.2rem 0 0rem 0; /* Sin padding bottom */
+  border-bottom: 2px solid #ddd;
+  position: relative;
+  margin-bottom: 1rem;
+  min-height: 60px;
+}
+
+.profile-tabs-visible-container {
+  display: flex;
+  gap: 8rem; /* Aumentado de 6rem a 8rem para mucha más separación */
+  justify-content: center;
+}
+
+/* Para pantallas más grandes, máxima separación */
+@media (min-width: 1200px) {
+  .profile-tabs-visible-container {
+    gap: 10rem; /* Aumentado de 7rem a 10rem para pantallas grandes */
+  }
+}
+
+/* Para pantallas muy grandes */
+@media (min-width: 1400px) {
+  .profile-tabs-visible-container {
+    gap: 12rem; /* Separación máxima para pantallas muy grandes */
+  }
+}
+
+/* Para pantallas medianas */
+@media (max-width: 900px) {
+  .profile-tabs-visible-container {
+    gap: 5rem; /* Aumentado de 4rem a 5rem */
+  }
+}
+
+/* Para pantallas móviles */
+@media (max-width: 600px) {
+  .profile-tabs-visible-container {
+    gap: 3rem; /* Aumentado de 2.5rem a 3rem */
+  }
+}
+
+/* Flechas con estilo CategoryFilter */
+.profile-tab-nav-arrow {
+  width: 35px;
+  height: 35px;
+  border: 2px solid #7d5938;
+  border-radius: 50%;
+  background: white;
+  color: #7d5938;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.profile-tab-nav-arrow:hover {
+  background: #7d5938;
+  color: white;
+  transform: translateY(-50%) translateY(-1px);
+}
+
+.profile-tab-nav-left {
+  left: 2rem; /* Cambiado de 1rem a 2rem para estar más cerca */
+}
+
+.profile-tab-nav-right {
+  right: 2rem; /* Cambiado de 1rem a 2rem para estar más cerca */
+}
+
+/* Títulos con línea más pegada a la línea gris */
+.profile-tab-title {
+  font-family: 'Goldman';
+  font-size: 1.8rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0 0.5rem 0.8rem 0.5rem; /* Reducido a 0.2rem para estar más cerca */
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  position: relative;
+  margin-bottom: -10px;
+}
+
+.profile-tab-title.active {
+  color: #000;
+  border-bottom: 3px solid #000000; 
+}
+
+.profile-tab-title:hover:not(.active) {
+  color: #141414;
+}
+
+/* Header verde separado */
+.profile-tabs-green-header {
+  background: #8fa381;
+  padding: 1.2rem 0;
+  text-align: center;
+  border-radius: 0;
+  border-bottom: 3px solid #7A8A6E;
+  margin-top: 0; /* Sin margen superior */
+}
+
+.profile-tabs-green-header h2 {
+  font-family: 'Goldman';
+  font-size: 2rem;
+  color: #fff;
+  margin: 0;
+  letter-spacing: 0.04em;
+  font-weight: normal;
+}
+
+/* AQUÍ es donde va el fondo naranja - SOLO en el contenido */
+.profile-tabs-content {
+  background: #c7a47b; /* Fondo naranja SOLO aquí */
+  padding: 2rem 2rem 3rem 2rem;
+  min-height: 400px;
+  border-radius: 0 0 18px 18px; /* Solo bordes redondeados abajo */
+}
+
+/* Grid y cards mantienen sus estilos */
+.profile-tabs-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: flex-start;
+  min-height: 300px;
+  margin-bottom: 2rem;
+}
+
+.profile-tabs-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  padding: 1rem;
+  width: 270px;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-tabs-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.profile-tabs-card-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: flex-start;
+}
+
+.profile-tabs-card-title {
+  font-family: 'Goldman';
+  font-size: 1.1rem;
+  color: #222;
+}
+
+.profile-tabs-card-date,
+.profile-tabs-card-price {
+  font-family: 'Nunito Sans';
+  font-size: 1rem;
+  color: #444;
+}
+
+.profile-tabs-empty {
+  text-align: center;
+  color: #666;
+  font-family: 'Nunito Sans';
+  font-size: 1.1rem;
+  margin: 2rem 0;
+}
+
+.profile-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 1rem 0; /* Añadir padding */
+  background: transparent; /* Sin fondo */
+}
+
+.profile-pagination button {
+  background: rgba(255,255,255,0.9); /* Fondo blanco semi-transparente */
+  border: 2px solid #8fa381;
+  color: #8fa381;
+  font-family: 'Goldman';
+  font-size: 1.1rem;
+  padding: 0.5rem 0.9rem; /* Botones más grandes */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 40px;
+}
+
+.profile-pagination button.active {
+  background: #8fa381;
+  color: #fff;
+  border-color: #8fa381;
+}
+
+.profile-pagination button:hover:not(:disabled) {
+  background: #8fa381;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.profile-pagination button:disabled {
+  background: rgba(255,255,255,0.5);
+  color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Grid especial para favoritos con animación */
+.profile-tabs-favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 2rem;
+}
+
+/* Transición suave para InfoCards */
+.profile-tabs-favorites-grid .info-card {
+  transition: all 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Animación de entrada */
+@keyframes fadeInCard {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.profile-tabs-favorites-grid .info-card {
+  animation: fadeInCard 0.4s ease-out;
+}
+
+/* Animación cuando se quita una card */
+.profile-tabs-favorites-grid .info-card.removing {
+  animation: slideOutDown 0.3s ease-in forwards;
+}
+
+@keyframes slideOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+  }
+}
+
+/* Estilos existentes... */
+
+/* Modal de confirmación para quitar favoritos */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.confirmation-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  border: 3px solid #7d5938;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.confirmation-modal-icon {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.modal-title-goldman {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.25rem;
+  color: #7d5938;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  letter-spacing: 0.02em;
+}
+
+.confirmation-modal-text {
+  color: #555;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-bottom: 2rem;
+}
+
+.confirmation-modal-text strong {
+  color: #7d5938;
+  font-weight: 600;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.cancel-modal-btn {
+  background: transparent;
+  border: 2px solid #ccc;
+  color: #666;
+  padding: 0.7rem 1.5rem;
+  border-radius: 12px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.cancel-modal-btn:hover {
+  border-color: #999;
+  color: #333;
+}
+
+.confirm-modal-btn {
+  background: #e74c3c;
+  border: 2px solid #e74c3c;
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border-radius: 12px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.confirm-modal-btn:hover {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+
+.cancel-modal-btn:disabled,
+.confirm-modal-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.confirm-modal-btn:disabled {
+  background: #ccc;
+  border-color: #ccc;
+  color: #666;
+}
+
+/* Responsive para modal */
+@media (max-width: 480px) {
+  .confirmation-modal {
+    width: 95%;
+    padding: 1.5rem;
+  }
+  
+  .confirmation-buttons {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .cancel-modal-btn,
+  .confirm-modal-btn {
+    width: 100%;
+  }
+}

@@ -9,7 +9,7 @@
   width: 100%;
   max-width: 340px;
   min-width: 280px;
-  height: 400px;
+  height: 420px; /* Aumentado de 400px a 420px para más espacio */
   display: flex;
   flex-direction: column;
   margin: 0;
@@ -20,6 +20,7 @@
   height: 200px;
   overflow: hidden;
   position: relative;
+  flex-shrink: 0; /* Evitar que se comprima */
 }
 
 .card-image img {
@@ -37,10 +38,10 @@
   padding: 16px;
   background: white;
   position: relative;
-  border-top: 2px solid #e0e0e0;
-  flex: 1;
+  flex: 1; /* Tomar el espacio restante */
   display: flex;
   flex-direction: column;
+  border-top: 2px solid #e0e0e0;
   min-height: 0;
 }
 
@@ -86,17 +87,21 @@
   font-weight: 400;
 }
 
+/* Descripción con más espacio - igual que en favoritos */
 .info-description {
   margin: 8px 0 0 0;
   font-size: 0.9rem;
   color: #333;
-  line-height: 1.3;
+  line-height: 1.4;
   font-family: 'Nunito Sans', sans-serif;
   font-weight: 400;
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
+  -webkit-line-clamp: 4; /* Aumentado a 4 líneas */
+  max-height: calc(1.4em * 4); /* Espacio para 4 líneas */
+  flex: 1; /* Tomar el espacio disponible */
 }
 
 .info-tags {
@@ -104,6 +109,7 @@
   flex-wrap: wrap;
   gap: 4px;
   margin-top: 8px;
+  flex-shrink: 0; /* No comprimir los tags */
 }
 
 .tag-label {
@@ -141,10 +147,47 @@
   font-family: 'Nunito Sans', sans-serif;
 }
 
+/* Botón de favoritos en InfoCard */
+.info-card-favorite-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.info-card-favorite-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.info-card-favorite-btn.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.info-card-favorite-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .info-card {
     max-width: 320px;
+    height: 400px; /* Mantener altura en tablets */
   }
 }
 
@@ -152,9 +195,15 @@
   .info-card {
     max-width: 100%;
     min-width: 280px;
+    height: 380px; /* Reducir ligeramente en móviles */
   }
   .card-image {
     height: 180px;
+  }
+  
+  .info-description {
+    -webkit-line-clamp: 3; /* 3 líneas en móviles */
+    max-height: calc(1.4em * 3);
   }
 }
 
@@ -167,5 +216,10 @@
   }
   .card-image {
     height: 160px;
+  }
+  
+  .info-description {
+    -webkit-line-clamp: 2; /* 2 líneas en móviles pequeños */
+    max-height: calc(1.4em * 2);
   }
 }
