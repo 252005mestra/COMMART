@@ -2,20 +2,26 @@ import { Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import Home from './pages/Home'
 import EditProfile from './pages/EditProfile'
-import ArtistProfile from './pages/ArtistProfile'  // <-- Agregar esta importación
-import ResetPassword from './pages/ResetPasswordPage'; // o './pages/ResetPassword'
+import ArtistProfile from './pages/ArtistProfile'
+import ResetPassword from './pages/ResetPasswordPage'
 import PrivateRoute from './components/PrivateRoute'
-import Profile from './components/Profile';
-import PublicArtistProfile from './pages/PublicArtistProfile';
-import PublicUserProfile from './pages/PublicUserProfile';
-
+import Profile from './components/Profile'
+import PublicArtistProfile from './pages/PublicArtistProfile'
+import PublicUserProfile from './pages/PublicUserProfile'
+import ArtistOrders from './pages/ArtistOrders'
+import ClientOrders from './pages/ClientOrders'
+import CreateOrder from './components/CreateOrder'
+import OrderDetail from './pages/OrderDetail'
+import { useUser } from './context/UserContext'
 
 const App = () => {
+  const { profile } = useUser()
+
   return (
     <>
       <Routes>
         <Route path='/' element={<LandingPage />} />
-        
+
         <Route
           path='/home'
           element={
@@ -24,7 +30,7 @@ const App = () => {
             </PrivateRoute>
           }
         />
-        
+
         <Route
           path='/edit-profile'
           element={
@@ -34,6 +40,7 @@ const App = () => {
           }
         />
 
+        {/* Ruta para perfil de artista propio */}
         <Route
           path='/artist-profile'
           element={
@@ -43,11 +50,9 @@ const App = () => {
           }
         />
 
-        <Route
-          path='/reset-password/:token'
-          element={<ResetPassword />}
-        />
+        <Route path='/reset-password/:token' element={<ResetPassword />} />
 
+        {/* Ruta para perfil de usuario propio */}
         <Route
           path="/profile"
           element={
@@ -57,11 +62,9 @@ const App = () => {
           }
         />
 
-        <Route
-          path="/artist/:id"
-          element={<PublicArtistProfile />}
-        />
-
+        {/* Rutas públicas para ver perfiles de otros usuarios */}
+        <Route path="/artist/:id" element={<PublicArtistProfile />} />
+        
         <Route
           path='/user/:id'
           element={
@@ -71,6 +74,42 @@ const App = () => {
           }
         />
 
+        {/* Rutas de pedidos */}
+        <Route
+          path="/artist/orders"
+          element={
+            <PrivateRoute>
+              <ArtistOrders />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/orders"
+          element={
+            <PrivateRoute>
+              <ClientOrders />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/order/new/:artistId"
+          element={
+            <PrivateRoute>
+              <CreateOrder />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/orders/:id"
+          element={
+            <PrivateRoute>
+              <OrderDetail user={profile} />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </>
   )

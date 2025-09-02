@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { useUser } from '../context/UserContext'; // <-- Asegurar que esté importado
+import { useUser } from '../context/UserContext';
 
 // Iconos
 import logo from '../assets/LogoCOMMART.png';
@@ -17,45 +17,45 @@ import {
   MessageSquareText,
   Search,
   Menu,
-  Tag
+  Tag,
+  Package, 
+  RefreshCw, 
+  CheckCircle, 
+  DollarSign, 
+  MessageCircle, 
+  Palette
 } from 'lucide-react';
 
 import '../styles/navbar.css';
 
 const MainNav = ({
-  // Callbacks para comunicación con páginas específicas
-  onSearchResults,      // Para Home: envía resultados de búsqueda
-  onStyleFilter,        // Para Home: controla carrusel y filtro de categorías
-  onCarouselVisibility, // Para Home: controla visibilidad del carrusel
-  // Props de configuración
+  onSearchResults,
+  onStyleFilter,
+  onCarouselVisibility,
   showCarouselByDefault = false
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, logout } = useUser(); // <-- Agregar logout aquí
-  
-  // Estados del componente
+  const { profile, logout } = useUser();
+
   const [openMenu, setOpenMenu] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStyle, setSelectedStyle] = useState(null);
-  
-  // Estados para datos
+
   const [users, setUsers] = useState([]);
   const [styles, setStyles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
-  
+  const [notifications, setNotifications] = useState([]);
+
   const menuRef = useRef();
   const iconsRef = useRef();
 
-  // Verificar si estamos en Home
   const isHomePage = location.pathname === '/home';
 
-  // Cargar datos iniciales (solo una vez)
   useEffect(() => {
     if (initialLoadDone) return;
-    
     const fetchInitialData = async () => {
       try {
         setLoading(true);
@@ -63,17 +63,13 @@ const MainNav = ({
           axios.get('http://localhost:5000/api/auth/artists', { withCredentials: true }),
           axios.get('http://localhost:5000/api/auth/styles')
         ]);
-        
         setUsers(usersRes.data);
         setStyles(stylesRes.data);
         setInitialLoadDone(true);
-        
-        // Solo enviar datos iniciales si estamos en Home
         if (isHomePage && onSearchResults) {
           onSearchResults(usersRes.data, null, '');
         }
       } catch (error) {
-        console.error('Error al cargar datos iniciales:', error);
         if (isHomePage && onSearchResults) {
           onSearchResults([], 'Error al cargar artistas', '');
         }
@@ -82,38 +78,27 @@ const MainNav = ({
         setLoading(false);
       }
     };
-
     fetchInitialData();
   }, [initialLoadDone, isHomePage, onSearchResults]);
 
-  // Debounce para la búsqueda
   const debounceSearchRef = useRef();
-  
+
   const performSearch = useCallback((term, usersList, stylesList) => {
     if (!isHomePage || !onSearchResults) return;
-    
     if (!term || term.trim() === '') {
-      // Filtrar el usuario actual de los resultados iniciales
       const filteredUsers = usersList.filter(user => profile?.id !== user.id);
       onSearchResults(filteredUsers, null, '');
-      if (onCarouselVisibility) {
-        onCarouselVisibility(showCarouselByDefault);
-      }
+      if (onCarouselVisibility) onCarouselVisibility(showCarouselByDefault);
       return;
     }
-
-    // Buscar por artista - EXCLUIR PERFIL PROPIO
     const filteredByArtist = usersList.filter(user =>
       user.username.toLowerCase().includes(term.toLowerCase()) &&
-      profile?.id !== user.id // <-- Excluir perfil propio
+      profile?.id !== user.id
     );
-
-    // Buscar por estilo - EXCLUIR PERFIL PROPIO
     const searchTermLower = term.toLowerCase();
     const matchingStyles = stylesList.filter(style => 
       style.name.toLowerCase().includes(searchTermLower)
     );
-
     let filteredByStyle = [];
     if (matchingStyles.length > 0) {
       filteredByStyle = usersList.filter(user => 
@@ -122,83 +107,56 @@ const MainNav = ({
             userStyle.toLowerCase().includes(matchingStyle.name.toLowerCase())
           )
         ) &&
-        profile?.id !== user.id // <-- Excluir perfil propio
+        profile?.id !== user.id
       );
     }
-
-    // Combinar resultados y eliminar duplicados
     const combinedResults = [...filteredByArtist];
     filteredByStyle.forEach(styleUser => {
       if (!combinedResults.find(user => user.id === styleUser.id)) {
         combinedResults.push(styleUser);
       }
     });
-
     onSearchResults(combinedResults, null, term);
-    
-    // Ocultar carrusel durante búsqueda
-    if (onCarouselVisibility) {
-      onCarouselVisibility(false);
-    }
-  }, [isHomePage, onSearchResults, onCarouselVisibility, showCarouselByDefault, profile?.id]); // <-- Agregar profile?.id a las dependencias
+    if (onCarouselVisibility) onCarouselVisibility(false);
+  }, [isHomePage, onSearchResults, onCarouselVisibility, showCarouselByDefault, profile?.id]);
 
-  // Lógica de búsqueda con debounce
   useEffect(() => {
     if (!initialLoadDone || !users.length || !styles.length) return;
-    
-    // Limpiar timeout anterior
-    if (debounceSearchRef.current) {
-      clearTimeout(debounceSearchRef.current);
-    }
-    
-    // Ejecutar búsqueda con delay
+    if (debounceSearchRef.current) clearTimeout(debounceSearchRef.current);
     debounceSearchRef.current = setTimeout(() => {
       setSelectedStyle(null);
       performSearch(searchTerm, users, styles);
     }, 300);
-
     return () => {
-      if (debounceSearchRef.current) {
-        clearTimeout(debounceSearchRef.current);
-      }
+      if (debounceSearchRef.current) clearTimeout(debounceSearchRef.current);
     };
   }, [searchTerm, users, styles, initialLoadDone, performSearch]);
 
-  // Lógica de filtro por estilo
   useEffect(() => {
     if (!isHomePage || !onSearchResults || !initialLoadDone || !users.length) return;
-    if (searchTerm && searchTerm.trim() !== '') return; // No aplicar filtro si hay búsqueda activa
-    
+    if (searchTerm && searchTerm.trim() !== '') return;
     const applyStyleFilter = async () => {
       if (!selectedStyle) {
         onSearchResults(users, null, '');
         return;
       }
-
       try {
         setLoading(true);
         const response = await axios.get(
           `http://localhost:5000/api/auth/artists/style/${selectedStyle.id}`,
           { withCredentials: true }
         );
-        
         onSearchResults(response.data, null, '');
-        
-        if (onStyleFilter) {
-          onStyleFilter(selectedStyle, showCarouselByDefault);
-        }
+        if (onStyleFilter) onStyleFilter(selectedStyle, showCarouselByDefault);
       } catch (error) {
-        console.error('Error al obtener artistas por estilo:', error);
         onSearchResults([], 'Error al obtener artistas por estilo', '');
       } finally {
         setLoading(false);
       }
     };
-
     applyStyleFilter();
   }, [selectedStyle, users, searchTerm, isHomePage, onSearchResults, onStyleFilter, showCarouselByDefault, initialLoadDone]);
 
-  // Cerrar dropdown al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -212,13 +170,11 @@ const MainNav = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Función pública para que CategoryFilter pueda filtrar por estilo
   const handleStyleSelect = useCallback((style) => {
     setSelectedStyle(style);
     setSearchTerm('');
   }, []);
 
-  // Exponer función para uso externo (CategoryFilter)
   useEffect(() => {
     window.mainNavStyleSelect = handleStyleSelect;
     return () => {
@@ -226,12 +182,11 @@ const MainNav = ({
     };
   }, [handleStyleSelect]);
 
-  // Sugerencias dinámicas - EXCLUIR PERFIL PROPIO
   const artistSuggestions = users
     .filter(user =>
       searchTerm &&
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      profile?.id !== user.id // <-- Excluir perfil propio
+      profile?.id !== user.id
     )
     .slice(0, 4);
 
@@ -242,22 +197,17 @@ const MainNav = ({
     )
     .slice(0, 4);
 
-  // Función para alternar menús
   const toggleMenu = (menu) => {
     setOpenMenu(openMenu === menu ? null : menu);
   };
 
-  // Función para cerrar sesión
   const handleLogout = async () => {
     try {
       await logout();
       window.location.href = '/';
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
+    } catch (error) {}
   };
 
-  // Maneja selección de sugerencia de artista
   const handleArtistSuggestionClick = (username) => {
     const artist = artistSuggestions.find(u => u.username === username);
     if (artist) {
@@ -267,7 +217,6 @@ const MainNav = ({
     }
   };
 
-  // Maneja selección de sugerencia de estilo
   const handleStyleSuggestionClick = (style) => {
     if (isHomePage) {
       setSelectedStyle(style);
@@ -278,14 +227,11 @@ const MainNav = ({
     }
   };
 
-  // Maneja el cambio en el input de búsqueda
   const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
+    setSearchTerm(e.target.value);
     setShowSuggestions(true);
   };
 
-  // Maneja el submit de búsqueda (Enter)
   const handleSearchSubmit = (e) => {
     if (e.key === 'Enter' && searchTerm.trim()) {
       if (!isHomePage) {
@@ -295,15 +241,12 @@ const MainNav = ({
     }
   };
 
-  // Oculta sugerencias al perder foco
   const handleBlur = () => {
     setTimeout(() => setShowSuggestions(false), 100);
   };
 
-  // Verificar si hay sugerencias para mostrar
   const hasSuggestions = ((artistSuggestions?.length ?? 0) > 0 || (styleSuggestions?.length ?? 0) > 0) && searchTerm;
 
-  // Maneja el click en el perfil
   const handleProfileClick = () => {
     if (profile?.is_artist) {
       navigate('/artist-profile');
@@ -313,29 +256,130 @@ const MainNav = ({
     setOpenMenu(null);
   };
 
-  // Función para obtener URL de imagen de perfil
   const getProfileImageUrl = (imgPath) =>
     imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
 
-  // En la función que maneja el click en resultados de búsqueda
   const handleArtistClick = (artistId) => {
     if (profile && String(profile.id) === String(artistId)) {
-      // Es tu propio perfil - redirigir a vista privada
       if (profile.is_artist) {
         navigate('/artist-profile');
       } else {
         navigate('/profile');
       }
     } else {
-      // Es perfil de otro usuario - mostrar vista pública
-      // En búsqueda solo aparecen artistas, pero verificar por seguridad
       const foundUser = users.find(user => user.id === artistId);
       if (foundUser && foundUser.is_artist) {
         navigate(`/artist/${artistId}`);
       } else {
-        navigate(`/user/${artistId}`); // Por si acaso
+        navigate(`/user/${artistId}`);
       }
     }
+  };
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/notifications', { withCredentials: true });
+        setNotifications(res.data);
+      } catch (err) {
+        setNotifications([]);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  // NOTIFICACIONES: Redirección completa y funcional
+  const handleNotificationClick = (notification) => {
+    setOpenMenu(null);
+
+    if (!notification.is_read) {
+      markNotificationAsRead(notification.id);
+    }
+
+    // Redirigir según tipo y existencia de order_id
+    if (
+      notification.type === 'order_phase_updated' ||
+      notification.type === 'order_completed' ||
+      notification.type === 'order_paid' ||
+      notification.type === 'new_message' ||
+      notification.type === 'new_sample' ||
+      notification.type === 'sample_uploaded' ||
+      notification.type === 'new_order' ||
+      notification.type === 'order_created'
+    ) {
+      if (notification.order_id) {
+        // Agrega un query param único para forzar el montaje
+        const uniqueKey = Date.now();
+        navigate(`/orders/${notification.order_id}?notif=${uniqueKey}`, {
+          state: {
+            phase: notification.phase || undefined,
+            messageId: notification.message_id || undefined
+          }
+        });
+        return;
+      }
+      if (notification.related_order_id) {
+        navigate(`/orders/${notification.related_order_id}`);
+        return;
+      }
+      // Si es artista y no hay order_id, ir a pedidos de artista
+      if (profile?.is_artist) {
+        navigate('/artist/orders');
+        return;
+      }
+      // Si es cliente y no hay order_id, ir a pedidos de cliente
+      navigate('/orders');
+      return;
+    }
+
+    // Por defecto, ir a home
+    navigate('/home');
+  };
+
+  const markNotificationAsRead = async (notificationId) => {
+    try {
+      await axios.put(
+        `http://localhost:5000/api/notifications/${notificationId}/read`,
+        {},
+        { withCredentials: true }
+      );
+      setNotifications(prev =>
+        prev.map(n =>
+          n.id === notificationId ? { ...n, is_read: true } : n
+        )
+      );
+    } catch (error) {}
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'new_order':
+      case 'order_created':
+        return <Package size={18} />;
+      case 'order_phase_updated':
+        return <RefreshCw size={18} />;
+      case 'order_completed':
+        return <CheckCircle size={18} />;
+      case 'order_paid':
+        return <DollarSign size={18} />;
+      case 'new_message':
+        return <MessageCircle size={18} />;
+      case 'new_sample':
+      case 'sample_uploaded':
+        return <Palette size={18} />;
+      default:
+        return <Bell size={18} />;
+    }
+  };
+
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+    if (diffInMinutes < 1) return 'Ahora';
+    if (diffInMinutes < 60) return `${diffInMinutes}m`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h`;
+    return `${Math.floor(diffInMinutes / 1440)}d`;
   };
 
   return (
@@ -359,7 +403,6 @@ const MainNav = ({
           />
           {showSuggestions && hasSuggestions && (
             <ul className='suggestions-list'>
-              {/* Sugerencias de artistas */}
               {artistSuggestions.map(user => (
                 <li
                   key={`artist-${user.id}`}
@@ -377,8 +420,6 @@ const MainNav = ({
                   </div>
                 </li>
               ))}
-              
-              {/* Sugerencias de estilos */}
               {styleSuggestions.map(style => (
                 <li
                   key={`style-${style.id}`}
@@ -444,7 +485,19 @@ const MainNav = ({
               <li onClick={() => navigate('/edit-profile')} style={{ cursor: 'pointer' }}>
                 <SquarePen className='thick-icon' size={22} /> Editar cuenta
               </li>
-              <li><ClipboardPenLine className='thick-icon' size={22} /> Pedidos</li>
+              <li
+                onClick={() => {
+                  if (profile?.is_artist) {
+                    navigate('/artist/orders');
+                  } else {
+                    navigate('/orders');
+                  }
+                  setOpenMenu(null);
+                }}
+              >
+                <ClipboardPenLine size={22} />
+                <span>Pedidos</span>
+              </li>
               <li onClick={handleLogout} style={{ cursor: 'pointer' }}>
                 <LogOut className='thick-icon' size={22} /> Cerrar sesión
               </li>
@@ -454,15 +507,45 @@ const MainNav = ({
 
         {openMenu === 'notifications' && (
           <div className='notifications-dropdown modern-dropdown'>
-            <div className='menu-header'>Notificaciones</div>
-            <div className='notifications-tabs'>
-              <button>Leídos</button>
-              <button>No leídos</button>
+            <div className='menu-header'>
+              Notificaciones
+              {notifications.filter(n => !n.is_read).length > 0 && (
+                <span className="unread-count">
+                  {notifications.filter(n => !n.is_read).length}
+                </span>
+              )}
             </div>
+            
             <div className='notifications-list'>
-              <div className='notification-card'>
-                  {/* Aqui va el mapeo de notificaciones */}
-              </div>
+              {notifications.length === 0 ? (
+                <div className='no-notifications'>
+                  Sin notificaciones
+                </div>
+              ) : (
+                notifications.map(notification => (
+                  <div
+                    key={notification.id}
+                    className={`notification-card ${!notification.is_read ? 'unread' : ''}`}
+                    onClick={() => handleNotificationClick(notification)}
+                  >
+                    <div className="notification-icon">
+                      {getNotificationIcon(notification.type)}
+                    </div>
+                    
+                    <div className="notification-content">
+                      <div className="notification-title">
+                        {notification.title || 'Notificación'}
+                      </div>
+                      <div className="notification-message">
+                        {notification.message}
+                      </div>
+                      <div className="notification-time">
+                        {formatTimeAgo(notification.created_at)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}

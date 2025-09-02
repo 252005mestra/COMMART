@@ -1,0 +1,340 @@
+.order-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(60, 48, 36, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.order-modal-content {
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 8px 32px rgba(60, 48, 36, 0.13);
+  border: 3px solid #7d5938;
+  width: 1100px;
+  max-width: 95vw;
+  height: auto;
+  max-height: 95vh;
+  padding: 2rem;
+  position: relative;
+  text-align: center;
+  overflow-y: auto;
+  font-family: 'Nunito Sans', sans-serif;
+  margin: 0;
+  box-sizing: border-box;
+  /* Barra de scroll minimalista */
+  scrollbar-width: thin;
+  scrollbar-color: #D2AB80 transparent;
+}
+
+/* Webkit scrollbar (Chrome, Safari, Edge) */
+.order-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.order-modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.order-modal-content::-webkit-scrollbar-thumb {
+  background: #D2AB80;
+  border-radius: 10px;
+}
+
+.order-modal-content::-webkit-scrollbar-thumb:hover {
+  background: #8B6D47;
+}
+
+/* Header con info del artista */
+.order-header {
+  background: #fff;
+  padding: 1rem 2rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.order-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.order-header-text {
+  font-size: 1.1rem;
+  color: #666;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.artist-info-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.artist-avatar-header {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.artist-name-header {
+  font-family: 'Goldman';
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Contenedor del formulario */
+.order-form-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.order-form-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.order-logo {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.order-logo img {
+  height: 60px;
+}
+
+.order-form-title {
+  font-family: 'Goldman';
+  font-size: 1.8rem;
+  color: #8B6D47;
+  margin: 1rem 0 2rem 0;
+}
+
+/* Secciones del formulario */
+.order-section {
+  margin-bottom: 1.5rem;
+}
+
+.section-label {
+  font-family: 'Goldman';
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+/* Grid de paquetes */
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.package-card {
+  border: 3px solid #D2AB80;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  height: 280px;  /* Aumentado de 240px a 280px */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.package-card.selected {
+  border-style: dashed;
+  border-color: #8B6D47;
+  transform: scale(1.02);
+}
+
+.package-header {
+  padding: 0.8rem;
+  text-align: center;
+  color: white;
+  font-family: 'Goldman';
+  font-size: 1rem;
+  flex-shrink: 0; /* No se comprime */
+}
+
+.package-content {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  overflow-y: auto; /* Permitir scroll interno si es necesario */
+}
+
+.package-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem; /* Ligeramente más pequeño */
+  line-height: 1.3;   /* Menos espacio entre líneas */
+}
+
+.package-features li {
+  margin-bottom: 0.2rem; /* Reducido de 0.3rem */
+  color: #666;
+}
+
+.package-price {
+  font-family: 'Goldman';
+  font-size: 1.1rem;
+  color: #8B6D47;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Textarea limpio */
+.description-textarea {
+  width: 100%;
+  height: 100px;  /* Más alto */
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-family: 'Nunito Sans';
+  resize: none;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+/* Área de subida de imágenes con tamaño fijo más grande */
+.images-upload-area {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.image-preview {
+  width: 140px;  /* Aumentado de 100px a 140px */
+  height: 140px; /* Aumentado de 100px a 140px */
+  border-radius: 12px;
+  border: 2px solid #D2AB80;
+  position: relative;
+  overflow: hidden;
+  background: #f9f9f9;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.image-preview .remove-image-btn {
+  position: absolute;
+  top: 5px;       /* Cambiado de -8px a 5px */
+  right: 5px;     /* Cambiado de -8px a 5px */
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.image-preview .remove-image-btn:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+.add-image-area {
+  width: 140px;   /* Aumentado de 100px a 140px */
+  height: 140px;  /* Aumentado de 100px a 140px */
+  border-radius: 12px;
+  border: 2px dashed #D2AB80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #8B6D47;
+  transition: all 0.3s ease;
+  font-size: 2rem; /* Hacer el ícono + más grande */
+}
+
+.add-image-area:hover {
+  border-color: #8B6D47;
+  background: rgba(139, 109, 71, 0.05);
+}
+
+.add-image-area input[type="file"] {
+  display: none;
+}
+
+/* Botones limpios */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.cancel-button,
+.continue-button {
+  padding: 0.75rem 2rem;
+  border-radius: 20px;
+  font-family: 'Goldman';
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-button {
+  background: #e0e0e0;
+  color: #666;
+}
+
+.continue-button {
+  background: #8B6D47;
+  color: white;
+}
+
+@media (max-width: 900px) {
+  .order-modal-content {
+    width: 98vw;
+    height: 90vh;
+    padding: 1.5rem;
+  }
+  
+  .packages-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1200px) {
+  .order-modal-content {
+    width: 98vw;
+    height: 95vh;
+    padding: 1.5rem;
+  }
+  
+  .packages-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
