@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './src/routes/authRoutes.js';
 import orderRoutes from './src/routes/orderRoutes.js';
 import notificationRoutes from './src/routes/notificationRoutes.js';
+import packageRoutes from './src/routes/packageRoutes.js';
 import dbConnection from './src/config/db.js';
 import path from 'path';
 
@@ -22,6 +23,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes); // localhost:5000/api/auth/register
 app.use('/api/orders', orderRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/packages', packageRoutes);
 
 // Servir archivos estáticos de la carpeta uploads
 app.use('/uploads', express.static(path.join(process.cwd(), 'src', 'uploads')));

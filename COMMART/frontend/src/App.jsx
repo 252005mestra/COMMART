@@ -11,6 +11,7 @@ import PublicUserProfile from './pages/PublicUserProfile'
 import ArtistOrders from './pages/ArtistOrders'
 import ClientOrders from './pages/ClientOrders'
 import CreateOrder from './components/CreateOrder'
+import CreateOrderPage from './pages/CreateOrderPage'
 import OrderDetail from './pages/OrderDetail'
 import { useUser } from './context/UserContext'
 
@@ -107,6 +108,15 @@ const App = () => {
           element={
             <PrivateRoute>
               <OrderDetail user={profile} />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/artist/:artistId/order"
+          element={
+            <PrivateRoute>
+              <CreateOrderPage />
             </PrivateRoute>
           }
         />

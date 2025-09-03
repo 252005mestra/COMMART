@@ -560,7 +560,7 @@ export const updateArtistProfileModel = async ({
 
   // Guardar nuevas imágenes de portafolio
   if (portfolioImages && portfolioImages.length > 0) {
-    const values = portfolioImages.map(img => [userId, `uploads/${img.filename}`]);
+    const values = portfolioImages.map(img => [`${userId}`, `uploads/portfolio_images/${img.filename}`]);
     await new Promise((resolve, reject) => {
       dbConnection.query(
         'INSERT INTO portfolios (artist_id, image_path) VALUES ?',

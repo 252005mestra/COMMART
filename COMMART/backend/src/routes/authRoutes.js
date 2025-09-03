@@ -1,5 +1,9 @@
 // Rutas de autenticación y usuarios
 import express from 'express';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
+
 import { 
     registerUser, 
     loginUser, 
@@ -45,42 +49,39 @@ import {
     getArtistFavoritedByListModel
 } from '../models/userModel.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
-import multer from 'multer';
-import path from 'path';
 
 const router = express.Router();
 
 // Configuración de multer para subida de imágenes
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'src/uploads/')
+    let folder = 'src/uploads/';
+    if (file.fieldname === 'profile_image') {
+      folder = 'src/uploads/profile_images/';
+    } else if (file.fieldname === 'portfolio_images') {
+      folder = 'src/uploads/portfolio_images/';
+    }
+    // Crear la carpeta si no existe
+    if (!fs.existsSync(folder)) {
+      fs.mkdirSync(folder, { recursive: true });
+    }
+    cb(null, folder);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    
-    // Determinar prefijo según el campo
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1e9);
     let prefix = 'file';
     if (file.fieldname === 'profile_image') {
       prefix = 'profile';
     } else if (file.fieldname === 'portfolio_images') {
       prefix = 'portfolio';
     }
-    
-    cb(null, prefix + '-' + uniqueSuffix + path.extname(file.originalname))
+    const ext = path.extname(file.originalname);
+    cb(null, `${prefix}-${timestamp}-${random}${ext}`);
   }
 });
 
-const upload = multer({ 
-  storage: storage,
-  fileFilter: function (req, file, cb) {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Solo se permiten archivos de imagen'));
-    }
-  },
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB máximo
-});
+const upload = multer({ storage });
 
 // Registro, login y logout
 router.post('/register', registerUser);

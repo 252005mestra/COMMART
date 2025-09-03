@@ -7,20 +7,21 @@ import '../styles/userprofile.css';
 import axios from 'axios';
 import UserListModal from '../components/UserListModal';
 import ProfileTabsSection from '../components/ProfileTabsSection';
-import Footer from '../components/Footer'; // Agregar import
+import Footer from '../components/Footer';
 
 const UserProfile = () => {
   const { profile, removeFavoriteArtist, fetchProfile } = useUser();
   const fileInputRef = useRef(null);
 
-  // Imagen actual y preview
+  // Estados para imagen y modal de confirmación
   const [imagePreview, setImagePreview] = useState(
     profile?.profile_image ? `http://localhost:5000/${profile.profile_image}` : null
   );
-  // Nueva imagen seleccionada (temporal)
   const [pendingImage, setPendingImage] = useState(null);
   const [pendingImageUrl, setPendingImageUrl] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // Estados para modales
   const [showFollowingModal, setShowFollowingModal] = useState(false);
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
 
@@ -49,19 +50,29 @@ const UserProfile = () => {
   // Confirmar cambio de imagen
   const handleConfirmChange = async () => {
     if (!pendingImage) return;
-    const formData = new FormData();
-    formData.append('profile_image', pendingImage);
+    
     try {
+      const formData = new FormData();
+      formData.append('profile_image', pendingImage);
+      
       await axios.put('http://localhost:5000/api/auth/profile', formData, {
         withCredentials: true,
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      
+      // Actualizar el contexto del usuario para refrescar los datos
       if (typeof fetchProfile === 'function') await fetchProfile();
+      
+      // Actualizar la vista previa localmente
       setImagePreview(pendingImageUrl);
       setShowConfirm(false);
       setPendingImage(null);
       setPendingImageUrl(null);
+      
+      alert('Foto de perfil actualizada correctamente');
+      
     } catch (err) {
+      console.error('Error al actualizar la foto de perfil:', err);
       alert('Error al actualizar la foto de perfil');
     }
   };
@@ -158,6 +169,62 @@ const UserProfile = () => {
           type="my-favorites"
           title="Favoritos"
         />
+
+        {/* Modal de confirmación para cambio de imagen */}
+        {showConfirm && (
+          <div className="modal-overlay">
+            <div className="modal-content" style={{ maxWidth: 350, textAlign: 'center' }}>
+              <h3 style={{ fontFamily: 'Goldman', fontSize: '1.2rem', margin: '0 0 1rem 0' }}>
+                ¿Deseas cambiar tu foto de perfil?
+              </h3>
+              <div style={{ margin: '1rem 0' }}>
+                <img
+                  src={pendingImageUrl}
+                  alt="Vista previa"
+                  style={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '3px solid #b3b792'
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <button 
+                  className="cancel-btn" 
+                  onClick={handleCancelChange}
+                  style={{
+                    background: '#666',
+                    color: 'white',
+                    padding: '0.5rem 1.5rem',
+                    border: 'none',
+                    borderRadius: '25px',
+                    cursor: 'pointer',
+                    fontFamily: 'Goldman'
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  className="save-btn" 
+                  onClick={handleConfirmChange}
+                  style={{
+                    background: '#8B6D47',
+                    color: 'white',
+                    padding: '0.5rem 1.5rem',
+                    border: 'none',
+                    borderRadius: '25px',
+                    cursor: 'pointer',
+                    fontFamily: 'Goldman'
+                  }}
+                >
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />

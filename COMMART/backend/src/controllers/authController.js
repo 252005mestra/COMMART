@@ -546,7 +546,7 @@ export const updateUserProfileController = async (req, res) => {
 
     // Actualizar imagen de perfil
     if (profileImage) {
-      updateData.profile_image = `uploads/${profileImage.filename}`;
+      updateData.profile_image = `uploads/profile_images/${profileImage.filename}`;
     }
 
     // Actualizar estado de artista si se proporciona
@@ -861,9 +861,13 @@ export const updateArtistProfileController = async (req, res) => {
 
     // Actualizar imagen de perfil del usuario si se proporciona
     if (profileImage) {
-      await updateUserModel(userId, { profile_image: `uploads/${profileImage.filename}` });
+      // CAMBIA ESTA LÍNEA:
+      // await updateUserModel(userId, { profile_image: `uploads/${profileImage.filename}` });
+      await updateUserModel(userId, { profile_image: `uploads/profile_images/${profileImage.filename}` });
     }
 
+    // Cuando guardes las imágenes de portafolio, asegúrate de guardar así:
+    // portfolioImages.map(img => `uploads/portfolio_images/${img.filename}`)
     // Convertir strings de arrays si vienen como JSON strings
     let stylesArray = [];
     let languagesArray = [];

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Edit2, Trash2, Plus, X, Camera, Star, StarOff, CircleUserRound, CircleArrowLeft, CircleArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
 import UserListModal from './UserListModal';
 import '../styles/artistportfolio.css';
@@ -17,6 +18,8 @@ const ArtistPortfolio = ({
   isFavorite = false,
   actionLoading = { follow: false, favorite: false }
 }) => {
+  const navigate = useNavigate(); 
+  
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -739,7 +742,7 @@ const ArtistPortfolio = ({
               ) : (
                 <button 
                   className={`btn-order ${!artist?.availability ? 'btn-disabled' : ''}`}
-                  onClick={artist?.availability ? onOrder : null}
+                  onClick={artist?.availability ? () => navigate(`/artist/${artist.id}/order`) : null}
                   disabled={!artist?.availability}
                   title={!artist?.availability ? 'El artista no está disponible' : 'Hacer pedido'}
                 >
