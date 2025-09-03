@@ -20,10 +20,11 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// Rutas
 app.use('/api/auth', authRoutes); // localhost:5000/api/auth/register
 app.use('/api/orders', orderRoutes);
+app.use('/api/packages', packageRoutes); // ✅ AGREGAR ESTA LÍNEA
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/packages', packageRoutes);
 
 // Servir archivos estáticos de la carpeta uploads
 app.use('/uploads', express.static(path.join(process.cwd(), 'src', 'uploads')));

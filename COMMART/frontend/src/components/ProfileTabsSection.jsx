@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import InfoCard from './InfoCard';
+import ArtistPackages from './ArtistPackages';
 import '../styles/profiletabs.css';
 import { useUser } from '../context/UserContext';
 
@@ -248,6 +249,60 @@ const ProfileTabsSection = ({ data, isArtist, isPublicView = false, onFavoriteTo
 
   const headerText = getHeaderText();
 
+  // ✅ SOLO MODIFICAR ESTA FUNCIÓN - EL RESTO NO SE TOCA
+  const renderTabContent = () => {
+    // Si es la pestaña de paquetes, mostrar ArtistPackages
+    if (activeTab === 'packages') {
+      return <ArtistPackages isPublicView={isPublicView} />;
+    }
+
+    // Resto del código existente
+    if (paginatedItems.length === 0) {
+      return (
+        <div className="profile-tabs-empty">
+          {activeTab === 'favorites' && currentData.length === 0 ? 
+            'No tienes artistas favoritos' : 
+            'No hay datos para mostrar.'
+          }
+        </div>
+      );
+    }
+
+    if (activeTab === 'favorites') {
+      return (
+        <div className="profile-tabs-favorites-grid">
+          {paginatedItems.map((artist, index) => (
+            <InfoCard
+              key={`favorite-${artist.id}-${index}`}
+              image={getPortfolioImageUrl(artist.portfolio_image)}
+              avatar={getProfileImageUrl(artist.profile_image)}
+              title={artist.username}
+              subtitle={`${artist.followers || 0} Followers`}
+              tags={artist.styles || []}
+              description={artist.description}
+              onClick={() => handleArtistClick(artist)}
+              asLink={false}
+              showFavoriteButton={!isPublicView}
+              isFavorite={true}
+              onFavoriteClick={() => handleFavoriteToggle(artist)}
+              favoriteLoading={favoriteLoading[artist.id] || false}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="profile-tabs-grid">
+        {paginatedItems.map((item, idx) => (
+          <div key={item.id || idx} className="profile-tabs-card">
+            {renderCardContent(activeTab, item)}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="profile-tabs-section-bg">
       <div className="profile-tabs-header">
@@ -287,45 +342,9 @@ const ProfileTabsSection = ({ data, isArtist, isPublicView = false, onFavoriteTo
       </div>
 
       <div className="profile-tabs-content">
-        {paginatedItems.length === 0 ? (
-          <div className="profile-tabs-empty">
-            {activeTab === 'favorites' && currentData.length === 0 ? 
-              'No tienes artistas favoritos' : 
-              'No hay datos para mostrar.'
-            }
-          </div>
-        ) : (
-          <div className={activeTab === 'favorites' ? 'profile-tabs-favorites-grid' : 'profile-tabs-grid'}>
-            {activeTab === 'favorites' ? (
-              paginatedItems.map((artist, index) => (
-                <InfoCard
-                  key={`favorite-${artist.id}-${index}`}
-                  image={getPortfolioImageUrl(artist.portfolio_image)}
-                  avatar={getProfileImageUrl(artist.profile_image)}
-                  title={artist.username}
-                  subtitle={`${artist.followers || 0} Followers`}
-                  tags={artist.styles || []}
-                  description={artist.description}
-                  onClick={() => handleArtistClick(artist)}
-                  asLink={false}
-                  // Props para el botón de favoritos (solo en vista privada)
-                  showFavoriteButton={!isPublicView}
-                  isFavorite={true}
-                  onFavoriteClick={() => handleFavoriteToggle(artist)} // ⭐ DIRECTO SIN MODAL
-                  favoriteLoading={favoriteLoading[artist.id] || false}
-                />
-              ))
-            ) : (
-              paginatedItems.map((item, idx) => (
-                <div className="profile-tabs-card" key={`${activeTab}-${item.id || idx}`}>
-                  {renderCardContent(activeTab, item)}
-                </div>
-              ))
-            )}
-          </div>
-        )}
+        {renderTabContent()}
         
-        {renderPagination()}
+        {activeTab !== 'packages' && renderPagination()}
       </div>
     </div>
   );

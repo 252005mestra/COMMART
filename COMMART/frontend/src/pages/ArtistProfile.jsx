@@ -5,6 +5,7 @@ import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import ArtistPortfolio from '../components/ArtistPortfolio';
 import ProfileTabsSection from '../components/ProfileTabsSection';
+import ArtistPackages from '../components/ArtistPackages';
 
 const ArtistProfile = () => {
   const { profile, removeFavoriteArtist, fetchProfile } = useUser();
@@ -137,13 +138,11 @@ const ArtistProfile = () => {
   return (
     <>
       <MainNav />
-
       <main className="main-content">
         <section className="artist-profile-section">
           <ArtistPortfolio
             artist={{
               ...(artistData || profile),
-              // favorites: localFavoriteCount // ⭐ USAR CONTEO LOCAL
             }}
             allStyles={allStyles}
             allLanguages={allLanguages}
@@ -171,7 +170,6 @@ const ArtistProfile = () => {
           />
         )}
       </main>
-
       <Footer />
     </>
   );

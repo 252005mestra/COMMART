@@ -1,0 +1,693 @@
+/* ========== ArtistPackages - Diseño mejorado según especificaciones ========== */
+.artist-packages-section {
+  width: 100%;
+  font-family: 'Nunito Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* ========== Grid de paquetes - Más grandes ========== */
+.packages-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 2rem;
+  justify-items: center;
+  max-width: 100%;
+}
+
+/* ========== Cards de paquetes - Más grandes y fondo completamente blanco ========== */
+.artist-package-card {
+  background: white;
+  border-radius: 16px;
+  width: 320px; /* Aumentado de 280px a 320px */
+  height: 480px; /* Aumentado de 400px a 480px */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.2s ease;
+  border: 2px solid #f0f0f0;
+}
+
+.artist-package-card:hover {
+  transform: translateY(-2px);
+}
+
+/* ========== Header de paquete - Fondo blanco y título café ========== */
+.package-header-artist {
+  background: white; /* Cambiado de #D2AB80 a white */
+  color: #8B6D47; /* Color café */
+  padding: 1rem;
+  text-align: center;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60px;
+  border-bottom: 2px solid rgba(139, 109, 71, 0.1); /* Sutil línea café */
+}
+
+.package-title-artist {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.3rem; /* Ligeramente más grande */
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin: 0;
+  color: #8B6D47; /* Color café */
+}
+
+.package-edit-icon {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #8B6D47; /* Cambiar a café */
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.package-edit-icon:hover {
+  background: rgba(139, 109, 71, 0.1);
+}
+
+/* ========== Contenido del paquete ========== */
+.package-content-artist {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+}
+
+/* ========== Divider del 80% ========== */
+.package-content-artist::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%; /* Para que ocupe el 80% centrado */
+  width: 80%;
+  height: 1px;
+  background: rgba(139, 109, 71, 0.2);
+}
+
+/* ========== Sección de precio - Completamente a la izquierda ========== */
+.package-price-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 0.5rem; /* Espacio después del divider */
+}
+
+.package-price-label {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  font-weight: 400;
+}
+
+.package-price-amount {
+  background: #8fa381;
+  color: white;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  padding: 8px 20px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+/* ========== Descripción ========== */
+.package-description-section {
+  flex: 1;
+}
+
+.package-desc-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.8rem;
+  font-weight: 400;
+}
+
+.package-desc-text {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.package-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.package-features-list li {
+  margin-bottom: 0.3rem;
+  position: relative;
+  padding-left: 1rem;
+  color: #666;
+}
+
+.package-features-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #7d5938; /* Mismo color que "Como manejo mis precios" */
+  font-weight: bold;
+}
+
+/* ========== Sección de muestra - Imágenes más grandes ========== */
+.package-samples-section {
+  margin-top: auto;
+}
+
+.package-samples-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.8rem;
+  font-weight: 400;
+}
+
+.package-samples-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem; /* Aumentado de 0.8rem a 1rem */
+}
+
+.package-sample-image {
+  width: 100%;
+  height: 100px; /* Aumentado de 80px a 100px */
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #D2AB80;
+}
+
+.package-no-samples {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  font-size: 0.85rem;
+  padding: 2rem;
+  border: 2px dashed #D2AB80;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+/* ========== Card "Agregar" - Más grande ========== */
+.add-package-card {
+  background: white;
+  border: 3px dashed #C7A47B;
+  border-radius: 16px;
+  width: 320px; /* Aumentado de 280px a 320px */
+  height: 480px; /* Aumentado de 400px a 480px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #C7A47B;
+}
+
+.add-package-card:hover {
+  border-color: #8B6D47;
+  color: #8B6D47;
+  transform: translateY(-2px);
+}
+
+.add-package-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.add-package-icon {
+  width: 140px; /* Aumentado de 120px a 140px */
+  height: 140px; /* Aumentado de 120px a 140px */
+  border-radius: 50%;
+  border: 3px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4.5rem; /* Aumentado de 4rem a 4.5rem */
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.add-package-card:hover .add-package-icon {
+  transform: scale(1.05);
+}
+
+.add-package-text {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.4rem; /* Aumentado de 1.3rem a 1.4rem */
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+/* ========== Sección de Extras ========== */
+.extras-section-artist {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-top: 2rem;
+  position: relative;
+}
+
+.extras-header-artist {
+  background: white;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.extras-title-artist {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.4rem;
+  color: #333;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.extras-edit-btn {
+  background: none;
+  border: none;
+  color: #8B6D47;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.extras-edit-btn:hover {
+  background: rgba(139, 109, 71, 0.1);
+  color: #7A5D3F;
+}
+
+/* ========== Lista de extras ========== */
+.extras-list-artist {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  min-height: 200px;
+}
+
+.extra-item-artist {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 1.5rem;
+  border-right: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s;
+  min-height: 70px;
+}
+
+.extra-item-artist:nth-child(odd) {
+  border-right: 1px solid #f0f0f0;
+}
+
+.extra-item-artist:nth-child(even) {
+  border-right: none;
+}
+
+.extra-item-artist:hover {
+  background: #f8f9fa;
+}
+
+.extra-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex: 1;
+}
+
+.extra-item-bullet {
+  color: #8B6D47;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.extra-item-name {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+}
+
+.extra-item-right {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.extra-item-price {
+  background: #8fa381;
+  color: white;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  padding: 6px 16px;
+  border-radius: 15px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.extra-item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.extra-action-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.extra-action-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.extra-action-btn.delete:hover {
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
+
+/* ========== Mensaje cuando no hay extras ========== */
+.no-extras-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 3rem;
+  background: #f9f9f9;
+}
+
+/* ========== Modal de paquete ========== */
+.package-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.package-form-modal {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 3px solid #8B6D47;
+}
+
+.package-form-header {
+  background: #8B6D47;
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.package-form-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.3rem;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.package-form-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.package-form-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.package-form {
+  padding: 2rem;
+}
+
+.form-field-artist {
+  margin-bottom: 1.5rem;
+}
+
+.form-field-artist label {
+  display: block;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.8rem;
+  font-weight: 400;
+}
+
+.form-field-artist input,
+.form-field-artist textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.form-field-artist input:focus,
+.form-field-artist textarea:focus {
+  outline: none;
+  border-color: #8B6D47;
+}
+
+.form-field-artist textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-field-help {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.3rem;
+  font-style: italic;
+}
+
+.image-preview {
+  margin-top: 0.8rem;
+}
+
+.image-preview img {
+  width: 120px; /* Aumentado de 100px a 120px */
+  height: 120px; /* Aumentado de 100px a 120px */
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #D2AB80;
+}
+
+.form-actions-artist {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.form-btn-cancel,
+.form-btn-save {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.form-btn-cancel {
+  background: #666;
+  color: white;
+}
+
+.form-btn-cancel:hover {
+  background: #555;
+}
+
+.form-btn-save {
+  background: #8B6D47;
+  color: white;
+}
+
+.form-btn-save:hover {
+  background: #7A5D3F;
+}
+
+/* ========== Modal de extra ========== */
+.extra-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.extra-form-modal {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  border: 3px solid #8B6D47;
+}
+
+.extra-form-content {
+  padding: 0;
+}
+
+.extra-form-header {
+  background: #8B6D47;
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.extra-form-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.2rem;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.extra-form-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.extra-form-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.extra-form {
+  padding: 1.5rem;
+}
+
+/* ========== Estados de carga ========== */
+.packages-loading {
+  text-align: center;
+  padding: 4rem;
+  font-family: 'Nunito Sans', sans-serif;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1024px) {
+  .packages-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .packages-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .artist-package-card,
+  .add-package-card {
+    width: 100%;
+    max-width: 350px;
+    height: 450px;
+  }
+  
+  .extras-list-artist {
+    grid-template-columns: 1fr;
+  }
+  
+  .extra-item-artist:nth-child(odd) {
+    border-right: none;
+  }
+  
+  .package-form-modal,
+  .extra-form-modal {
+    margin: 1rem;
+    width: calc(100% - 2rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .package-form {
+    padding: 1rem;
+  }
+  
+  .form-actions-artist {
+    flex-direction: column;
+  }
+  
+  .form-btn-cancel,
+  .form-btn-save {
+    width: 100%;
+  }
+  
+  .artist-package-card,
+  .add-package-card {
+    height: 420px;
+  }
+}
