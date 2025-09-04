@@ -7,31 +7,54 @@ import '../styles/artistpackages.css';
 const MAX_PACKAGES = 3;
 const MAX_EXTRAS = 6;
 
-const ArtistPackages = ({ isPublicView = false }) => {
+const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages = [] }) => {
   const [packages, setPackages] = useState([]);
   const [extras, setExtras] = useState([]);
-  const [editing, setEditing] = useState(null);
-  const [editingExtra, setEditingExtra] = useState(null);
-  const [showAdd, setShowAdd] = useState(false);
-  const [showAddExtra, setShowAddExtra] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Cargar paquetes y extras
-  useEffect(() => {
-    fetchPackages();
-    if (!isPublicView) {
-      fetchExtras();
-    }
-  }, [isPublicView]);
+  // FALTABAN ESTOS ESTADOS:
+  const [editing, setEditing] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editingExtra, setEditingExtra] = useState(null);
+  const [showAddExtra, setShowAddExtra] = useState(false);
 
+  // Cargar paquetes y extras solo una vez según la vista
+  useEffect(() => {
+    if (isPublicView) {
+      // Vista pública: usar initialPackages solo al montar
+      setPackages(initialPackages || []);
+      setLoading(false);
+    } else {
+      // Vista privada: cargar desde el backend
+      const fetchAll = async () => {
+        setLoading(true);
+        await fetchPackages();
+        await fetchExtras();
+        setLoading(false);
+      };
+      fetchAll();
+    }
+    // eslint-disable-next-line
+  }, [isPublicView, artistId]); // NO incluyas packages ni initialPackages aquí
+
+  // Vista privada (propia)
   const fetchPackages = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/packages/my', { 
-        withCredentials: true 
-      });
+      const res = await axios.get('http://localhost:5000/api/packages/my', { withCredentials: true });
       setPackages(res.data || []);
     } catch (error) {
-      console.error('Error al cargar paquetes:', error);
+      setPackages([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Vista pública (de otro artista)
+  const fetchPackagesPublic = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/packages/artist/${artistId}`);
+      setPackages(res.data || []);
+    } catch (error) {
       setPackages([]);
     } finally {
       setLoading(false);

@@ -169,6 +169,7 @@ const PublicArtistProfile = () => {
             }}
             isArtist={true}
             isPublicView={true}
+            artistId={artist.id}
           />
         )}
 

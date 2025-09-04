@@ -8,7 +8,7 @@ import { useUser } from '../context/UserContext';
 
 const PAGE_SIZE = 6;
 
-const ProfileTabsSection = ({ data, isArtist, isPublicView = false, onFavoriteToggle }) => {
+const ProfileTabsSection = ({ data, isArtist, isPublicView = false, artistId = null, onFavoriteToggle }) => {
   const [favoriteLoading, setFavoriteLoading] = useState({});
   
   // Estado para navegación de tabs
@@ -249,11 +249,16 @@ const ProfileTabsSection = ({ data, isArtist, isPublicView = false, onFavoriteTo
 
   const headerText = getHeaderText();
 
-  // ✅ SOLO MODIFICAR ESTA FUNCIÓN - EL RESTO NO SE TOCA
   const renderTabContent = () => {
-    // Si es la pestaña de paquetes, mostrar ArtistPackages
     if (activeTab === 'packages') {
-      return <ArtistPackages isPublicView={isPublicView} />;
+      // PASA LOS PAQUETES COMO PROP EN VISTA PUBLICA
+      return (
+        <ArtistPackages
+          isPublicView={isPublicView}
+          artistId={artistId}
+          initialPackages={isPublicView ? data.packages : undefined}
+        />
+      );
     }
 
     // Resto del código existente

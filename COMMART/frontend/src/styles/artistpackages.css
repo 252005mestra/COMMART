@@ -28,7 +28,7 @@
   overflow: hidden;
   position: relative;
   transition: transform 0.2s ease;
-  border: 2px solid #f0f0f0;
+  border: 3px solid #000000;
 }
 
 .artist-package-card:hover {
@@ -196,7 +196,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  aspect-ratio: 2 / 1; /* Para mantener proporciones consistentes */
+  aspect-ratio: 1 / 1; /* Para mantener proporciones consistentes */
 }
 
 .package-no-samples {

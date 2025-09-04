@@ -44,6 +44,11 @@ import {
   getArtistFavoritedByListModel
 } from '../models/userModel.js';
 
+import { 
+  getPackagesByArtist, 
+  getExtrasByArtist 
+} from '../models/packageModel.js';
+
 // Función para detectar caracteres peligrosos (para validación - rechazar entrada)
 const containsXSSChars = (input) => /[<>"'&/]/.test(input);
 
@@ -784,21 +789,25 @@ export const getPublicArtistProfileController = async (req, res) => {
     const { id } = req.params;
     const profile = await getArtistFullProfileModel(id);
     if (!profile) return res.status(404).json({ message: 'Artista no encontrado.' });
-    
+
     // Calcular contadores correctos para vista pública
     const myFavoriteArtistsCount = await getUserFavoriteArtistsCountModel(id);
     const followedArtistsCount = await getUserFollowedArtistsCountModel(id);
-    
+
     // Agregar listas para vista pública
     const favoritesList = await getUserFavoriteArtistsModel(id);
-    
+
+    // === AGREGAR ESTO: obtener paquetes y extras ===
+    const packagesList = await getPackagesByArtist(id);
+    const extrasList = await getExtrasByArtist(id);
+
     res.json({
       ...profile,
-      favorites: myFavoriteArtistsCount, // Sus favoritos
-      myFavoriteArtistsCount,
+      favorites: myFavoriteArtistsCount,
       followedArtistsCount,
       favoritesList,
-      reviewsList: []
+      packagesList,
+      extrasList, // Puedes usarlo si lo necesitas en el frontend
     });
   } catch (err) {
     console.error('Error al obtener perfil público:', err);
