@@ -76,14 +76,23 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
   // Crear o editar paquete
   const handleSavePackage = async (pkg) => {
     try {
+      // Si es una eliminación, usar función específica
+      if (pkg.delete) {
+        await handleDeletePackage(pkg.id);
+        return;
+      }
+      
       const formData = new FormData();
       
       // Convertir precio a número antes de enviar
       const finalPrice = parsePriceForDB(pkg.price.toString());
       
-      // Agregar campos del formulario
+      // Agregar campos del formulario (SIN incluir 'delete')
       Object.entries(pkg).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && key !== 'reference_image1' && key !== 'reference_image2') {
+        if (value !== null && value !== undefined && 
+            key !== 'reference_image1' && 
+            key !== 'reference_image2' && 
+            key !== 'delete') { // EXCLUIR delete
           if (key === 'price') {
             formData.append(key, finalPrice);
           } else {
@@ -374,12 +383,45 @@ function PackageModal({ pkg, onSave, onCancel }) {
   const fileInputRef1 = React.useRef();
   const fileInputRef2 = React.useRef();
 
-  // Eliminar imagen
-  const handleRemoveImage = (idx) => {
+  // ELIMINAR ESTA FUNCIÓN DUPLICADA:
+  // const handleRemoveImage = (idx) => {
+  //   if (idx === 1) {
+  //     setForm(f => ({ ...f, reference_image1: null }));
+  //     setPreview1(null);
+  //   } else {
+  //     setForm(f => ({ ...f, reference_image2: null }));
+  //     setPreview2(null);
+  //   }
+  // };
+
+  // MANTENER SOLO ESTA FUNCIÓN:
+  const handleRemoveImage = async (idx) => {
     if (idx === 1) {
+      // Si es una imagen existente, eliminarla del servidor
+      if (pkg?.reference_image1 && typeof pkg.reference_image1 === 'string') {
+        try {
+          await axios.delete(`http://localhost:5000/api/packages/my/${pkg.id}/image/1`, {
+            withCredentials: true
+          });
+        } catch (error) {
+          console.error('Error al eliminar imagen:', error);
+          // No hacer alert para errores del servidor, solo en el estado local
+        }
+      }
       setForm(f => ({ ...f, reference_image1: null }));
       setPreview1(null);
     } else {
+      // Si es una imagen existente, eliminarla del servidor
+      if (pkg?.reference_image2 && typeof pkg.reference_image2 === 'string') {
+        try {
+          await axios.delete(`http://localhost:5000/api/packages/my/${pkg.id}/image/2`, {
+            withCredentials: true
+          });
+        } catch (error) {
+          console.error('Error al eliminar imagen:', error);
+          // No hacer alert para errores del servidor, solo en el estado local
+        }
+      }
       setForm(f => ({ ...f, reference_image2: null }));
       setPreview2(null);
     }
@@ -432,9 +474,19 @@ function PackageModal({ pkg, onSave, onCancel }) {
   };
 
   // Eliminar paquete
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (window.confirm('¿Estás seguro de eliminar este paquete? Esta acción no se puede deshacer.')) {
-      onSave({ ...form, delete: true, id: pkg.id });
+      try {
+        await axios.delete(`http://localhost:5000/api/packages/my/${pkg.id}`, { 
+          withCredentials: true 
+        });
+        onCancel(); // Cerrar modal
+        // Recargar paquetes (necesitas pasar esta función desde el componente padre)
+        window.location.reload(); // Temporal - mejor pasar función de recarga
+      } catch (error) {
+        console.error('Error al eliminar paquete:', error);
+        alert('Error al eliminar el paquete');
+      }
     }
   };
 

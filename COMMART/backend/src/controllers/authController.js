@@ -322,38 +322,18 @@ export const logoutUser = (req, res) => {
     res.status(200).json({ message: 'Sesión cerrada correctamente.' });
 };
 
-// Obtener artistas públicos para la landing (función del controlador)
-export const getPublicArtistsController = async (req, res) => {
-  try {
-    const artists = await getArtistsBasicInfoModel();  // Usar directamente el nombre del modelo
-    
-    // Sanitizar datos antes de enviarlos (usernames que se muestran al público)
-    const sanitizedArtists = artists.map(artist => ({
-      ...artist,
-      username: sanitizeInput(artist.username)
-    }));
-    
-    res.status(200).json(sanitizedArtists);
-  } catch (error) {
-    console.error('Error al obtener artistas públicos:', error);
-    res.status(500).json({ message: 'Error del servidor al obtener artistas públicos.' });
-  }
-};
-
 // Obtener todos los artistas (con información completa)
 export const getAllArtistsController = async (req, res) => {
   try {
     const currentUserId = req.user?.id; // Obtener ID del usuario actual
     const artists = await getArtistsBasicInfoModel();
 
-    // Sanitizar usernames para mostrar de forma segura Y excluir perfil propio
-    const sanitizedArtists = artists
-      .filter(artist => artist.id !== currentUserId) // <-- Excluir perfil propio
-      .map(artist => ({
-        ...artist,
-        username: sanitizeInput(artist.username),
-        description: artist.description ? sanitizeInput(artist.description) : null
-      }));
+    // Sanitizar usernames para mostrar de forma segura SIN excluir perfil propio
+    const sanitizedArtists = artists.map(artist => ({
+      ...artist,
+      username: sanitizeInput(artist.username),
+      description: artist.description ? sanitizeInput(artist.description) : null
+    }));
     
     res.status(200).json(sanitizedArtists);
   } catch (error) {
@@ -369,19 +349,36 @@ export const getArtistsByStyleController = async (req, res) => {
     const currentUserId = req.user?.id; // Obtener ID del usuario actual
     const artists = await getArtistsBasicInfoModel(parseInt(styleId));
 
-    // Sanitizar usernames para mostrar de forma segura Y excluir perfil propio
-    const sanitizedArtists = artists
-      .filter(artist => artist.id !== currentUserId) // <-- Excluir perfil propio
-      .map(artist => ({
-        ...artist,
-        username: sanitizeInput(artist.username),
-        description: artist.description ? sanitizeInput(artist.description) : null
-      }));
+    // Sanitizar usernames para mostrar de forma segura SIN excluir perfil propio
+    const sanitizedArtists = artists.map(artist => ({
+      ...artist,
+      username: sanitizeInput(artist.username),
+      description: artist.description ? sanitizeInput(artist.description) : null
+    }));
     
     res.status(200).json(sanitizedArtists);
   } catch (error) {
     console.error('Error al obtener artistas por estilo:', error);
     res.status(500).json({ message: 'Error del servidor al obtener artistas por estilo.' });
+  }
+};
+
+// Obtener artistas públicos (para landing page)
+export const getPublicArtistsController = async (req, res) => {
+  try {
+    const artists = await getArtistsBasicInfoModel();
+
+    // Sanitizar usernames para mostrar de forma segura
+    const sanitizedArtists = artists.map(artist => ({
+      ...artist,
+      username: sanitizeInput(artist.username),
+      description: artist.description ? sanitizeInput(artist.description) : null
+    }));
+    
+    res.status(200).json(sanitizedArtists);
+  } catch (error) {
+    console.error('Error al obtener artistas públicos:', error);
+    res.status(500).json({ message: 'Error del servidor al obtener artistas públicos.' });
   }
 };
 
@@ -797,9 +794,23 @@ export const getPublicArtistProfileController = async (req, res) => {
     // Agregar listas para vista pública
     const favoritesList = await getUserFavoriteArtistsModel(id);
 
-    // === AGREGAR ESTO: obtener paquetes y extras ===
-    const packagesList = await getPackagesByArtist(id);
-    const extrasList = await getExtrasByArtist(id);
+    // Obtener paquetes y extras - CON MANEJO DE ERRORES
+    let packagesList = [];
+    let extrasList = [];
+    
+    try {
+      packagesList = await getPackagesByArtist(id);
+    } catch (error) {
+      console.error('Error al obtener paquetes:', error);
+      packagesList = [];
+    }
+    
+    try {
+      extrasList = await getExtrasByArtist(id);
+    } catch (error) {
+      console.error('Error al obtener extras:', error);
+      extrasList = [];
+    }
 
     res.json({
       ...profile,
@@ -807,7 +818,7 @@ export const getPublicArtistProfileController = async (req, res) => {
       followedArtistsCount,
       favoritesList,
       packagesList,
-      extrasList, // Puedes usarlo si lo necesitas en el frontend
+      extrasList,
     });
   } catch (err) {
     console.error('Error al obtener perfil público:', err);

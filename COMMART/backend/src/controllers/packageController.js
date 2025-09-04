@@ -6,7 +6,8 @@ import {
   getExtrasByArtist,
   createExtra,
   updateExtra,
-  deleteExtra
+  deleteExtra,
+  updatePackageImageField // NUEVA FUNCIÓN
 } from '../models/packageModel.js';
 
 // ========== PAQUETES ==========
@@ -60,6 +61,9 @@ export const updateArtistPackage = async (req, res) => {
       data.price = parseFloat(data.price);
     }
     
+    // REMOVER cualquier campo 'delete' que pueda venir
+    delete data.delete;
+    
     // Manejar imágenes si se suben
     if (req.files) {
       if (req.files.reference_image1) {
@@ -90,6 +94,33 @@ export const deleteArtistPackage = async (req, res) => {
   }
 };
 
+// NUEVA FUNCIÓN: Eliminar imagen específica de un paquete
+export const deletePackageImage = async (req, res) => {
+  try {
+    const { id, imageNum } = req.params;
+    const artistId = req.user.id;
+    
+    // Validar que el paquete pertenece al artista
+    const packages = await getPackagesByArtist(artistId);
+    const packageExists = packages.find(pkg => pkg.id == id);
+    
+    if (!packageExists) {
+      return res.status(404).json({ message: 'Paquete no encontrado.' });
+    }
+    
+    // Determinar qué campo actualizar
+    const field = imageNum === '1' ? 'reference_image1' : 'reference_image2';
+    
+    // Actualizar el campo a NULL
+    await updatePackageImageField(id, field, null);
+    
+    res.json({ message: 'Imagen eliminada exitosamente.' });
+  } catch (err) {
+    console.error('Error al eliminar imagen:', err);
+    res.status(500).json({ message: 'Error al eliminar imagen.' });
+  }
+};
+
 // ========== EXTRAS ==========
 
 export const getArtistExtras = async (req, res) => {
@@ -105,7 +136,14 @@ export const getArtistExtras = async (req, res) => {
 
 export const createArtistExtra = async (req, res) => {
   try {
-    const data = req.body;
+    const artistId = req.user.id; // Obtener artist_id del usuario autenticado
+    const data = { ...req.body, artist_id: artistId }; // Agregar artist_id
+    
+    // Convertir precio a número decimal
+    if (data.price) {
+      data.price = parseFloat(data.price);
+    }
+    
     const extra = await createExtra(data);
     res.status(201).json(extra);
   } catch (err) {
@@ -117,7 +155,13 @@ export const createArtistExtra = async (req, res) => {
 export const updateArtistExtra = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = req.body;
+    const data = { ...req.body };
+    
+    // Convertir precio a número decimal
+    if (data.price) {
+      data.price = parseFloat(data.price);
+    }
+    
     await updateExtra(id, data);
     res.json({ message: 'Extra actualizado.' });
   } catch (err) {

@@ -9,7 +9,8 @@ import {
   getArtistExtras,
   createArtistExtra,
   updateArtistExtra,
-  deleteArtistExtra
+  deleteArtistExtra,
+  deletePackageImage // NUEVA FUNCIÓN
 } from '../controllers/packageController.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 
@@ -54,6 +55,9 @@ router.put('/my/:id', verifyToken, upload.fields([
   { name: 'reference_image2', maxCount: 1 }
 ]), updateArtistPackage);
 router.delete('/my/:id', verifyToken, deleteArtistPackage);
+
+// NUEVA RUTA: Eliminar imagen específica de un paquete
+router.delete('/my/:id/image/:imageNum', verifyToken, deletePackageImage);
 
 // ========== RUTAS DE EXTRAS ==========
 router.get('/my/extras', verifyToken, getArtistExtras);
