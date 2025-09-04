@@ -405,6 +405,12 @@ function PackageModal({ pkg, onSave, onCancel }) {
   // Manejar cambios de campos generales
   const handleChange = e => {
     const { name, value } = e.target;
+    
+    // Limitar descripción a 200 caracteres (reducido de 300)
+    if (name === 'description' && value.length > 100) {
+      return;
+    }
+    
     setForm(f => ({ ...f, [name]: value }));
   };
 
@@ -498,23 +504,28 @@ function PackageModal({ pkg, onSave, onCancel }) {
                 />
                 <span className="package-delivery-time">días</span>
               </div>
-
+            </div>
+            
+            <div className="modal-fields-col">
+              {/* MOVER LA DESCRIPCIÓN AQUÍ - ARRIBA DE MUESTRAS */}
               <div className="modal-desc-row">
                 <span className="package-desc-title">Descripción</span>
                 <textarea
                   name="description"
                   value={form.description}
                   onChange={handleChange}
-                  placeholder="Boceto + lineart&#10;Sin coloreado o coloreado simple"
+                  placeholder="Boceto + lineart&#10;Sin coloreado"
                   rows={3}
                   className="modal-textarea"
                   style={{ resize: 'none' }}
-                  maxLength={300}
+                  maxLength={100}
                   required
                 />
+                <div className={`character-count ${form.description.length > 100 ? 'warning' : ''}`}>
+                  {form.description.length}/100 caracteres
+                </div>
               </div>
-            </div>
-            <div className="modal-fields-col">
+
               <span className="package-samples-title">Muestra</span>
               <div className="modal-samples-row">
                 {/* Imagen 1 */}
