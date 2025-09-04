@@ -27,6 +27,11 @@ export const createArtistPackage = async (req, res) => {
     const artist_id = req.user.id;
     const data = { ...req.body, artist_id };
     
+    // Convertir precio a número decimal
+    if (data.price) {
+      data.price = parseFloat(data.price);
+    }
+    
     // Manejar imágenes si se suben
     if (req.files) {
       if (req.files.reference_image1) {
@@ -49,6 +54,11 @@ export const updateArtistPackage = async (req, res) => {
   try {
     const { id } = req.params;
     const data = { ...req.body };
+    
+    // Convertir precio a número decimal
+    if (data.price) {
+      data.price = parseFloat(data.price);
+    }
     
     // Manejar imágenes si se suben
     if (req.files) {

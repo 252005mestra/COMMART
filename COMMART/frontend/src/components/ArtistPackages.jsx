@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Edit, Trash2, X } from 'lucide-react';
-import { formatColombianPrice, formatPriceInput, parsePrice, isValidPrice } from '../utils/priceFormatter';
+import { formatColombianPrice, formatPriceInput, parsePrice, parsePriceForDB, isValidPrice } from '../utils/priceFormatter';
 import '../styles/artistpackages.css';
 
 const MAX_PACKAGES = 3;
@@ -56,7 +56,7 @@ const ArtistPackages = ({ isPublicView = false }) => {
       const formData = new FormData();
       
       // Convertir precio a número antes de enviar
-      const finalPrice = parsePrice(pkg.price.toString());
+      const finalPrice = parsePriceForDB(pkg.price.toString());
       
       // Agregar campos del formulario
       Object.entries(pkg).forEach(([key, value]) => {
@@ -117,7 +117,7 @@ const ArtistPackages = ({ isPublicView = false }) => {
   const handleSaveExtra = async (extra) => {
     try {
       // Convertir precio a número
-      const finalPrice = parsePrice(extra.price.toString());
+      const finalPrice = parsePriceForDB(extra.price.toString());
       const finalExtra = { ...extra, price: finalPrice };
       
       if (extra.id) {
@@ -333,7 +333,9 @@ function PackageModal({ pkg, onSave, onCancel }) {
   const [form, setForm] = useState({
     title: pkg?.title || '',
     description: pkg?.description || '',
-    price: pkg ? formatPriceInput(pkg.price.toString()) : '',
+    price: pkg
+      ? Number(pkg.price).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+      : '',
     delivery_time_days: pkg?.delivery_time_days || 7,
     reference_image1: null,
     reference_image2: null
@@ -365,7 +367,7 @@ function PackageModal({ pkg, onSave, onCancel }) {
       reader.readAsDataURL(file);
     } else {
       if (name === 'price') {
-        // Formatear precio mientras se escribe
+        // Solo formatear para visualización, mantener el valor original
         const formatted = formatPriceInput(value);
         setForm(f => ({ ...f, [name]: formatted }));
       } else {
@@ -383,12 +385,23 @@ function PackageModal({ pkg, onSave, onCancel }) {
     }
     
     const numericPrice = parsePrice(form.price);
+    const decimalPrice = parsePriceForDB(form.price);
+    
+    // 🔍 LOGS DETALLADOS PARA DEBUGGEAR
+    console.log('=== DEBUGGING COMPLETO ===');
+    console.log('1. Valor RAW del input:', form.price);
+    console.log('2. Tipo del valor RAW:', typeof form.price);
+    console.log('3. parsePrice(form.price):', numericPrice);
+    console.log('4. parsePriceForDB(form.price):', decimalPrice);
+    console.log('5. formatColombianPrice(numericPrice):', formatColombianPrice(numericPrice));
+    console.log('6. formatColombianPrice(decimalPrice):', formatColombianPrice(decimalPrice));
+     
     if (!isValidPrice(numericPrice)) {
       alert('El precio debe estar entre $1.000 y $100.000.000 COP');
       return;
     }
 
-    const finalForm = { ...form, price: numericPrice };
+    const finalForm = { ...form, price: numericPrice }; // Usar numericPrice en lugar de decimalPrice
     if (pkg?.id) finalForm.id = pkg.id;
     
     onSave(finalForm);
@@ -509,7 +522,9 @@ function PackageModal({ pkg, onSave, onCancel }) {
 function ExtraForm({ extra, onSave, onCancel, maxExtras, currentExtras }) {
   const [form, setForm] = useState({
     name: extra?.name || '',
-    price: extra ? formatPriceInput(extra.price.toString()) : ''
+    price: extra
+      ? Number(extra.price).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+      : ''
   });
 
   const handleChange = e => {
