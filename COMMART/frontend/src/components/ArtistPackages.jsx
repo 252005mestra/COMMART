@@ -337,8 +337,8 @@ function PackageModal({ pkg, onSave, onCancel }) {
       ? Number(pkg.price).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
       : '',
     delivery_time_days: pkg?.delivery_time_days || 7,
-    reference_image1: null,
-    reference_image2: null
+    reference_image1: pkg?.reference_image1 || null,
+    reference_image2: pkg?.reference_image2 || null
   });
 
   const [preview1, setPreview1] = useState(
@@ -348,169 +348,212 @@ function PackageModal({ pkg, onSave, onCancel }) {
     pkg?.reference_image2 ? `http://localhost:5000/${pkg.reference_image2}` : null
   );
 
-  const handleChange = e => {
-    const { name, value, files } = e.target;
-    
-    if (files && files[0]) {
-      const file = files[0];
-      setForm(f => ({ ...f, [name]: file }));
-      
-      // Crear preview
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        if (name === 'reference_image1') {
-          setPreview1(ev.target.result);
-        } else if (name === 'reference_image2') {
-          setPreview2(ev.target.result);
-        }
-      };
-      reader.readAsDataURL(file);
+  const fileInputRef1 = React.useRef();
+  const fileInputRef2 = React.useRef();
+
+  // Eliminar imagen
+  const handleRemoveImage = (idx) => {
+    if (idx === 1) {
+      setForm(f => ({ ...f, reference_image1: null }));
+      setPreview1(null);
     } else {
-      if (name === 'price') {
-        // Solo formatear para visualización, mantener el valor original
-        const formatted = formatPriceInput(value);
-        setForm(f => ({ ...f, [name]: formatted }));
-      } else {
-        setForm(f => ({ ...f, [name]: value }));
-      }
+      setForm(f => ({ ...f, reference_image2: null }));
+      setPreview2(null);
     }
   };
 
+  // Manejar cambio de imagen
+  const handleImageChange = (e, idx) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (idx === 1) {
+      setForm(f => ({ ...f, reference_image1: file }));
+      const reader = new FileReader();
+      reader.onload = (ev) => setPreview1(ev.target.result);
+      reader.readAsDataURL(file);
+    } else {
+      setForm(f => ({ ...f, reference_image2: file }));
+      const reader = new FileReader();
+      reader.onload = (ev) => setPreview2(ev.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Manejar cambios de campos generales
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
+  };
+
+  // Guardar
   const handleSubmit = e => {
     e.preventDefault();
-    
     if (!form.title.trim() || !form.price) {
       alert('El título y el precio son obligatorios');
       return;
     }
-    
     const numericPrice = parsePrice(form.price);
-    const decimalPrice = parsePriceForDB(form.price);
-    
-    // 🔍 LOGS DETALLADOS PARA DEBUGGEAR
-    console.log('=== DEBUGGING COMPLETO ===');
-    console.log('1. Valor RAW del input:', form.price);
-    console.log('2. Tipo del valor RAW:', typeof form.price);
-    console.log('3. parsePrice(form.price):', numericPrice);
-    console.log('4. parsePriceForDB(form.price):', decimalPrice);
-    console.log('5. formatColombianPrice(numericPrice):', formatColombianPrice(numericPrice));
-    console.log('6. formatColombianPrice(decimalPrice):', formatColombianPrice(decimalPrice));
-     
     if (!isValidPrice(numericPrice)) {
       alert('El precio debe estar entre $1.000 y $100.000.000 COP');
       return;
     }
-
-    const finalForm = { ...form, price: numericPrice }; // Usar numericPrice en lugar de decimalPrice
+    const finalForm = { ...form, price: numericPrice };
     if (pkg?.id) finalForm.id = pkg.id;
-    
     onSave(finalForm);
+  };
+
+  // Eliminar paquete
+  const handleDelete = () => {
+    if (window.confirm('¿Estás seguro de eliminar este paquete? Esta acción no se puede deshacer.')) {
+      onSave({ ...form, delete: true, id: pkg.id });
+    }
   };
 
   return (
     <div className="package-form-overlay">
-      <div className="package-form-modal">
-        <div className="package-form-header">
-          <h3 className="package-form-title">
-            {pkg ? 'Editar Paquete' : 'Nuevo Paquete'}
-          </h3>
-          <button className="package-form-close" onClick={onCancel}>
-            <X size={20} />
-          </button>
+      <div className="package-form-modal custom-modal-horizontal">
+        <div className="modal-toolbar">
+          <span className="modal-title">Editar Paquete</span>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button className="modal-toolbar-btn" onClick={handleDelete} title="Eliminar paquete">
+              <Trash2 size={28} />
+            </button>
+            <button className="modal-toolbar-btn" onClick={handleSubmit} title="Guardar cambios">
+              <span style={{ color: '#78966a' }}>
+                <svg width="28" height="28" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M20.285 6.709a1 1 0 0 0-1.414-1.418l-9.192 9.193-4.243-4.243a1 1 0 1 0-1.415 1.415l4.95 4.95a1 1 0 0 0 1.414 0l9.9-9.897z"/>
+                </svg>
+              </span>
+            </button>
+            <button className="modal-toolbar-btn" onClick={onCancel} title="Cancelar">
+              <X size={28} />
+            </button>
+          </div>
         </div>
-        
-        <form onSubmit={handleSubmit} className="package-form">
-          <div className="form-field-artist">
-            <label>Nombre del paquete</label>
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="Básico"
-              maxLength={100}
-              required
-            />
-          </div>
-          
-          <div className="form-field-artist">
-            <label>Descripción</label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Boceto + lineart&#10;Sin coloreado o coloreado simple"
-              rows={4}
-            />
-            <div className="form-field-help">
-              Cada línea será mostrada como un punto en la lista
-            </div>
-          </div>
-          
-          <div className="form-field-artist">
-            <label>Precio (Pesos Colombianos)</label>
-            <input
-              name="price"
-              type="text"
-              value={form.price}
-              onChange={handleChange}
-              placeholder="50.000"
-              required
-            />
-            <div className="form-field-help">
-              Se mostrará como: <strong>{formatColombianPrice(parsePrice(form.price) || 0)}</strong>
-            </div>
-          </div>
-          
-          <div className="form-field-artist">
-            <label>Tiempo de entrega (días)</label>
-            <input
-              name="delivery_time_days"
-              type="number"
-              value={form.delivery_time_days}
-              onChange={handleChange}
-              placeholder="7"
-              min="1"
-              max="365"
-            />
-          </div>
-          
-          <div className="form-field-artist">
-            <label>Imagen de muestra 1</label>
-            <input
-              name="reference_image1"
-              type="file"
-              accept="image/*"
-              onChange={handleChange}
-            />
-            {preview1 && (
-              <div className="image-preview">
-                <img src={preview1} alt="Preview 1" />
+        <form className="package-modal-form" onSubmit={handleSubmit} autoComplete="off">
+          <div className="modal-fields-row">
+            <div className="modal-fields-col">
+              <label className="package-desc-title" htmlFor="title">Nombre del paquete</label>
+              <input
+                name="title"
+                id="title"
+                type="text"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Título del paquete"
+                className="modal-input"
+                maxLength={100}
+                required
+              />
+
+              <div className="modal-price-row">
+                <span className="package-price-amount">{formatColombianPrice(parsePrice(form.price) || 0)}</span>
+                <span className="package-price-label">Precio</span>
               </div>
-            )}
-          </div>
-          
-          <div className="form-field-artist">
-            <label>Imagen de muestra 2</label>
-            <input
-              name="reference_image2"
-              type="file"
-              accept="image/*"
-              onChange={handleChange}
-            />
-            {preview2 && (
-              <div className="image-preview">
-                <img src={preview2} alt="Preview 2" />
+              <input
+                name="price"
+                type="text"
+                value={form.price}
+                onChange={handleChange}
+                placeholder="50.000"
+                className="modal-input"
+                required
+              />
+
+              <div className="modal-delivery-row">
+                <span className="package-delivery-label">Tiempo estimado</span>
+                <input
+                  name="delivery_time_days"
+                  type="number"
+                  value={form.delivery_time_days}
+                  onChange={handleChange}
+                  placeholder="7"
+                  min="1"
+                  max="365"
+                  className="modal-input"
+                  required
+                />
+                <span className="package-delivery-time">días</span>
               </div>
-            )}
-          </div>
-          
-          <div className="form-actions-artist">
-            <button type="button" className="form-btn-cancel" onClick={onCancel}>
-              Cancelar
-            </button>
-            <button type="submit" className="form-btn-save">
-              {pkg ? 'Actualizar' : 'Crear'} Paquete
-            </button>
+
+              <div className="modal-desc-row">
+                <span className="package-desc-title">Descripción</span>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  placeholder="Boceto + lineart&#10;Sin coloreado o coloreado simple"
+                  rows={3}
+                  className="modal-textarea"
+                  style={{ resize: 'none' }}
+                  maxLength={300}
+                  required
+                />
+              </div>
+            </div>
+            <div className="modal-fields-col">
+              <span className="package-samples-title">Muestra</span>
+              <div className="modal-samples-row">
+                {/* Imagen 1 */}
+                <div className="modal-sample-img-container">
+                  {preview1 ? (
+                    <div className="modal-sample-img-preview">
+                      <img src={preview1} alt="Muestra 1" />
+                      <button type="button" className="remove-image-btn" onClick={() => handleRemoveImage(1)} title="Eliminar imagen">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      className="modal-sample-add"
+                      onClick={() => fileInputRef1.current.click()}
+                      tabIndex={0}
+                      role="button"
+                      title="Agregar imagen"
+                    >
+                      <span>Agregar</span>
+                      <span className="modal-sample-add-icon">+</span>
+                      <input
+                        ref={fileInputRef1}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={e => handleImageChange(e, 1)}
+                      />
+                    </div>
+                  )}
+                </div>
+                {/* Imagen 2 */}
+                <div className="modal-sample-img-container">
+                  {preview2 ? (
+                    <div className="modal-sample-img-preview">
+                      <img src={preview2} alt="Muestra 2" />
+                      <button type="button" className="remove-image-btn" onClick={() => handleRemoveImage(2)} title="Eliminar imagen">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      className="modal-sample-add"
+                      onClick={() => fileInputRef2.current.click()}
+                      tabIndex={0}
+                      role="button"
+                      title="Agregar imagen"
+                    >
+                      <span>Agregar</span>
+                      <span className="modal-sample-add-icon">+</span>
+                      <input
+                        ref={fileInputRef2}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={e => handleImageChange(e, 2)}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </form>
       </div>
