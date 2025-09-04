@@ -11,7 +11,7 @@
 .artist-portfolio-profile {
   background: white;
   border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 2px rgba(0, 0, 0, 0.321);
   overflow: hidden;
   border: 3px solid #000;
   min-height: 50vh;
@@ -368,10 +368,10 @@
 .btn-order {
   background: linear-gradient(135deg, #8c643f 0%, #5f3f26 100%);
   color: white;
-  font-weight: 600;
+  font-weight: normal;
   padding: 12px 24px;
   font-size: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 2px rgba(0, 0, 0, 0.321);
 }
 
 .btn-order:hover {

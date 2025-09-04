@@ -4,17 +4,17 @@ export const formatColombianPrice = (price) => {
   
   if (isNaN(numPrice) || numPrice <= 0) return '$0';
   
-  // Para cantidades grandes, usar texto descriptivo
+  // Para cantidades grandes, usar texto descriptivo con COP$
   if (numPrice >= 1000000) {
     const millions = numPrice / 1000000;
     const formatted = new Intl.NumberFormat('es-CO', {
       minimumFractionDigits: 0,
       maximumFractionDigits: millions % 1 === 0 ? 0 : 1
     }).format(millions);
-    return `$${formatted} ${millions === 1 ? 'millón' : 'millones'}`;
+    return `${formatted} ${millions === 1 ? 'millón' : 'millones'} COP$`; // Agregado COP$
   } else if (numPrice >= 1000) {
     const thousands = Math.round(numPrice / 1000);
-    return `$${thousands}mil`;
+    return `${thousands}mil COP$`; // Agregado COP$
   } else {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Edit2, Trash2, X } from 'lucide-react';
+import { Edit, Trash2, X } from 'lucide-react';
 import { formatColombianPrice, formatPriceInput, parsePrice, isValidPrice } from '../utils/priceFormatter';
 import '../styles/artistpackages.css';
 
@@ -177,7 +177,7 @@ const ArtistPackages = ({ isPublicView = false }) => {
                   onClick={() => setEditing(pkg)}
                   title="Editar paquete"
                 >
-                  <Edit2 size={16} />
+                  <Edit size={25} />
                 </button>
               )}
             </div>
@@ -187,6 +187,13 @@ const ArtistPackages = ({ isPublicView = false }) => {
                 <span className="package-price-label">Precio</span>
                 <span className="package-price-amount">
                   {formatColombianPrice(pkg.price)}
+                </span>
+              </div>
+              
+              <div className="package-delivery-section">
+                <span className="package-delivery-label">Tiempo estimado</span>
+                <span className="package-delivery-time">
+                  {pkg.delivery_time_days} {pkg.delivery_time_days === 1 ? 'día' : 'días'}
                 </span>
               </div>
               
@@ -253,7 +260,7 @@ const ArtistPackages = ({ isPublicView = false }) => {
               onClick={() => setShowAddExtra(true)}
               title="Agregar extra"
             >
-              <Edit2 size={16} />
+              <Edit size={16} />
             </button>
           </div>
           
@@ -272,7 +279,7 @@ const ArtistPackages = ({ isPublicView = false }) => {
                       onClick={() => setEditingExtra(extra)}
                       title="Editar extra"
                     >
-                      <Edit2 size={14} />
+                      <Edit size={14} />
                     </button>
                     <button 
                       className="extra-action-btn delete" 
