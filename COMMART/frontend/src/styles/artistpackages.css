@@ -35,20 +35,53 @@
   transform: translateY(-2px);
 }
 
-/* ========== Card "Agregar" - Mismo tamaño ajustado ========== */
+/* ========== Card "Agregar" - Estilo blanco casi transparente ========== */
 .add-package-card {
-  background: white;
-  border: 3px dashed #C7A47B;
-  border-radius: 16px;
-  width: 420px; /* Aumentado de 380px a 420px */
-  height: 630px; /* Aumentado de 580px a 630px */
+  background: rgba(255, 255, 255, 0.318); /* Fondo blanco casi transparente */
+  border: 3px dashed rgba(255, 255, 255, 0.9); /* Borde blanco semi-transparente */
+  border-radius: 40px;
+  width: 420px;
+  height: 630px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: #C7A47B;
+  transition: all 0.3s ease;
+  color: #ffffff; 
   box-shadow: 0 8px 2px rgba(0, 0, 0, 0.321);
+}
+
+.add-package-card:hover {
+  background: rgba(255, 255, 255, 0.592); /* Hover más opaco pero manteniendo blanco */
+  border-color: rgba(255, 255, 255, 1); /* Borde completamente blanco al hover */
+  transform: translateY(-2px); /* Efecto sutil de elevación */
+  box-shadow: 0 12px 4px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+}
+
+.add-package-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem; /* Aumentado de 1rem a 1.5rem */
+}
+
+.add-package-icon {
+  color: #ffffff; /* Ícono blanco */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 6rem; /* Ícono más grande */
+}
+
+.add-package-text {
+  font-family: 'Goldman', sans-serif;
+  font-size: 2.2rem; /* Aumentado de 1.8rem a 2.2rem */
+  font-weight: 400;
+  color: #ffffff; /* Texto blanco */
+  letter-spacing: 0.04em;
+  margin-top: 0.5rem;
 }
 
 /* ========== Header de paquete - Título más grande ========== */
@@ -201,10 +234,10 @@
 
 .package-sample-image {
   width: 100%;
-  height: 160px; /* Aumentado de 120px a 160px */
+  height: 160px; 
   object-fit: cover;
-  border-radius: 12px; /* Aumentado de 8px a 12px */
-  border: 2px solid #D2AB80;
+  border-radius: 12px; 
+  border: 2px solid #000000;
   display: block;
 }
 
@@ -234,20 +267,6 @@
   gap: 2rem; /* Aumentado de 1.5rem a 2rem */
   justify-content: flex-start;
   margin-top: 0.5rem;
-}
-
-.modal-sample-img-container {
-  width: 160px; /* Aumentado de 120px a 160px */
-  height: 160px; /* Aumentado de 120px a 160px */
-  border-radius: 16px; /* Aumentado de 12px a 16px */
-  border: 2px solid #D2AB80;
-  background: #f8f8f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0; /* Evita que se comprima */
 }
 
 .modal-sample-img-preview {
@@ -290,37 +309,98 @@
 .modal-sample-add {
   width: 100%;
   height: 100%;
-  border: 2px dashed #7d5938;
+  border: 3px dashed #333 !important; /* UN SOLO borde negro dashed */
   border-radius: 16px;
-  background: rgba(255,255,255,0.7);
+  background: #fff !important; /* Fondo blanco */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #7d5938;
+  color: #333 !important; /* Texto negro */
   font-family: 'Goldman', sans-serif;
-  font-size: 1.1rem; /* Aumentado de 1rem a 1.1rem */
+  font-size: 1.1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: border 0.2s, background 0.2s;
-  gap: 0.5rem; /* Aumentado de 0.2rem a 0.5rem */
+  transition: all 0.3s ease;
+  gap: 0.5rem;
 }
 
+/* Hover para cuadros de muestra - Negro */
 .modal-sample-add:hover {
-  border-color: #8B6D47;
-  background: rgba(139, 109, 71, 0.08);
+  border-color: #666 !important; /* Gris más claro al hover */
+  background: #f8f8f8 !important; /* Fondo ligeramente gris al hover */
+  color: #666 !important;
 }
 
 .modal-sample-add-icon {
-  font-size: 3rem; /* Aumentado de 2.2rem a 3rem */
+  font-size: 3rem; /* Icono + más grande */
   line-height: 1;
-  margin-top: 0.2rem;
+  font-weight: bold;
+  color: inherit;
 }
 
-/* Separador visual entre secciones en modal */
-.modal-fields-col > .package-samples-title {
-  margin-top: 1rem; /* Aumentado de 0.8rem a 1rem */
-  padding-top: 1rem; /* Aumentado de 0.8rem a 1rem */
-  border-top: 1px solid #e0e0e0;
+/* ========== Contenedor de muestra con borde negro ========== */
+.modal-sample-img-container {
+  width: 160px;
+  height: 160px;
+  border-radius: 16px;
+  border: 3px dashed #000000 !important; /* Borde negro consistente */
+  background: #fff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+/* Hover para el contenedor */
+.modal-sample-img-container:hover {
+  border-color: #666 !important;
+  background: #f8f8f8 !important;
+}
+
+/* Cuando tiene imagen, cambiar el borde a sólido */
+.modal-sample-img-container:has(.modal-sample-img-preview) {
+  border: 3px solid #333 !important; /* Borde sólido cuando tiene imagen */
+}
+
+.modal-sample-img-container:has(.modal-sample-img-preview):hover {
+  border-color: #666 !important;
+}
+
+/* ========== Botón eliminar imagen ========== */
+.modal-sample-img-preview .remove-image-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #fff;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 2;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-sample-img-preview .remove-image-btn:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* ========== Texto "Agregar" con estilo mejorado ========== */
+.modal-sample-add span:first-child {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
 }
 
 /* ========== Responsive para muestras ========== */
@@ -751,20 +831,6 @@
   margin-top: 0.5rem;
 }
 
-.modal-sample-img-container {
-  width: 160px; /* Aumentado de 120px a 160px */
-  height: 160px; /* Aumentado de 120px a 160px */
-  border-radius: 16px; /* Aumentado de 12px a 16px */
-  border: 2px solid #D2AB80;
-  background: #f8f8f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0; /* Evita que se comprima */
-}
-
 .modal-sample-img-preview {
   width: 100%;
   height: 100%;
@@ -805,33 +871,85 @@
 .modal-sample-add {
   width: 100%;
   height: 100%;
-  border: 2px dashed #7d5938;
+  border: none !important;
   border-radius: 16px;
-  background: rgba(255,255,255,0.7);
+  background: #fff !important; /* Fondo blanco */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #7d5938;
+  color: #333 !important; /* Texto negro */
   font-family: 'Goldman', sans-serif;
-  font-size: 1.1rem; /* Aumentado de 1rem a 1.1rem */
+  font-size: 1.1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: border 0.2s, background 0.2s;
-  gap: 0.5rem; /* Aumentado de 0.2rem a 0.5rem */
+  transition: all 0.3s ease;
+  gap: 0.5rem;
 }
 
+/* Hover para cuadros de muestra - Negro */
 .modal-sample-add:hover {
-  border-color: #8B6D47;
-  background: rgba(139, 109, 71, 0.08);
+  border-color: #666 !important; /* Gris más claro al hover */
+  background: #f8f8f8 !important; /* Fondo ligeramente gris al hover */
+  color: #666 !important;
 }
 
 .modal-sample-add-icon {
-  font-size: 3rem; /* Aumentado de 2.2rem a 3rem */
+  font-size: 3rem; /* Icono + más grande */
   line-height: 1;
-  margin-top: 0.2rem;
+  font-weight: bold;
+  color: inherit;
 }
 
-/* Responsive para modales más pequeñas */
+/* Hover para el contenedor */
+.modal-sample-img-container:hover {
+  border-color: #666 !important;
+  background: #f8f8f8 !important;
+}
+
+/* Cuando tiene imagen, cambiar el borde a sólido */
+.modal-sample-img-container:has(.modal-sample-img-preview) {
+  border: 3px solid #333 !important; /* Borde sólido cuando tiene imagen */
+}
+
+.modal-sample-img-container:has(.modal-sample-img-preview):hover {
+  border-color: #666 !important;
+}
+
+/* ========== Botón eliminar imagen ========== */
+.modal-sample-img-preview .remove-image-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #fff;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 2;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-sample-img-preview .remove-image-btn:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* ========== Texto "Agregar" con estilo mejorado ========== */
+.modal-sample-add span:first-child {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+/* ========== Responsive para modales más pequeñas */
 @media (max-width: 1000px) { /* Aumentado de 900px a 1000px */
   .package-form-modal.custom-modal-horizontal {
     width: 90vw;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Edit, Trash2, X } from 'lucide-react';
+import { Edit, Trash2, X, CirclePlus } from 'lucide-react';
 import { formatColombianPrice, formatPriceInput, parsePrice, parsePriceForDB, isValidPrice } from '../utils/priceFormatter';
 import '../styles/artistpackages.css';
 
@@ -275,8 +275,10 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
         {!isPublicView && packages.length < MAX_PACKAGES && (
           <div className="add-package-card" onClick={() => setShowAdd(true)}>
             <div className="add-package-content">
-              <div className="add-package-icon">+</div>
-              <div className="add-package-text">Agregar</div>
+              <div className="add-package-icon">
+                <CirclePlus size={75} />
+              </div>
+              <span className="add-package-text">Agregar</span>
             </div>
           </div>
         )}
@@ -383,18 +385,6 @@ function PackageModal({ pkg, onSave, onCancel }) {
   const fileInputRef1 = React.useRef();
   const fileInputRef2 = React.useRef();
 
-  // ELIMINAR ESTA FUNCIÓN DUPLICADA:
-  // const handleRemoveImage = (idx) => {
-  //   if (idx === 1) {
-  //     setForm(f => ({ ...f, reference_image1: null }));
-  //     setPreview1(null);
-  //   } else {
-  //     setForm(f => ({ ...f, reference_image2: null }));
-  //     setPreview2(null);
-  //   }
-  // };
-
-  // MANTENER SOLO ESTA FUNCIÓN:
   const handleRemoveImage = async (idx) => {
     if (idx === 1) {
       // Si es una imagen existente, eliminarla del servidor
@@ -559,14 +549,13 @@ function PackageModal({ pkg, onSave, onCancel }) {
             </div>
             
             <div className="modal-fields-col">
-              {/* MOVER LA DESCRIPCIÓN AQUÍ - ARRIBA DE MUESTRAS */}
               <div className="modal-desc-row">
                 <span className="package-desc-title">Descripción</span>
                 <textarea
                   name="description"
                   value={form.description}
                   onChange={handleChange}
-                  placeholder="Boceto + lineart&#10;Sin coloreado"
+                  placeholder="Describe lo que incluye este paquete"
                   rows={3}
                   className="modal-textarea"
                   style={{ resize: 'none' }}
@@ -598,7 +587,7 @@ function PackageModal({ pkg, onSave, onCancel }) {
                       title="Agregar imagen"
                     >
                       <span>Agregar</span>
-                      <span className="modal-sample-add-icon">+</span>
+                      <CirclePlus size={48} className="modal-sample-add-icon" />
                       <input
                         ref={fileInputRef1}
                         type="file"
@@ -627,7 +616,7 @@ function PackageModal({ pkg, onSave, onCancel }) {
                       title="Agregar imagen"
                     >
                       <span>Agregar</span>
-                      <span className="modal-sample-add-icon">+</span>
+                      <CirclePlus size={48} className="modal-sample-add-icon" />
                       <input
                         ref={fileInputRef2}
                         type="file"
