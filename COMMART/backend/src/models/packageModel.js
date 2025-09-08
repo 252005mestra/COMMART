@@ -108,12 +108,8 @@ export const deletePackage = (id, artistId) => {
 // Obtener extras del artista - CORREGIR LA CONSULTA
 export const getExtrasByArtist = (artistId) => {
   return new Promise((resolve, reject) => {
-    // OPCIÓN 1: Si la tabla extras tiene package_id, usar JOIN
     dbConnection.query(
-      `SELECT e.* FROM extras e
-       INNER JOIN packages p ON e.package_id = p.id
-       WHERE p.artist_id = ?
-       ORDER BY e.id ASC`,
+      'SELECT * FROM extras WHERE artist_id = ? ORDER BY id ASC',
       [artistId],
       (err, results) => {
         if (err) return reject(err);
@@ -125,11 +121,11 @@ export const getExtrasByArtist = (artistId) => {
 
 // Crear extra
 export const createExtra = (data) => {
-  const { artist_id, name, price, package_id } = data;
+  const { artist_id, name, price } = data;
   return new Promise((resolve, reject) => {
     dbConnection.query(
-      'INSERT INTO extras (artist_id, name, price, package_id) VALUES (?, ?, ?, ?)',
-      [artist_id, name, price, package_id],
+      'INSERT INTO extras (artist_id, name, price) VALUES (?, ?, ?)',
+      [artist_id, name, price],
       (err, result) => {
         if (err) return reject(err);
         resolve({ id: result.insertId, ...data });

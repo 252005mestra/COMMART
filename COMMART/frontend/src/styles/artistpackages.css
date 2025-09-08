@@ -450,55 +450,69 @@
   }
 }
 
-/* ========== Sección de Extras ========== */
+/* ========== Sección de Extras - Ajustada al tamaño de 3 cards ========== */
 .extras-section-artist {
   background: white;
-  border-radius: 16px;
+  border: 3px solid #000000; /* Mismo borde que los paquetes */
+  border-radius: 40px; /* Mismo border-radius que los paquetes */
   box-shadow: 0 8px 2px rgba(0, 0, 0, 0.321);
   overflow: hidden;
   margin-top: 2rem;
   position: relative;
+  width: 100%; /* Ocupa el ancho completo del grid de 3 columnas */
+  max-width: calc(3 * 420px + 2 * 2rem); /* Ancho de 3 cards + gaps = 1304px */
+  min-width: 1304px; /* Ancho mínimo para forzar el tamaño */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .extras-header-artist {
-  background: white;
-  padding: 1.5rem;
+  background: white; /* Mismo fondo blanco que los headers de paquetes */
+  padding: 1rem; /* Mismo padding que el header de los paquetes */
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* Centrado como los títulos de paquetes */
   align-items: center;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 2px solid rgba(19, 19, 19, 0.2); /* Divider igual que en el contenido de paquetes */
+  min-height: 60px; /* Misma altura mínima que los headers de paquetes */
+  position: relative;
 }
 
 .extras-title-artist {
   font-family: 'Goldman', sans-serif;
-  font-size: 1.4rem;
-  color: #333;
+  font-size: 2rem; /* Mismo tamaño que los títulos de paquetes */
+  color: #8B6D47; /* Mismo color que los títulos de paquetes */
   font-weight: 400;
   letter-spacing: 0.04em;
   margin: 0;
+  text-align: center;
 }
 
 .extras-edit-btn {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  color: #8B6D47;
+  color: #000; /* Mismo color que el botón de editar de paquetes */
   cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  transition: all 0.2s;
+  padding: 12px; /* Mismo padding que el botón de editar de paquetes */
+  border-radius: 8px;
+  transition: background 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.8rem; /* Mismo tamaño que el botón de editar de paquetes */
 }
 
 .extras-edit-btn:hover {
-  background: rgba(139, 109, 71, 0.1);
-  color: #7A5D3F;
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
 }
 
 /* ========== Lista de extras ========== */
 .extras-list-artist {
-  padding: 0;
+  padding: 1.5rem; /* Mismo padding que el contenido de paquetes */
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
@@ -555,14 +569,16 @@
 }
 
 .extra-item-price {
-  background: #8fa381;
+  background-color: #809671; /* Mismo color verde que los precios de paquetes */
+  border: 3px solid #B3B792; /* Mismo borde que los precios de paquetes */
   color: white;
   font-family: 'Goldman', sans-serif;
-  font-size: 0.85rem;
+  font-size: 1rem; /* Mismo tamaño que los precios de paquetes */
   font-weight: 400;
-  padding: 6px 16px;
-  border-radius: 15px;
+  padding: 10px 24px; /* Mismo padding que los precios de paquetes */
+  border-radius: 20px; /* Mismo border-radius que los precios de paquetes */
   letter-spacing: 0.04em;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Misma sombra que los precios de paquetes */
   white-space: nowrap;
 }
 
