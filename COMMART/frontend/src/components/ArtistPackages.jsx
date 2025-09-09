@@ -307,7 +307,7 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
                 onClick={() => setShowAddExtra(true)}
                 title="Agregar extra"
               >
-                <Edit size={16} />
+                <CirclePlus size={28} />
               </button>
             )}
           </div>
@@ -328,14 +328,14 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
                         onClick={() => setEditingExtra(extra)}
                         title="Editar extra"
                       >
-                        <Edit size={14} />
+                        <Edit size={20} />
                       </button>
                       <button 
                         className="extra-action-btn delete" 
                         onClick={() => handleDeleteExtra(extra.id)}
                         title="Eliminar extra"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={20} />
                       </button>
                     </div>
                   )}
@@ -502,17 +502,15 @@ function PackageModal({ pkg, onSave, onCancel }) {
         <div className="modal-toolbar">
           <span className="modal-title">Editar Paquete</span>
           <div style={{ display: 'flex', gap: 12 }}>
-            <button className="modal-toolbar-btn" onClick={handleDelete} title="Eliminar paquete">
+            <button className="modal-toolbar-btn delete" onClick={handleDelete} title="Eliminar paquete">
               <Trash2 size={28} />
             </button>
-            <button className="modal-toolbar-btn" onClick={handleSubmit} title="Guardar cambios">
-              <span style={{ color: '#78966a' }}>
-                <svg width="28" height="28" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M20.285 6.709a1 1 0 0 0-1.414-1.418l-9.192 9.193-4.243-4.243a1 1 0 1 0-1.415 1.415l4.95 4.95a1 1 0 0 0 1.414 0l9.9-9.897z"/>
-                </svg>
-              </span>
+            <button className="modal-toolbar-btn save" onClick={handleSubmit} title="Guardar cambios">
+              <svg width="28" height="28" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M20.285 6.709a1 1 0 0 0-1.414-1.418l-9.192 9.193-4.243-4.243a1 1 0 1 0-1.415 1.415l4.95 4.95a1 1 0 0 0 1.414 0l9.9-9.897z"/>
+              </svg>
             </button>
-            <button className="modal-toolbar-btn" onClick={onCancel} title="Cancelar">
+            <button className="modal-toolbar-btn close" onClick={onCancel} title="Cancelar">
               <X size={28} />
             </button>
           </div>
@@ -534,8 +532,8 @@ function PackageModal({ pkg, onSave, onCancel }) {
               />
 
               <div className="modal-price-row">
-                <span className="package-price-amount">{formatColombianPrice(parsePrice(form.price) || 0)}</span>
                 <span className="package-price-label">Precio</span>
+                <span className="package-price-amount">{formatColombianPrice(parsePrice(form.price) || 0)}</span>
               </div>
               <input
                 name="price"
@@ -663,12 +661,7 @@ function ExtraForm({ extra, onSave, onCancel, maxExtras, currentExtras }) {
 
   const handleChange = e => {
     const { name, value } = e.target;
-    if (name === 'price') {
-      const formatted = formatPriceInput(value);
-      setForm(f => ({ ...f, [name]: formatted }));
-    } else {
-      setForm(f => ({ ...f, [name]: value }));
-    }
+    setForm(f => ({ ...f, [name]: value }));
   };
 
   const handleSubmit = e => {
@@ -678,7 +671,7 @@ function ExtraForm({ extra, onSave, onCancel, maxExtras, currentExtras }) {
       alert('El nombre y el precio son obligatorios');
       return;
     }
-    
+
     const numericPrice = parsePrice(form.price);
     if (!isValidPrice(numericPrice)) {
       alert('El precio debe estar entre $1.000 y $100.000.000 COP');
@@ -697,52 +690,57 @@ function ExtraForm({ extra, onSave, onCancel, maxExtras, currentExtras }) {
   };
 
   return (
-    <div className="extra-form-modal">
+    <div className="extra-form-overlay">
       <div className="extra-form-content">
         <div className="extra-form-header">
           <h3 className="extra-form-title">
             {extra ? 'Editar Extra' : 'Nuevo Extra'}
           </h3>
-          <button className="extra-form-close" onClick={onCancel}>
-            <X size={18} />
-          </button>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button className="modal-toolbar-btn save" onClick={handleSubmit} title="Guardar extra">
+              <svg width="28" height="28" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M20.285 6.709a1 1 0 0 0-1.414-1.418l-9.192 9.193-4.243-4.243a1 1 0 1 0-1.415 1.415l4.95 4.95a1 1 0 0 0 1.414 0l9.9-9.897z"/>
+              </svg>
+            </button>
+            <button className="modal-toolbar-btn close" onClick={onCancel} title="Cancelar">
+              <X size={28} />
+            </button>
+          </div>
         </div>
         
-        <form onSubmit={handleSubmit} className="extra-form">
+        <form className="extra-form" autoComplete="off">
           <div className="form-field-artist">
-            <label>Nombre del extra</label>
+            <label htmlFor="extra-name">Nombre del extra</label>
             <input
+              id="extra-name"
               name="name"
+              type="text"
               value={form.name}
               onChange={handleChange}
-              placeholder="Dos personajes"
-              maxLength={100}
+              placeholder="Nombre del extra"
+              className="modal-input"
+              maxLength={50}
               required
             />
           </div>
-          
+
           <div className="form-field-artist">
-            <label>Precio (Pesos Colombianos)</label>
+            <div className="modal-price-row">
+              <span className="package-price-label">Precio</span>
+              <span className="package-price-amount">{formatColombianPrice(parsePrice(form.price) || 0)}</span>
+            </div>
             <input
               name="price"
               type="text"
               value={form.price}
               onChange={handleChange}
-              placeholder="10.000"
+              placeholder="15.000"
+              className="modal-input"
               required
             />
             <div className="form-field-help">
-              Se mostrará como: <strong>{formatColombianPrice(parsePrice(form.price) || 0)}</strong>
+              Precio en <strong>pesos colombianos (COP)</strong>. Mínimo $1.000 - Máximo $100.000.000
             </div>
-          </div>
-          
-          <div className="form-actions-artist">
-            <button type="button" className="form-btn-cancel" onClick={onCancel}>
-              Cancelar
-            </button>
-            <button type="submit" className="form-btn-save">
-              {extra ? 'Actualizar' : 'Crear'} Extra
-            </button>
           </div>
         </form>
       </div>

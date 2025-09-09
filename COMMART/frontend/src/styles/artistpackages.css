@@ -125,6 +125,11 @@
   font-size: 1.8rem; /* Aumentado de 1.2rem a 1.8rem */
 }
 
+.package-edit-icon:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
 /* ========== Contenido del paquete - Reducir espacio entre datos ========== */
 .package-content-artist {
   padding: 1.5rem;
@@ -153,7 +158,6 @@
   align-items: center;
   width: 100%;
   margin-top: 0.5rem; /* Espacio después del divider */
-  flex-direction: row-reverse; /* Invierte el orden para que precio vaya primero */
 }
 
 .package-price-label {
@@ -161,7 +165,6 @@
   font-size: 1rem;
   color: #000000;
   font-weight: 400;
-  order: 2; /* Asegura que "Precio" vaya después */
 }
 
 .package-price-amount {
@@ -175,7 +178,6 @@
   border-radius: 20px;
   letter-spacing: 0.04em;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-  order: 1; /* Asegura que el precio vaya primero */
 }
 
 /* ========== Descripción ========== */
@@ -459,9 +461,8 @@
   overflow: hidden;
   margin-top: 2rem;
   position: relative;
-  width: 100%; /* Ocupa el ancho completo del grid de 3 columnas */
-  max-width: calc(3 * 420px + 2 * 2rem); /* Ancho de 3 cards + gaps = 1304px */
-  min-width: 1304px; /* Ancho mínimo para forzar el tamaño */
+  width: 100%; 
+  max-width: calc(3 * 450px + 2 * 2rem); /* Ancho de 3 cards + gaps + 150px extra = 1454px */
   margin-left: auto;
   margin-right: auto;
 }
@@ -472,7 +473,6 @@
   display: flex;
   justify-content: center; /* Centrado como los títulos de paquetes */
   align-items: center;
-  border-bottom: 2px solid rgba(19, 19, 19, 0.2); /* Divider igual que en el contenido de paquetes */
   min-height: 60px; /* Misma altura mínima que los headers de paquetes */
   position: relative;
 }
@@ -502,7 +502,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem; /* Mismo tamaño que el botón de editar de paquetes */
+  font-size: 2rem; /* Aumentado de 1.8rem a 2rem - más grande */
 }
 
 .extras-edit-btn:hover {
@@ -516,18 +516,30 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  min-height: 200px;
+  min-height: 160px; /* Reducido de 200px a 160px */
+  position: relative;
+}
+
+/* Divider al 85% en la lista de extras - igual que en paquetes */
+.extras-list-artist::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 5%; 
+  width: 90%;
+  height: 2px;
+  background: rgba(19, 19, 19, 0.2);
 }
 
 .extra-item-artist {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.2rem 1.5rem;
+  padding: 0.8rem 1.5rem; /* Reducido de 1.2rem a 0.8rem */
   border-right: 1px solid #f0f0f0;
   border-bottom: 1px solid #f0f0f0;
   transition: background 0.2s;
-  min-height: 70px;
+  min-height: 50px; /* Reducido de 70px a 50px */
 }
 
 .extra-item-artist:nth-child(odd) {
@@ -552,7 +564,7 @@
 .extra-item-bullet {
   color: #8B6D47;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.4rem; /* Aumentado de 1.2rem a 1.4rem - más grande */
 }
 
 .extra-item-name {
@@ -592,12 +604,13 @@
   border: none;
   color: #666;
   cursor: pointer;
-  padding: 6px;
+  padding: 10px; /* Aumentado de 8px a 10px */
   border-radius: 4px;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.3rem; /* Aumentado de 1.1rem a 1.3rem - iconos más grandes */
 }
 
 .extra-action-btn:hover {
@@ -661,27 +674,57 @@
   background: transparent;
 }
 
-.modal-toolbar-btn {
-  background: none;
-  border: none;
-  color: #7d5938;
-  font-size: 1.7rem;
-  cursor: pointer;
-  padding: 0 0.3rem;
-  transition: color 0.2s;
-}
-.modal-toolbar-btn:hover {
-  color: #e74c3c;
-}
-
 .modal-title {
   font-family: 'Goldman', sans-serif;
   font-size: 2rem;
   color: #8B6D47;
   font-weight: 400;
   letter-spacing: 0.04em;
-  text-align: center;
+  text-align: left; /* Cambiado de center a left */
   flex: 1;
+}
+
+.modal-toolbar-btn {
+  background: none;
+  border: none;
+  font-size: 1.7rem;
+  cursor: pointer;
+  padding: 8px 12px; /* Aumentado padding para área clickeable más grande */
+  border-radius: 8px; /* Añadido border-radius para el hover */
+  transition: all 0.2s; /* Cambio de solo color a all para incluir background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Botón eliminar - Rojo */
+.modal-toolbar-btn.delete {
+  color: #e74c3c;
+}
+
+.modal-toolbar-btn.delete:hover {
+  background: rgba(231, 76, 60, 0.1);
+  color: #c0392b;
+}
+
+/* Botón guardar/aceptar - Verde */
+.modal-toolbar-btn.save {
+  color: #28a745;
+}
+
+.modal-toolbar-btn.save:hover {
+  background: rgba(40, 167, 69, 0.1);
+  color: #218838;
+}
+
+/* Botón cerrar - Café */
+.modal-toolbar-btn.close {
+  color: #7d5938;
+}
+
+.modal-toolbar-btn.close:hover {
+  background: rgba(125, 89, 56, 0.1);
+  color: #6b4a30;
 }
 
 .package-modal-form {
@@ -719,6 +762,7 @@
 
 .modal-price-row {
   display: flex;
+  justify-content: space-between; /* Cambiado de center a space-between */
   align-items: center;
   gap: 1rem;
   margin-bottom: 0.3rem; /* Reducido de 0.5rem a 0.3rem */
@@ -1006,43 +1050,111 @@
   }
 }
 
-/* ========== Responsive ========== */
-@media (max-width: 1024px) {
-  .packages-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
+/* ========== Modal de Extra - Igual que el de paquetes ========== */
+.extra-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* Cambiado de 0.85 a 0.5 para que coincida con el modal de paquetes */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
-@media (max-width: 768px) {
-  .packages-row {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .artist-package-card,
-  .add-package-card {
-    width: 100%;
-    max-width: 420px; /* Aumentado de 400px a 420px */
-    height: 560px; /* Aumentado de 520px a 560px */
-  }
+.extra-form-content {
+  width: 500px; /* Más pequeño que el modal de paquetes */
+  min-width: 500px;
+  max-width: 550px;
+  min-height: 320px;
+  max-height: none;
+  background: #fff;
+  border-radius: 32px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35); /* Misma sombra que el modal de paquetes */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 0;
+  overflow: visible;
 }
 
-@media (max-width: 480px) {
-  .package-form {
-    padding: 1rem;
-  }
-  
-  .form-actions-artist {
-    flex-direction: column;
-  }
-  
-  .form-btn-cancel,
-  .form-btn-save {
-    width: 100%;
-  }
-  
-  .artist-package-card,
-  .add-package-card {
-    height: 520px; /* Aumentado de 480px a 520px */
-  }
+/* Toolbar igual que en paquetes */
+.extra-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 3rem 0.5rem 3rem; /* Mismo padding que el modal de paquetes */
+  border-bottom: 2px solid #e0e0e0;
+  background: transparent;
+}
+
+.extra-form-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 2rem;
+  color: #8B6D47;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-align: left;
+  flex: 1;
+  margin: 0;
+}
+
+/* Formulario igual que en paquetes */
+.extra-form {
+  padding: 1.5rem 3rem 2rem 3rem; /* Mismo padding que el formulario de paquetes */
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.form-field-artist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.8rem;
+}
+
+.form-field-artist label {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  color: #000000;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+}
+
+.form-field-artist input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: 2px solid #b3b792;
+  background: #f8f8f5;
+  font-size: 1rem;
+  font-family: 'Nunito Sans';
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.form-field-artist input:focus {
+  outline: none;
+  border-color: #78966a;
+  background: #f4f7f2;
+}
+
+.form-field-help {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.3rem;
+}
+
+.form-field-help strong {
+  color: #333;
+}
+
+/* Remover los botones inferiores ya que ahora están en el header */
+.form-actions-artist {
+  display: none;
 }
