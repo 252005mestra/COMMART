@@ -484,8 +484,6 @@ export const updateArtistProfileModel = async ({
   languages,
   portfolioImages
 }) => {
-  console.log('Actualizando perfil con:', { userId, bio, availability, price_policy, styles, languages });
-
   // Actualizar o crear perfil de artista
   await new Promise((resolve, reject) => {
     dbConnection.query(

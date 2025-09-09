@@ -90,8 +90,6 @@ export const sendPhaseMessageController = async (req, res) => {
       is_read: false
     });
 
-    console.log('Enviando mensaje:', { phase, message });
-
     res.json({ message: 'Mensaje enviado.' });
   } catch (error) {
     console.error('Error al enviar mensaje:', error);

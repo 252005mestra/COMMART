@@ -7,6 +7,7 @@ import {
   updateArtistPackage,
   deleteArtistPackage,
   getArtistExtras,
+  getArtistExtrasPublic, // NUEVA FUNCIÓN
   createArtistExtra,
   updateArtistExtra,
   deleteArtistExtra,
@@ -64,5 +65,8 @@ router.get('/my/extras', verifyToken, getArtistExtras);
 router.post('/my/extras', verifyToken, createArtistExtra);
 router.put('/my/extras/:id', verifyToken, updateArtistExtra);
 router.delete('/my/extras/:id', verifyToken, deleteArtistExtra);
+
+// Agregar esta ruta ANTES de las rutas que requieren autenticación
+router.get('/artist/:artistId/extras', getArtistExtrasPublic); // Ruta pública para extras
 
 export default router;

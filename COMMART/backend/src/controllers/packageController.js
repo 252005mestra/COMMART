@@ -4,6 +4,7 @@ import {
   updatePackage,
   deletePackage,
   getExtrasByArtist,
+  getExtrasByArtistPublic, // NUEVA FUNCIÓN
   createExtra,
   updateExtra,
   deleteExtra,
@@ -178,5 +179,17 @@ export const deleteArtistExtra = async (req, res) => {
   } catch (err) {
     console.error('Error al eliminar extra:', err);
     res.status(500).json({ message: 'Error al eliminar extra.' });
+  }
+};
+
+// Nuevo controlador para obtener extras públicos de un artista
+export const getArtistExtrasPublic = async (req, res) => {
+  try {
+    const { artistId } = req.params;
+    const extras = await getExtrasByArtistPublic(artistId);
+    res.json(extras);
+  } catch (err) {
+    console.error('Error al obtener extras públicos:', err);
+    res.status(500).json({ message: 'Error al obtener extras.' });
   }
 };

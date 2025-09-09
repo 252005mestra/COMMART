@@ -98,8 +98,10 @@ const ArtistPortfolio = ({
 
   // Handlers de edición
   const handleAddStyle = (style) => {
-    if (style && !styles.includes(style)) {
+    if (style && !styles.includes(style) && styles.length < 3) {
       setStyles([...styles, style]);
+    } else if (styles.length >= 3) {
+      alert('Máximo 3 estilos permitidos');
     }
   };
 
@@ -108,8 +110,10 @@ const ArtistPortfolio = ({
   };
 
   const handleAddLanguage = (lang) => {
-    if (lang && !languages.includes(lang)) {
+    if (lang && !languages.includes(lang) && languages.length < 3) {
       setLanguages([...languages, lang]);
+    } else if (languages.length >= 3) {
+      alert('Máximo 3 idiomas permitidos');
     }
   };
 
@@ -431,20 +435,23 @@ const ArtistPortfolio = ({
                   {styles.length > 3 && (
                     <span className="style-more">+{styles.length - 3}</span>
                   )}
-                  <select 
-                    className="add-style-select"
-                    onChange={e => { 
-                      if (e.target.value) {
-                        handleAddStyle(e.target.value); 
-                        e.target.value = ''; 
-                      }
-                    }}
-                  >
-                    <option value="">+ Agregar</option>
-                    {allStyles.filter(s => !styles.includes(s.name)).map((style, idx) => (
-                      <option key={`option-style-${style.id || idx}`} value={style.name}>{style.name}</option>
-                    ))}
-                  </select>
+                  {/* Solo mostrar el selector si no se ha alcanzado el límite */}
+                  {styles.length < 3 && (
+                    <select 
+                      className="add-style-select"
+                      onChange={e => { 
+                        if (e.target.value) {
+                          handleAddStyle(e.target.value); 
+                          e.target.value = ''; 
+                        }
+                      }}
+                    >
+                      <option value="">+ Agregar</option>
+                      {allStyles.filter(s => !styles.includes(s.name)).map((style, idx) => (
+                        <option key={`option-style-${style.id || idx}`} value={style.name}>{style.name}</option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 <div className="portfolio-artist-description">
@@ -557,19 +564,22 @@ const ArtistPortfolio = ({
                       </button>
                     </span>
                   ))}
-                  <select 
-                    onChange={e => { 
-                      if (e.target.value) {
-                        handleAddLanguage(e.target.value); 
-                        e.target.value = ''; 
-                      }
-                    }}
-                  >
-                    <option value="">+ Agregar</option>
-                    {allLanguages.filter(l => !languages.includes(l.name)).map((lang, idx) => (
-                      <option key={`option-lang-${lang.id || idx}`} value={lang.name}>{lang.name}</option>
-                    ))}
-                  </select>
+                  {/* Solo mostrar el selector si no se ha alcanzado el límite */}
+                  {languages.length < 3 && (
+                    <select 
+                      onChange={e => { 
+                        if (e.target.value) {
+                          handleAddLanguage(e.target.value); 
+                          e.target.value = ''; 
+                        }
+                      }}
+                    >
+                      <option value="">+ Agregar</option>
+                      {allLanguages.filter(l => !languages.includes(l.name)).map((lang, idx) => (
+                        <option key={`option-lang-${lang.id || idx}`} value={lang.name}>{lang.name}</option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
 

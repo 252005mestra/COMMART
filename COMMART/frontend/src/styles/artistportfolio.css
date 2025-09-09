@@ -254,7 +254,7 @@
 
 /* Descripción + Responsive */
 .portfolio-artist-description {
-  color: #666;
+  color: #444; /* Cambiado de #666 a #444 - más oscuro */
   line-height: 1.4;
   margin-bottom: 8px;
   font-size: clamp(13px, 1.8vw, 15px);
@@ -724,7 +724,7 @@
 }
 
 .language-list li {
-  color: #666;
+  color: #444; /* Cambiado de #666 a #444 - más oscuro */
   padding: 3px 0;
   font-size: clamp(12px, 1.5vw, 14px);
   line-height: 1.4;
@@ -771,7 +771,7 @@
 }
 
 .price-policy-list li {
-  color: #666;
+  color: #444; /* Cambiado de #666 a #444 - más oscuro */
   padding: 4px 0;
   font-size: clamp(12px, 1.5vw, 14px);
   line-height: 1.4;

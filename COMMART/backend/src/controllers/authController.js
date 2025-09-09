@@ -46,7 +46,8 @@ import {
 
 import { 
   getPackagesByArtist, 
-  getExtrasByArtist 
+  getExtrasByArtist,
+  getExtrasByArtistPublic // AGREGAR ESTA LÍNEA
 } from '../models/packageModel.js';
 
 // Función para detectar caracteres peligrosos (para validación - rechazar entrada)
@@ -806,7 +807,7 @@ export const getPublicArtistProfileController = async (req, res) => {
     }
     
     try {
-      extrasList = await getExtrasByArtist(id);
+      extrasList = await getExtrasByArtistPublic(id); // Cambiar esta línea
     } catch (error) {
       console.error('Error al obtener extras:', error);
       extrasList = [];
@@ -853,9 +854,6 @@ export const updateArtistProfileController = async (req, res) => {
   try {
     const userId = req.user.id;
     const { bio, availability, price_policy, styles = [], languages = [] } = req.body;
-    
-    console.log('Datos recibidos:', { bio, availability, price_policy, styles, languages });
-    console.log('Archivos recibidos:', req.files);
 
     // Validar que el usuario sea artista
     const user = await findUserByIdModel(userId);

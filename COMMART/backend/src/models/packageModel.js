@@ -177,3 +177,17 @@ export const deleteExtra = (id) => {
     );
   });
 };
+
+// Obtener extras de un artista específico (para vista pública)
+export const getExtrasByArtistPublic = (artistId) => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(
+      'SELECT * FROM extras WHERE artist_id = ? ORDER BY id ASC',
+      [artistId],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
+      }
+    );
+  });
+};

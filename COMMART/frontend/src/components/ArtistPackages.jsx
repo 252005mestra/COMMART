@@ -23,6 +23,7 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
     if (isPublicView) {
       // Vista pública: usar initialPackages solo al montar
       setPackages(initialPackages || []);
+      fetchExtrasPublic(); // AGREGAR ESTA LÍNEA
       setLoading(false);
     } else {
       // Vista privada: cargar desde el backend
@@ -58,6 +59,17 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
       setPackages([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Nueva función para cargar extras en vista pública
+  const fetchExtrasPublic = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/packages/artist/${artistId}/extras`);
+      setExtras(res.data || []);
+    } catch (error) {
+      console.error('Error al cargar extras públicos:', error);
+      setExtras([]);
     }
   };
 
@@ -284,18 +296,20 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
         )}
       </div>
 
-      {/* Sección de Extras - Solo en vista privada */}
-      {!isPublicView && (
+      {/* Sección de Extras - Mostrar en ambas vistas */}
+      {(extras.length > 0 || !isPublicView) && (
         <div className="extras-section-artist">
           <div className="extras-header-artist">
             <span className="extras-title-artist">Extra</span>
-            <button 
-              className="extras-edit-btn" 
-              onClick={() => setShowAddExtra(true)}
-              title="Agregar extra"
-            >
-              <Edit size={16} />
-            </button>
+            {!isPublicView && (
+              <button 
+                className="extras-edit-btn" 
+                onClick={() => setShowAddExtra(true)}
+                title="Agregar extra"
+              >
+                <Edit size={16} />
+              </button>
+            )}
           </div>
           
           <div className="extras-list-artist">
@@ -307,28 +321,30 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
                 </div>
                 <div className="extra-item-right">
                   <span className="extra-item-price">{formatColombianPrice(extra.price)}</span>
-                  <div className="extra-item-actions">
-                    <button 
-                      className="extra-action-btn" 
-                      onClick={() => setEditingExtra(extra)}
-                      title="Editar extra"
-                    >
-                      <Edit size={14} />
-                    </button>
-                    <button 
-                      className="extra-action-btn delete" 
-                      onClick={() => handleDeleteExtra(extra.id)}
-                      title="Eliminar extra"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+                  {!isPublicView && (
+                    <div className="extra-item-actions">
+                      <button 
+                        className="extra-action-btn" 
+                        onClick={() => setEditingExtra(extra)}
+                        title="Editar extra"
+                      >
+                        <Edit size={14} />
+                      </button>
+                      <button 
+                        className="extra-action-btn delete" 
+                        onClick={() => handleDeleteExtra(extra.id)}
+                        title="Eliminar extra"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
             
-            {/* Mostrar placeholder si no hay extras */}
-            {extras.length === 0 && (
+            {/* Mostrar placeholder solo en vista privada sin extras */}
+            {extras.length === 0 && !isPublicView && (
               <div className="no-extras-message">
                 No tienes extras agregados. Haz clic en el botón de editar para agregar extras.
               </div>
