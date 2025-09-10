@@ -36,7 +36,8 @@ import {
     getUserFavoriteArtistsController,
     getArtistFollowersController,
     getArtistFavoritedByController,
-    getPublicUserProfileController
+    getPublicUserProfileController,
+    checkRecoveryEmailController
 } from '../controllers/authController.js';
 
 // Importar los nuevos modelos
@@ -113,6 +114,7 @@ router.get('/profile', verifyToken, getUserProfileController);
 router.put('/profile', verifyToken, upload.single('profile_image'), updateUserProfileController);
 router.post('/check-username', verifyToken, checkUsernameController);
 router.post('/verify-password', verifyToken, verifyCurrentPasswordController);
+router.post('/check-recovery-email', verifyToken, checkRecoveryEmailController);
 
 // Rutas para recuperación de contraseña 
 router.post('/find-user', findUserForRecoveryController);

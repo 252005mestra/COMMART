@@ -16,6 +16,7 @@ import {
   getAllStylesModel,
   getAllLanguagesModel,
   findUserByRecoveryEmailModel,
+  isRecoveryEmailAvailableModel,
   setResetTokenModel,
   findUserByResetTokenModel,
   updatePasswordAndClearTokenModel,
@@ -589,15 +590,12 @@ export const updateUserProfileController = async (req, res) => {
 export const checkUsernameController = async (req, res) => {
   try {
     const { username, excludeUserId } = req.body;
-    
     if (!username) {
       return res.status(400).json({ message: 'Se requiere un nombre de usuario.' });
     }
-    
     const available = await isUsernameAvailableModel(username, excludeUserId);
     res.status(200).json({ available });
   } catch (error) {
-    console.error('Error al verificar username:', error);
     res.status(500).json({ message: 'Error del servidor.' });
   }
 };
@@ -1167,6 +1165,21 @@ export const getPublicUserProfileController = async (req, res) => {
 
   } catch (error) {
     console.error('Error al obtener perfil público de usuario:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+// Nuevo controlador para verificar disponibilidad de correo de recuperación
+export const checkRecoveryEmailController = async (req, res) => {
+  try {
+    const { recovery_email, excludeUserId } = req.body;
+    if (!recovery_email) {
+      return res.status(400).json({ message: 'Se requiere un correo de recuperación.' });
+    }
+    const available = await isRecoveryEmailAvailableModel(recovery_email, excludeUserId);
+    res.status(200).json({ available });
+  } catch (error) {
+    console.error('Error en checkRecoveryEmailController:', error);
     res.status(500).json({ message: 'Error del servidor.' });
   }
 };

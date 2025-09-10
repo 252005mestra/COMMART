@@ -16,33 +16,37 @@ const EditProfile = () => {
   const [pendingImage, setPendingImage] = useState(null);
   const [pendingImageUrl, setPendingImageUrl] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  
+
   // Estados del formulario
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     recovery_email: ''
   });
-  
+
   // Estados para modales
   const [showPasswordConfirmModal, setShowPasswordConfirmModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  // Estados para la contraseña
   const [passwordData, setPasswordData] = useState({
     current_password: '',
     new_password: '',
     confirm_password: ''
   });
-  
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+  const [errors, setErrors] = useState({});
+
   // Estados adicionales
   const [selectedFile, setSelectedFile] = useState(null);
-  const [errors, setErrors] = useState({});
   const [initialData, setInitialData] = useState({});
   const [isArtist, setIsArtist] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Estados para activación de artista
   const [showArtistConfirm, setShowArtistConfirm] = useState(false);
   const [artistActivationLoading, setArtistActivationLoading] = useState(false);
@@ -54,7 +58,7 @@ const EditProfile = () => {
         const userResponse = await axios.get('http://localhost:5000/api/auth/profile', {
           withCredentials: true
         });
-        
+
         const userData = userResponse.data;
         setFormData({
           username: userData.username || '',
@@ -62,7 +66,7 @@ const EditProfile = () => {
           recovery_email: userData.recovery_email || ''
         });
         setInitialData(userData);
-        
+
         if (userData.profile_image) {
           setImagePreview(`http://localhost:5000/${userData.profile_image}`);
         }
@@ -85,7 +89,7 @@ const EditProfile = () => {
       }
     }
   }, [location.state]);
-  
+
   // Verificar si hay cambios
   const hasChanges = () => {
     return (
@@ -102,14 +106,18 @@ const EditProfile = () => {
       ...prev,
       [name]: value
     }));
-    
-    // Limpiar errores específicos del campo
+
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
       });
+    }
+
+    // Validación en tiempo real para username y recovery_email
+    if (name === 'username' || name === 'recovery_email') {
+      validateField(name, value);
     }
   };
 
@@ -122,13 +130,13 @@ const EditProfile = () => {
         setErrors(prev => ({ ...prev, image: 'La imagen no puede ser mayor a 5MB' }));
         return;
       }
-      
+
       // Validar tipo
       if (!file.type.startsWith('image/')) {
         setErrors(prev => ({ ...prev, image: 'Solo se permiten archivos de imagen' }));
         return;
       }
-      
+
       const reader = new FileReader();
       reader.onload = (ev) => {
         setPendingImage(file);
@@ -157,104 +165,161 @@ const EditProfile = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Manejar cambios en inputs de contraseña
-  const handlePasswordInputChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Limpiar errores específicos del campo
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
+  // Regex igual que en registro
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+  const containsXSSChars = (input) => /[<>"'&/]/.test(input);
+
+  // Alternar visibilidad de contraseñas
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
   };
 
-  // Validación de campos
-  const validateField = async (field, value, isRequired = false) => {
-    const newErrors = { ...errors };
-    
+  // Validación de campos (incluye contraseñas)
+  const validateField = async (field, value, isRequired = false, pwdData = passwordData) => {
+    let newErrors = { ...errors };
+
     switch (field) {
       case 'username':
         if (!value) {
-          newErrors.username = 'El nombre de usuario es obligatorio';
+          newErrors.username = 'El nombre de usuario es obligatorio.';
         } else if (value.length < 3) {
-          newErrors.username = 'El nombre de usuario debe tener al menos 3 caracteres';
+          newErrors.username = 'El nombre de usuario debe tener al menos 3 caracteres.';
         } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-          newErrors.username = 'El nombre de usuario solo puede contener letras, números y guiones bajos';
+          newErrors.username = 'Solo letras, números y guiones bajos.';
+        } else if (containsXSSChars(value)) {
+          newErrors.username = 'No se permiten caracteres peligrosos como < > " \' / &';
+        } else if (/\s/.test(value)) {
+          newErrors.username = 'No se permiten espacios.';
         } else {
-          delete newErrors.username;
+          try {
+            const res = await axios.post(
+              'http://localhost:5000/api/auth/check-username',
+              { username: value, excludeUserId: initialData.id },
+              { withCredentials: true }
+            );
+            if (!res.data.available) {
+              newErrors.username = 'El nombre de usuario ya está en uso.';
+            } else {
+              delete newErrors.username;
+            }
+          } catch (err) {
+            newErrors.username = 'Error al verificar el nombre de usuario.';
+          }
         }
         break;
-        
+
       case 'recovery_email':
-        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) {
-          newErrors.recovery_email = 'Formato de correo inválido';
+        if (value && !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(value)) {
+          newErrors.recovery_email = 'Formato de correo inválido.';
+        } else if (value) {
+          try {
+            const res = await axios.post(
+              'http://localhost:5000/api/auth/check-recovery-email',
+              { recovery_email: value, excludeUserId: initialData.id },
+              { withCredentials: true }
+            );
+            if (!res.data.available) {
+              newErrors.recovery_email = 'El correo ya está en uso.';
+            } else {
+              delete newErrors.recovery_email;
+            }
+          } catch (err) {
+            newErrors.recovery_email = 'Error al verificar correo.';
+          }
         } else {
           delete newErrors.recovery_email;
         }
         break;
-        
+
       case 'current_password':
         if (isRequired && !value) {
-          newErrors.current_password = 'La contraseña actual es obligatoria';
+          newErrors.current_password = 'La contraseña actual es obligatoria.';
+        } else if (/\s/.test(value)) {
+          newErrors.current_password = 'No se permiten espacios.';
+        } else if (containsXSSChars(value)) {
+          newErrors.current_password = 'No se permiten caracteres peligrosos como < > " \' / &';
+        } else if (value) {
+          try {
+            const res = await axios.post(
+              'http://localhost:5000/api/auth/verify-password',
+              { current_password: value },
+              { withCredentials: true }
+            );
+            if (!res.data.valid) {
+              newErrors.current_password = 'La contraseña actual es incorrecta.';
+            } else {
+              delete newErrors.current_password;
+            }
+          } catch {
+            newErrors.current_password = 'Error al verificar contraseña actual.';
+          }
         } else {
           delete newErrors.current_password;
         }
         break;
-        
+
       case 'new_password':
         if (isRequired && !value) {
-          newErrors.new_password = 'La nueva contraseña es obligatoria';
-        } else if (value && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(value)) {
-          newErrors.new_password = 'La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial';
+          newErrors.new_password = 'La nueva contraseña es obligatoria.';
+        } else if (value === pwdData.current_password && value) {
+          newErrors.new_password = 'La nueva contraseña no puede ser igual a la actual.';
+        } else if (value && containsXSSChars(value)) {
+          newErrors.new_password = 'No se permiten caracteres peligrosos como < > " \' / &';
+        } else if (value && /\s/.test(value)) {
+          newErrors.new_password = 'No se permiten espacios.';
+        } else if (value && !passwordRegex.test(value)) {
+          newErrors.new_password = 'La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.';
         } else {
           delete newErrors.new_password;
         }
         break;
-        
+
       case 'confirm_password':
-        if (isRequired && !value) {
-          newErrors.confirm_password = 'Confirma tu nueva contraseña';
-        } else if (isRequired && value !== passwordData.new_password) {
-          newErrors.confirm_password = 'Las contraseñas no coinciden';
+        if (!value) {
+          newErrors.confirm_password = 'Confirma tu nueva contraseña.';
+        } else if (pwdData.new_password && value !== pwdData.new_password) {
+          newErrors.confirm_password = 'Las contraseñas no coinciden.';
         } else {
           delete newErrors.confirm_password;
         }
         break;
     }
-    
+
     setErrors(newErrors);
+  };
+
+  // Handler de cambio de input de contraseña
+  const handlePasswordInputChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => {
+      const updated = { ...prev, [name]: value };
+      validateField(name, value, true, updated);
+      if (name === 'new_password' || name === 'confirm_password') {
+        validateField('confirm_password', updated.confirm_password, true, updated);
+      }
+      if (name === 'current_password' || name === 'new_password') {
+        validateField('new_password', updated.new_password, true, updated);
+      }
+      return updated;
+    });
   };
 
   // Función para cancelar y restaurar datos originales
   const handleCancel = () => {
-    // Restaurar datos originales
     setFormData({
       username: initialData.username || '',
       email: initialData.email || '',
       recovery_email: initialData.recovery_email || ''
     });
-    
-    // Restaurar imagen original
+
     if (initialData.profile_image) {
       setImagePreview(`http://localhost:5000/${initialData.profile_image}`);
     } else {
       setImagePreview(null);
     }
-    
-    // Limpiar imagen seleccionada
+
     setSelectedFile(null);
-    
-    // Limpiar errores
     setErrors({});
-    
-    // Resetear el input de archivo
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -285,7 +350,6 @@ const EditProfile = () => {
       new_password: '',
       confirm_password: ''
     });
-    // Limpiar errores de contraseña
     const newErrors = { ...errors };
     delete newErrors.current_password;
     delete newErrors.new_password;
@@ -295,23 +359,24 @@ const EditProfile = () => {
 
   // Confirmar cambio de contraseña
   const handlePasswordConfirm = async () => {
-    // Validar todos los campos de contraseña
     await validateField('current_password', passwordData.current_password, true);
     await validateField('new_password', passwordData.new_password, true);
     await validateField('confirm_password', passwordData.confirm_password, true);
 
-    // Verificar si hay errores después de un breve delay
     setTimeout(() => {
       const hasPasswordErrors = ['current_password', 'new_password', 'confirm_password']
         .some(field => errors[field]);
 
-      if (!hasPasswordErrors && passwordData.current_password && 
-          passwordData.new_password && passwordData.confirm_password) {
+      if (
+        !hasPasswordErrors &&
+        passwordData.current_password &&
+        passwordData.new_password &&
+        passwordData.confirm_password
+      ) {
         setShowPasswordModal(false);
-        // Proceder con el envío del formulario completo
         handleSubmit(null, true);
       }
-    }, 500);
+    }, 0);
   };
 
   // Prevenir submit con Enter en el modal de contraseña
@@ -337,21 +402,20 @@ const EditProfile = () => {
     try {
       setArtistActivationLoading(true);
       setArtistActivationError('');
-      
+
       const formDataToSend = new FormData();
       formDataToSend.append('is_artist', 'true');
-      
+
       await axios.put('http://localhost:5000/api/auth/profile', formDataToSend, {
         withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
+
       setIsArtist(true);
       setShowArtistConfirm(false);
       alert('¡Cuenta de artista activada exitosamente!');
-      
     } catch (error) {
       const msg = error.response?.data?.message || 'Error al activar cuenta de artista';
       setArtistActivationError(msg);
@@ -363,53 +427,50 @@ const EditProfile = () => {
   // Enviar formulario
   const handleSubmit = async (e = null, includePassword = false) => {
     if (e) e.preventDefault();
-    
+
     if (!hasChanges() && !includePassword) {
       setErrors({ general: 'No se han realizado cambios' });
       return;
     }
-    
-    // Validar que no haya errores
+
     if (Object.keys(errors).some(key => key !== 'general' && errors[key])) {
       return;
     }
-    
+
     try {
       setLoading(true);
       const formDataToSend = new FormData();
-      
-      // Solo enviar campos que han cambiado
+
       if (formData.username !== initialData.username) {
         formDataToSend.append('username', formData.username);
       }
-      
+
       if (formData.recovery_email !== (initialData.recovery_email || '')) {
         formDataToSend.append('recovery_email', formData.recovery_email);
       }
-      
+
       if (includePassword && passwordData.new_password) {
         formDataToSend.append('current_password', passwordData.current_password);
         formDataToSend.append('new_password', passwordData.new_password);
       }
-      
+
       if (selectedFile) {
         formDataToSend.append('profile_image', selectedFile);
       }
-      
+
       await axios.put('http://localhost:5000/api/auth/profile', formDataToSend, {
         withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
+
       alert('Perfil actualizado exitosamente');
-      
-      // Recargar los datos del usuario actualizado
+
       const userResponse = await axios.get('http://localhost:5000/api/auth/profile', {
         withCredentials: true
       });
-      
+
       const userData = userResponse.data;
       setFormData({
         username: userData.username || '',
@@ -417,16 +478,13 @@ const EditProfile = () => {
         recovery_email: userData.recovery_email || ''
       });
       setInitialData(userData);
-      
-      // Actualizar imagen de perfil si se cambió
+
       if (userData.profile_image) {
         setImagePreview(`http://localhost:5000/${userData.profile_image}`);
       }
-      
-      // Limpiar el estado de la imagen seleccionada
+
       setSelectedFile(null);
-      
-      // Limpiar datos de contraseña si se cambió
+
       if (includePassword) {
         setPasswordData({
           current_password: '',
@@ -434,10 +492,8 @@ const EditProfile = () => {
           confirm_password: ''
         });
       }
-      
-      // Limpiar errores
+
       setErrors({});
-      
     } catch (error) {
       const msg = error.response?.data?.message || 'Error al actualizar el perfil';
       setErrors(prev => ({ ...prev, general: msg }));
@@ -454,8 +510,8 @@ const EditProfile = () => {
         <section className="edit-profile-section">
           <div className="edit-profile-container">
             <div className="edit-profile-header">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="back-btn"
                 onClick={handleGoBack}
                 title="Volver al inicio"
@@ -470,7 +526,7 @@ const EditProfile = () => {
                 <h2>Datos de Cuenta</h2>
               </div>
 
-              {errors.general && (
+              {errors.general && !errors.username && (
                 <div className="general-error">
                   {errors.general}
                 </div>
@@ -515,7 +571,7 @@ const EditProfile = () => {
                     className={errors.username ? 'input-error' : ''}
                   />
                   {errors.username && (
-                    <span className="field-error">{errors.username}</span>
+                    <span className="input-error-message">{errors.username}</span>
                   )}
                 </div>
 
@@ -540,7 +596,7 @@ const EditProfile = () => {
                     className={errors.recovery_email ? 'input-error' : ''}
                   />
                   {errors.recovery_email && (
-                    <span className="field-error">{errors.recovery_email}</span>
+                    <span className="input-error-message">{errors.recovery_email}</span>
                   )}
                 </div>
 
@@ -555,8 +611,8 @@ const EditProfile = () => {
                   <button type="button" className="cancel-btn" onClick={handleCancel}>
                     Cancelar
                   </button>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="save-btn"
                     disabled={loading || (!hasChanges() && Object.keys(errors).some(key => key !== 'general' && errors[key]))}
                   >
@@ -577,8 +633,8 @@ const EditProfile = () => {
         <section className="artist-activation-section">
           <div className="edit-profile-container">
             <div className="edit-profile-header">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="back-btn"
                 onClick={handleGoBack}
                 title="Volver al inicio"
@@ -629,13 +685,13 @@ const EditProfile = () => {
           <div className="confirmation-modal">
             <h3>¿Deseas cambiar tu contraseña?</h3>
             <div className="confirmation-buttons">
-              <button 
+              <button
                 className="cancel-modal-btn"
                 onClick={() => setShowPasswordConfirmModal(false)}
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 className="continue-modal-btn"
                 onClick={handlePasswordConfirmContinue}
               >
@@ -645,7 +701,7 @@ const EditProfile = () => {
           </div>
         </div>
       )}
-      
+
       {/* Modal de cambio de contraseña */}
       {showPasswordModal && (
         <div className="modal-overlay">
@@ -654,75 +710,84 @@ const EditProfile = () => {
               <img src="/src/assets/LogoCOMMART.png" alt="COMMART" className="modal-logo" />
               <h2>Cambiar Contraseña</h2>
             </div>
-            
-            <form 
-              className="password-change-form" 
-              onSubmit={(e) => e.preventDefault()}
+
+            <form
+              className="password-change-form"
+              onSubmit={e => e.preventDefault()}
               onKeyDown={handlePasswordFormKeyDown}
             >
               <div className="password-input-group">
-                <input
-                  type={showCurrentPassword ? 'text' : 'password'}
-                  name="current_password"
-                  value={passwordData.current_password}
-                  onChange={handlePasswordInputChange}
-                  className={errors.current_password ? 'input-error' : ''}
-                  placeholder="Contraseña actual"
-                  onKeyDown={handlePasswordFormKeyDown}
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowCurrentPassword(prev => !prev)}
-                >
-                  {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                <div className="password-input-container">
+                  <input
+                    type={showPasswords.current ? 'text' : 'password'}
+                    name="current_password"
+                    value={passwordData.current_password}
+                    onChange={handlePasswordInputChange}
+                    className={errors.current_password ? 'input-error' : ''}
+                    placeholder="Contraseña actual"
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => togglePasswordVisibility('current')}
+                    tabIndex={-1}
+                  >
+                    {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
                 {errors.current_password && (
-                  <span className="field-error">{errors.current_password}</span>
+                  <span className="input-error-message">{errors.current_password}</span>
                 )}
               </div>
 
               <div className="password-input-group">
-                <input
-                  type={showNewPassword ? 'text' : 'password'}
-                  name="new_password"
-                  value={passwordData.new_password}
-                  onChange={handlePasswordInputChange}
-                  className={errors.new_password ? 'input-error' : ''}
-                  placeholder="Contraseña nueva"
-                  onKeyDown={handlePasswordFormKeyDown}
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowNewPassword(prev => !prev)}
-                >
-                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                <div className="password-input-container">
+                  <input
+                    type={showPasswords.new ? 'text' : 'password'}
+                    name="new_password"
+                    value={passwordData.new_password}
+                    onChange={handlePasswordInputChange}
+                    className={errors.new_password ? 'input-error' : ''}
+                    placeholder="Contraseña nueva"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => togglePasswordVisibility('new')}
+                    tabIndex={-1}
+                  >
+                    {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
                 {errors.new_password && (
-                  <span className="field-error">{errors.new_password}</span>
+                  <span className="input-error-message">{errors.new_password}</span>
                 )}
               </div>
 
               <div className="password-input-group">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirm_password"
-                  value={passwordData.confirm_password}
-                  onChange={handlePasswordInputChange}
-                  className={errors.confirm_password ? 'input-error' : ''}
-                  placeholder="Confirmar contraseña"
-                  onKeyDown={handlePasswordFormKeyDown}
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowConfirmPassword(prev => !prev)}
-                >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                <div className="password-input-container">
+                  <input
+                    type={showPasswords.confirm ? 'text' : 'password'}
+                    name="confirm_password"
+                    value={passwordData.confirm_password}
+                    onChange={handlePasswordInputChange}
+                    className={errors.confirm_password ? 'input-error' : ''}
+                    placeholder="Confirmar contraseña"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => togglePasswordVisibility('confirm')}
+                    tabIndex={-1}
+                  >
+                    {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
                 {errors.confirm_password && (
-                  <span className="field-error">{errors.confirm_password}</span>
+                  <span className="input-error-message">{errors.confirm_password}</span>
                 )}
               </div>
 
@@ -739,8 +804,8 @@ const EditProfile = () => {
                   className="save-modal-btn"
                   onClick={handlePasswordConfirm}
                   disabled={
-                    !passwordData.current_password || 
-                    !passwordData.new_password || 
+                    !passwordData.current_password ||
+                    !passwordData.new_password ||
                     !passwordData.confirm_password ||
                     Object.keys(errors).some(key => key.includes('password') && errors[key])
                   }
@@ -752,7 +817,7 @@ const EditProfile = () => {
           </div>
         </div>
       )}
-      
+
       {/* Modal de confirmación para activar artista */}
       {showArtistConfirm && (
         <div className="modal-overlay">

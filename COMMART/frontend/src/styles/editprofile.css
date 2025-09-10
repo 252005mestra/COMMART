@@ -233,6 +233,12 @@ input[type="text"]::-webkit-strong-password-auto-fill-button {
   transition: all 0.3s ease;
 }
 
+input,
+input.input-error,
+input:focus {
+  transition: none !important;
+}
+
 .form-field input:focus {
   outline: none;
   background: #ddd;
@@ -737,5 +743,15 @@ textarea.disabled-field {
   font-weight: 400;
   letter-spacing: 0.04em;
   margin-bottom: 0.5rem;
+}
+
+.input-error-message {
+  font-family: 'Nunito Sans';
+  color: #e74c3c;
+  font-size: 0.93em;
+  display: block;
+  text-align: left;
+  padding-left: 0.3rem;
+  margin-top: 0.25rem;
 }
 

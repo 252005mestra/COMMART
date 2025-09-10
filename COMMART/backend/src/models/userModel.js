@@ -101,12 +101,10 @@ export const isUsernameAvailableModel = (username, excludeUserId = null) => {
   return new Promise((resolve, reject) => {
     let query = 'SELECT id FROM users WHERE username = ?';
     let params = [username];
-    
     if (excludeUserId) {
       query += ' AND id != ?';
       params.push(excludeUserId);
     }
-    
     dbConnection.query(query, params, (err, results) => {
       if (err) return reject(err);
       resolve(results.length === 0); // true si está disponible
@@ -805,5 +803,24 @@ export const getUserFollowedArtistsCountModel = (userId) => {
         resolve(parseInt(results[0].count) || 0); // Asegurar que sea número
       }
     );
+  });
+};
+
+// Verificar si un correo electrónico de recuperación está disponible (excluyendo un ID específico)
+export const isRecoveryEmailAvailableModel = (recovery_email, excludeUserId = null) => {
+  return new Promise((resolve, reject) => {
+    let query = `
+      SELECT id FROM users 
+      WHERE (email = ? OR recovery_email = ?)
+    `;
+    let params = [recovery_email, recovery_email];
+    if (excludeUserId && !isNaN(Number(excludeUserId))) {
+      query += ' AND id != ?';
+      params.push(Number(excludeUserId));
+    }
+    dbConnection.query(query, params, (err, results) => {
+      if (err) return reject(err);
+      resolve(results.length === 0); // true si está disponible
+    });
   });
 };
