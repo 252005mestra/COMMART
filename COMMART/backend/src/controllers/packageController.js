@@ -193,3 +193,14 @@ export const getArtistExtrasPublic = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener extras.' });
   }
 };
+
+export const getArtistPackagesPublic = async (req, res) => {
+  try {
+    const { artistId } = req.params;
+    const packages = await getPackagesByArtist(artistId);
+    res.json(packages);
+  } catch (err) {
+    console.error('Error al obtener paquetes públicos:', err);
+    res.status(500).json({ message: 'Error al obtener paquetes.' });
+  }
+};

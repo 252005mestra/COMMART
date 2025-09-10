@@ -6,7 +6,8 @@ import { useUser } from '../context/UserContext';
 import axios from 'axios';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
-import '../styles/createorderpage.css';
+import ArtistPackages from '../components/ArtistPackages';
+import '../styles/createorder.css';
 
 const CreateOrderPage = () => {
   const { artistId } = useParams();
@@ -131,7 +132,7 @@ const CreateOrderPage = () => {
       <>
         <MainNav />
         <main className="main-content">
-          <div className="loading-container">Cargando...</div>
+          <div className="create-order-loading-container">Cargando...</div>
         </main>
         <Footer />
       </>
@@ -143,44 +144,7 @@ const CreateOrderPage = () => {
       <>
         <MainNav />
         <main className="main-content">
-          <div className="error-container">Artista no encontrado</div>
-        </main>
-        <Footer />
-      </>
-    );
-  }
-
-  // Si no hay paquetes, mostrar mensaje y no permitir pedido
-  if (packages.length === 0) {
-    return (
-      <>
-        <MainNav />
-        <main className="main-content">
-          <div className="create-order-container">
-            <div className="order-header-section">
-              <h1 className="order-title">
-                Realizar pedido a <span className="artist-name">@{artist.username}</span>
-              </h1>
-            </div>
-            
-            <div className="order-card">
-              <div className="order-logo-section">
-                <img src="/src/assets/LogoCOMMART.png" alt="COMMART" className="order-logo" />
-                <h2 className="order-subtitle">Solicitud de Pedido</h2>
-              </div>
-              
-              <div className="no-packages-message">
-                <p>Este artista no tiene paquetes disponibles en este momento.</p>
-                <button 
-                  type="button" 
-                  className="back-btn"
-                  onClick={() => navigate(-1)}
-                >
-                  Volver
-                </button>
-              </div>
-            </div>
-          </div>
+          <div className="create-order-error-container">Artista no encontrado</div>
         </main>
         <Footer />
       </>
@@ -191,152 +155,112 @@ const CreateOrderPage = () => {
     <>
       <MainNav />
       <main className="main-content">
-        <div className="create-order-container">
-          <div className="order-header-section">
-            <h1 className="order-title">
-              Realizar pedido a <span className="artist-name">@{artist.username}</span>
+        <div className="create-order-page-container">
+          {/* Header con nombre y foto del artista */}
+          <div className="create-order-header-section">
+            <h1 className="create-order-title">
+              Realizar pedido a{' '}
+              <span className="create-order-artist-name">
+                <img
+                  src={artist?.profile_image ? `http://localhost:5000/${artist.profile_image}` : '/default-profile.jpg'}
+                  alt={artist?.username}
+                  className="create-order-artist-avatar"
+                />
+                {artist?.username}
+              </span>
             </h1>
           </div>
-          
-          <div className="order-card">
-            <div className="order-logo-section">
-              <img src="/src/assets/LogoCOMMART.png" alt="COMMART" className="order-logo" />
-              <h2 className="order-subtitle">Solicitud de Pedido</h2>
+
+          <div className="create-order-main-card">
+            <div className="create-order-logo-section">
+              <img src="/src/assets/LogoCOMMART.png" alt="COMMART" className="create-order-logo" />
+              <h2 className="create-order-subtitle">Solicitud de Pedido</h2>
             </div>
 
-            {errors.general && (
-              <div className="field-error">{errors.general}</div>
+            {/* Si no hay paquetes, mostrar mensaje y no permitir pedido */}
+            {packages.length === 0 ? (
+              <div className="create-order-no-packages-message">
+                <p>Este artista no tiene paquetes disponibles en este momento.</p>
+                <button type="button" className="create-order-back-btn" onClick={() => navigate(-1)}>
+                  Volver
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="create-order-form">
+                {/* Selección de paquetes */}
+                <div className="create-order-form-section">
+                  <label className="create-order-section-label">1. Selecciona uno de los paquetes del artista</label>
+                  <div className="create-order-packages-container">
+                    <ArtistPackages
+                      isPublicView={true}
+                      artistId={artistId}
+                      initialPackages={packages}
+                      selectionMode={true}
+                      selectedPackage={selectedPackage}
+                      onPackageSelect={handleSelectPackage}
+                      showExtras={false}
+                    />
+                  </div>
+                  {errors.package && <div className="create-order-field-error">{errors.package}</div>}
+                </div>
+
+                {/* Descripción */}
+                <div className="create-order-form-section">
+                  <label className="create-order-section-label">2. Descripción de la ilustración</label>
+                  <textarea
+                    className={`create-order-description-textarea ${errors.description ? 'error' : ''}`}
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    placeholder="Quiero un dibujo de mis dos perritos corriendo"
+                    required
+                  />
+                  {errors.description && <div className="create-order-field-error">{errors.description}</div>}
+                </div>
+
+                {/* Imágenes de referencia */}
+                <div className="create-order-form-section">
+                  <label className="create-order-section-label">3. Añade imágenes de referencia</label>
+                  <div className="create-order-images-upload-area">
+                    {referenceImages.map((img, idx) => (
+                      <div className="create-order-image-preview" key={idx}>
+                        <img src={URL.createObjectURL(img)} alt="Referencia" />
+                        <button
+                          type="button"
+                          className="create-order-remove-image-btn"
+                          onClick={() => handleRemoveImage(idx)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    {referenceImages.length < 3 && (
+                      <div className="create-order-add-image-area" onClick={() => fileInputRef.current.click()}>
+                        <div className="create-order-add-image-icon">+</div>
+                        <span>Agregar</span>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="create-order-file-input-hidden"
+                          multiple
+                          onChange={handleImageChange}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {errors.images && <div className="create-order-field-error">{errors.images}</div>}
+                </div>
+
+                <div className="create-order-form-actions">
+                  <button type="button" className="create-order-cancel-btn" onClick={() => navigate(-1)}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="create-order-submit-btn" disabled={submitting}>
+                    {submitting ? 'Enviando...' : 'Continuar'}
+                  </button>
+                </div>
+              </form>
             )}
-
-            <form onSubmit={handleSubmit} className="order-form">
-              {/* Selección de paquetes */}
-              <div className="form-section">
-                <label className="section-label">1. Selecciona uno de los paquetes del artista</label>
-                
-                <div className="packages-grid">
-                  {packages.map(pkg => (
-                    <div
-                      key={pkg.id}
-                      className={`package-card ${selectedPackage?.id === pkg.id ? 'selected' : ''}`}
-                      onClick={() => handleSelectPackage(pkg)}
-                    >
-                      <div className="package-header">
-                        <span className="package-name">{pkg.name}</span>
-                        <span className="package-badge">Online</span>
-                      </div>
-                      
-                      <div className="package-content">
-                        <div className="package-price">Precio<br/>${pkg.price}</div>
-                        
-                        <div className="package-features">
-                          {pkg.features && pkg.features.map((feature, idx) => (
-                            <div key={idx} className="feature-item">• {feature}</div>
-                          ))}
-                        </div>
-                        
-                        <div className="package-samples">
-                          <span className="samples-label">Muestra</span>
-                          {pkg.sample_images && pkg.sample_images.length > 0 ? (
-                            <div className="samples-grid">
-                              {pkg.sample_images.slice(0, 2).map((img, idx) => (
-                                <img 
-                                  key={idx}
-                                  src={`http://localhost:5000/${img}`} 
-                                  alt={`Muestra ${idx + 1}`}
-                                  className="sample-image"
-                                />
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="no-samples">Sin muestras</div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {errors.package && (
-                  <div className="field-error">{errors.package}</div>
-                )}
-              </div>
-
-              {/* Descripción */}
-              <div className="form-section">
-                <label className="section-label">2. Descripción de la ilustración</label>
-                <textarea
-                  className={`description-textarea ${errors.description ? 'error' : ''}`}
-                  value={description}
-                  onChange={(e) => {
-                    setDescription(e.target.value);
-                    if (errors.description) {
-                      setErrors(prev => ({ ...prev, description: '' }));
-                    }
-                  }}
-                  placeholder="Quiero un dibujo de mi personaje animado..."
-                />
-                {errors.description && (
-                  <div className="field-error">{errors.description}</div>
-                )}
-              </div>
-
-              {/* Imágenes de referencia */}
-              <div className="form-section">
-                <label className="section-label">3. Añade imágenes de referencia</label>
-                <div className="images-upload-area">
-                  {referenceImages.map((img, idx) => (
-                    <div className="image-preview" key={idx}>
-                      <img src={URL.createObjectURL(img)} alt="Referencia" />
-                      <button 
-                        type="button" 
-                        className="remove-image-btn" 
-                        onClick={() => handleRemoveImage(idx)}
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  ))}
-                  
-                  {referenceImages.length < 3 && (
-                    <div className="add-image-area" onClick={() => fileInputRef.current?.click()}>
-                      <div className="add-image-icon">+</div>
-                      <span>Agregar</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        style={{ display: 'none' }}
-                        ref={fileInputRef}
-                        onChange={handleImageChange}
-                      />
-                    </div>
-                  )}
-                </div>
-                
-                {errors.images && (
-                  <div className="field-error">{errors.images}</div>
-                )}
-              </div>
-
-              {/* Botones de acción */}
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="cancel-button" 
-                  onClick={() => navigate(-1)}
-                  disabled={submitting}
-                >
-                  Cancelar
-                </button>
-                <button 
-                  type="submit" 
-                  className="continue-button"
-                  disabled={submitting}
-                >
-                  {submitting ? 'Enviando...' : 'Continuar'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       </main>

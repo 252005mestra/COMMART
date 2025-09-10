@@ -1,340 +1,527 @@
-.order-modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(60, 48, 36, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.order-modal-content {
-  background: #fff;
-  border-radius: 28px;
-  box-shadow: 0 8px 32px rgba(60, 48, 36, 0.13);
-  border: 3px solid #7d5938;
-  width: 1100px;
-  max-width: 95vw;
-  height: auto;
-  max-height: 95vh;
-  padding: 2rem;
-  position: relative;
-  text-align: center;
-  overflow-y: auto;
-  font-family: 'Nunito Sans', sans-serif;
-  margin: 0;
-  box-sizing: border-box;
-  /* Barra de scroll minimalista */
-  scrollbar-width: thin;
-  scrollbar-color: #D2AB80 transparent;
-}
-
-/* Webkit scrollbar (Chrome, Safari, Edge) */
-.order-modal-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.order-modal-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.order-modal-content::-webkit-scrollbar-thumb {
-  background: #D2AB80;
-  border-radius: 10px;
-}
-
-.order-modal-content::-webkit-scrollbar-thumb:hover {
-  background: #8B6D47;
-}
-
-/* Header con info del artista */
-.order-header {
-  background: #fff;
-  padding: 1rem 2rem;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.order-header-content {
-  max-width: 1200px;
+/* ========== Container principal más ancho ========== */
+.create-order-page-container {
+  max-width: 95vw; /* Cambio de 1200px a 95vw para usar casi todo el viewport */
+  width: 95vw;
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.order-header-text {
-  font-size: 1.1rem;
-  color: #666;
+  padding: 2rem 1rem;
   font-family: 'Nunito Sans', sans-serif;
 }
 
-.artist-info-header {
+/* ========== Header con título y artista - TÍTULO A LA IZQUIERDA ========== */
+.create-order-header-section {
+  text-align: left; /* Cambiado de center a left */
+  margin-bottom: 3rem;
+  padding-left: 2rem; /* Agregar padding para alineación */
+}
+
+.create-order-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 2.5rem;
+  color: #8B6D47; /* Color café del proyecto */
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-}
-
-.artist-avatar-header {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.artist-name-header {
-  font-family: 'Goldman';
-  font-size: 1.2rem;
-  color: #333;
-  font-weight: 600;
-}
-
-/* Contenedor del formulario */
-.order-form-container {
-  display: flex;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.order-form-card {
-  background: white;
-  border-radius: 24px;
-  padding: 2rem;
-  max-width: 600px;
-  width: 100%;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-}
-
-.order-logo {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.order-logo img {
-  height: 60px;
-}
-
-.order-form-title {
-  font-family: 'Goldman';
-  font-size: 1.8rem;
-  color: #8B6D47;
-  margin: 1rem 0 2rem 0;
-}
-
-/* Secciones del formulario */
-.order-section {
-  margin-bottom: 1.5rem;
-}
-
-.section-label {
-  font-family: 'Goldman';
-  font-size: 1.1rem;
-  color: #333;
-  margin-bottom: 1rem;
-  text-align: left;
-}
-
-/* Grid de paquetes */
-.packages-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.package-card {
-  border: 3px solid #D2AB80;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: white;
-  height: 280px;  /* Aumentado de 240px a 280px */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.package-card.selected {
-  border-style: dashed;
-  border-color: #8B6D47;
-  transform: scale(1.02);
-}
-
-.package-header {
-  padding: 0.8rem;
-  text-align: center;
-  color: white;
-  font-family: 'Goldman';
-  font-size: 1rem;
-  flex-shrink: 0; /* No se comprime */
-}
-
-.package-content {
-  padding: 1rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 0;
-  overflow-y: auto; /* Permitir scroll interno si es necesario */
-}
-
-.package-features {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 0.85rem; /* Ligeramente más pequeño */
-  line-height: 1.3;   /* Menos espacio entre líneas */
-}
-
-.package-features li {
-  margin-bottom: 0.2rem; /* Reducido de 0.3rem */
-  color: #666;
-}
-
-.package-price {
-  font-family: 'Goldman';
-  font-size: 1.1rem;
-  color: #8B6D47;
-  margin-top: auto;
-  padding-top: 0.5rem;
-  border-top: 1px solid #e0e0e0;
-}
-
-/* Textarea limpio */
-.description-textarea {
-  width: 100%;
-  height: 100px;  /* Más alto */
-  padding: 1rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  font-family: 'Nunito Sans';
-  resize: none;
-  box-sizing: border-box;
-  font-size: 1rem;
-}
-
-/* Área de subida de imágenes con tamaño fijo más grande */
-.images-upload-area {
-  display: flex;
-  gap: 1.5rem;
-  justify-content: flex-start;
+  justify-content: flex-start; /* Cambiado de center a flex-start */
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
-.image-preview {
-  width: 140px;  /* Aumentado de 100px a 140px */
-  height: 140px; /* Aumentado de 100px a 140px */
-  border-radius: 12px;
-  border: 2px solid #D2AB80;
-  position: relative;
-  overflow: hidden;
-  background: #f9f9f9;
+.create-order-artist-name {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #000000; /* Color negro para el nombre */
 }
 
-.image-preview img {
+.create-order-artist-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #8B6D47;
+}
+
+/* ========== Card principal del formulario - 90% DEL VIEWPORT ========== */
+.create-order-main-card {
+  background: white;
+  border-radius: 30px;
+  width: 90vw; /* 90% del viewport width */
+  max-width: 90vw; /* Máximo 90% del viewport */
+  margin: 0 auto;
+  box-shadow: 0 8px 2px rgba(0, 0, 0, 0.321);
+  border: 3px solid #000;
+  overflow: hidden;
+}
+
+/* ========== Header de la card con logo y título ========== */
+.create-order-logo-section {
+  text-align: center;
+  padding: 2rem 0 1.5rem 0;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+}
+
+.create-order-logo {
+  height: 4rem;
+  margin-bottom: 1rem;
+}
+
+.create-order-subtitle {
+  font-family: 'Goldman', sans-serif;
+  font-size: 2rem;
+  color: #8B6D47;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+/* Divider que ocupa el 90% */
+.create-order-logo-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  height: 2px;
+  background: #e0e0e0;
+}
+
+/* ========== Formulario ========== */
+.create-order-form {
+  padding: 2.5rem 3rem;
+}
+
+.create-order-form-section {
+  margin-bottom: 3rem;
+}
+
+.create-order-section-label {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1.2rem;
+  color: #000000;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+/* ========== Sección de paquetes con fondo naranja ========== */
+.create-order-packages-container {
+  background: #D2AB80; /* Fondo naranja envolvente */
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+}
+
+/* ========== Grid más flexible para aprovechar el ancho ========== */
+.create-order-packages-container .packages-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Grid más flexible */
+  gap: 1.5rem; /* Reducir gap para aprovechar más espacio */
+  justify-items: center;
+  max-width: 100%;
+  margin: 0;
+}
+
+/* ========== Paquetes adaptados - AUMENTAR ALTURA PARA EVITAR CORTES ========== */
+.create-order-packages-container .artist-package-card {
+  width: 350px !important; /* Ligeramente más pequeños para que quepan más */
+  height: 580px !important; /* Aumentado de 520px a 580px para evitar cortes */
+  margin: 0;
+  transform: none; /* Resetear transform por defecto */
+}
+
+/* Ajustar contenido interno de los paquetes para mejor distribución */
+.create-order-packages-container .package-content-artist {
+  padding: 1.3rem !important; /* Reducido de 1.5rem a 1.3rem */
+  gap: 0.6rem !important; /* Reducido de 0.7rem a 0.6rem para más espacio */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Distribuir el contenido uniformemente */
+}
+
+/* Ajustar sección de descripción para que no se corte */
+.create-order-packages-container .package-description-section {
+  flex: 1;
+  min-height: 0; /* Permitir que se comprima si es necesario */
+  overflow: hidden;
+}
+
+.create-order-packages-container .package-desc-text {
+  font-size: 0.85rem !important;
+  line-height: 1.4 !important;
+  max-height: 120px; /* Limitar altura máxima */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 6; /* Máximo 6 líneas */
+  -webkit-box-orient: vertical;
+}
+
+/* Ajustar sección de muestras para que no se corte */
+.create-order-packages-container .package-samples-section {
+  margin-top: auto; /* Empujar hacia abajo */
+  flex-shrink: 0; /* No comprimir */
+}
+
+.create-order-packages-container .package-sample-image {
+  height: 120px !important; /* Reducido de 140px a 120px */
+}
+
+.create-order-packages-container .package-samples-grid {
+  gap: 0.8rem !important; /* Reducir gap */
+}
+
+/* MANTENER TODOS LOS ESTILOS DE SELECCIÓN */
+/* Estilos para los paquetes no seleccionados (opacos) en la vista de pedido */
+.create-order-packages-container .artist-package-card:not(.selected) {
+  opacity: 0.6;
+  filter: grayscale(0.3);
+}
+
+/* Estilo para el paquete seleccionado en la vista de pedido */
+.create-order-packages-container .artist-package-card.selected {
+  opacity: 1;
+  filter: none;
+  border: 3px dashed #000000 !important;
+  transform: scale(1.05) !important; /* Ligeramente más grande cuando está seleccionado */
+  box-shadow: 0 12px 4px rgba(0, 0, 0, 0.4) !important;
+  z-index: 2;
+}
+
+/* ========== Descripción del dibujo ========== */
+.create-order-description-textarea {
+  width: 100%;
+  min-height: 120px;
+  max-height: 120px;
+  border: 2px solid #b3b792;
+  border-radius: 12px;
+  padding: 1rem;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  background: #f8f8f5;
+  resize: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.create-order-description-textarea:focus {
+  outline: none;
+  border-color: #78966a;
+  background: #f4f7f2;
+}
+
+.create-order-description-textarea.error {
+  border-color: #e74c3c;
+}
+
+/* ========== Imágenes de referencia ========== */
+.create-order-images-upload-area {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.create-order-image-preview {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 3px solid #333;
+}
+
+.create-order-image-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 10px;
 }
 
-.image-preview .remove-image-btn {
+.create-order-remove-image-btn {
   position: absolute;
-  top: 5px;       /* Cambiado de -8px a 5px */
-  right: 5px;     /* Cambiado de -8px a 5px */
-  background: #e74c3c;
-  color: white;
-  border: none;
+  top: 8px;
+  right: 8px;
+  background: #fff;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 14px;
-  cursor: pointer;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  z-index: 10;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 16px;
 }
 
-.image-preview .remove-image-btn:hover {
-  background: #c0392b;
-  transform: scale(1.1);
+.create-order-remove-image-btn:hover {
+  background: #e74c3c;
+  color: #fff;
 }
 
-.add-image-area {
-  width: 140px;   /* Aumentado de 100px a 140px */
-  height: 140px;  /* Aumentado de 100px a 140px */
-  border-radius: 12px;
-  border: 2px dashed #D2AB80;
+/* ========== Área para agregar imagen (estilo de paquetes) ========== */
+.create-order-add-image-area {
+  width: 160px;
+  height: 160px;
+  border: 3px dashed #333 !important;
+  border-radius: 16px;
+  background: #fff !important;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #8B6D47;
   transition: all 0.3s ease;
-  font-size: 2rem; /* Hacer el ícono + más grande */
+  color: #333 !important;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  gap: 0.5rem;
 }
 
-.add-image-area:hover {
-  border-color: #8B6D47;
-  background: rgba(139, 109, 71, 0.05);
+.create-order-add-image-area:hover {
+  border-color: #666 !important;
+  background: #f8f8f8 !important;
+  color: #666 !important;
 }
 
-.add-image-area input[type="file"] {
+.create-order-add-image-icon {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: bold;
+  color: inherit;
+}
+
+/* ========== Input de archivo oculto ========== */
+.create-order-file-input-hidden {
   display: none;
 }
 
-/* Botones limpios */
-.form-actions {
+/* ========== Botones del formulario ========== */
+.create-order-form-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e0e0e0;
 }
 
-.cancel-button,
-.continue-button {
-  padding: 0.75rem 2rem;
-  border-radius: 20px;
-  font-family: 'Goldman';
+.create-order-cancel-btn,
+.create-order-submit-btn {
+  padding: 0.9rem 3rem;
   border: none;
+  border-radius: 25px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
   cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 400;
+  letter-spacing: 0.04em;
 }
 
-.cancel-button {
-  background: #e0e0e0;
-  color: #666;
+.create-order-cancel-btn {
+  background: #666;
+  color: white;
 }
 
-.continue-button {
+.create-order-cancel-btn:hover {
+  background: #555;
+  transform: translateY(-2px);
+}
+
+.create-order-submit-btn {
   background: #8B6D47;
   color: white;
 }
 
-@media (max-width: 900px) {
-  .order-modal-content {
-    width: 98vw;
-    height: 90vh;
-    padding: 1.5rem;
+.create-order-submit-btn:hover:not(:disabled) {
+  background: #7A5D3F;
+  transform: translateY(-2px);
+}
+
+.create-order-submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========== Mensajes de error ========== */
+.create-order-field-error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.create-order-general-error {
+  background: #fdf2f2;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.9rem;
+}
+
+/* ========== Estados de carga ========== */
+.create-order-loading-container,
+.create-order-error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  font-size: 1.2rem;
+  color: #666;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+/* ========== Mensaje cuando no hay paquetes ========== */
+.create-order-no-packages-message {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.create-order-no-packages-message p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.create-order-back-btn {
+  padding: 0.75rem 2rem;
+  background: #8B6D47;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.create-order-back-btn:hover {
+  background: #7A5D3F;
+  transform: translateY(-2px);
+}
+
+/* ========== Responsive Design ACTUALIZADO ========== */
+@media (max-width: 1400px) {
+  .create-order-packages-container .packages-row {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.2rem;
   }
   
-  .packages-grid {
-    grid-template-columns: 1fr;
+  .create-order-packages-container .artist-package-card {
+    width: 330px !important;
+    height: 560px !important; /* Aumentado proporcionalmente */
   }
 }
 
-@media (max-width: 1200px) {
-  .order-modal-content {
+@media (max-width: 1024px) {
+  .create-order-page-container {
     width: 98vw;
-    height: 95vh;
-    padding: 1.5rem;
+    max-width: 98vw;
   }
   
-  .packages-grid {
+  .create-order-main-card {
+    width: 95vw;
+    max-width: 95vw;
+  }
+  
+  .create-order-header-section {
+    padding-left: 1rem; /* Reducir padding en tablets */
+  }
+  
+  .create-order-packages-container .packages-row {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  
+  .create-order-packages-container .artist-package-card {
+    width: 310px !important;
+    height: 520px !important; /* Aumentado proporcionalmente */
+  }
+}
+
+@media (max-width: 768px) {
+  .create-order-page-container {
+    padding: 1rem 0.5rem;
+    width: 100vw;
+    max-width: 100vw;
+  }
+  
+  .create-order-main-card {
+    width: 95vw;
+    max-width: 95vw;
+  }
+  
+  .create-order-header-section {
+    text-align: center; /* Volver a centrar en móviles */
+    padding-left: 0; /* Quitar padding en móviles */
+  }
+  
+  .create-order-title {
+    justify-content: center; /* Centrar en móviles */
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .create-order-form {
+    padding: 1.5rem 1rem;
+  }
+  
+  /* En móviles, grid de 2 columnas si caben */
+  .create-order-packages-container .packages-row {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.8rem;
+    justify-items: center;
+  }
+  
+  .create-order-packages-container .artist-package-card {
+    width: 100% !important;
+    max-width: 280px !important;
+    height: 460px !important; /* Aumentado proporcionalmente */
+  }
+}
+
+@media (max-width: 480px) {
+  .create-order-page-container {
+    width: 100vw;
+    max-width: 100vw;
+    padding: 1rem 0.25rem;
+  }
+  
+  .create-order-main-card {
+    width: 98vw;
+    max-width: 98vw;
+  }
+  
+  .create-order_form {
+    padding: 1rem 0.5rem;
+  }
+  
+  /* Una sola columna en móviles muy pequeños */
+  .create-order-packages-container .packages-row {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 0.5rem;
+  }
+  
+  .create-order-packages-container .artist-package-card {
+    max-width: 260px !important;
+    height: 440px !important; /* Aumentado proporcionalmente */
+  }
+  
+  .create-order-packages-container .package-desc-text {
+    -webkit-line-clamp: 4 !important; /* Menos líneas en móviles pequeños */
+    max-height: 80px !important;
   }
 }

@@ -7,12 +7,20 @@ import '../styles/artistpackages.css';
 const MAX_PACKAGES = 3;
 const MAX_EXTRAS = 6;
 
-const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages = [] }) => {
+const ArtistPackages = ({ 
+  isPublicView = false, 
+  artistId = null, 
+  initialPackages = [],
+  selectionMode = false,
+  selectedPackage = null,
+  onPackageSelect = null,
+  showExtras = true // NUEVA PROP PARA CONTROLAR LA VISIBILIDAD DE EXTRAS
+}) => {
   const [packages, setPackages] = useState([]);
   const [extras, setExtras] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // FALTABAN ESTOS ESTADOS:
+  // Estados para edición
   const [editing, setEditing] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editingExtra, setEditingExtra] = useState(null);
@@ -23,20 +31,24 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
     if (isPublicView) {
       // Vista pública: usar initialPackages solo al montar
       setPackages(initialPackages || []);
-      fetchExtrasPublic(); // AGREGAR ESTA LÍNEA
+      if (showExtras) {
+        fetchExtrasPublic(); // Solo cargar extras si showExtras es true
+      }
       setLoading(false);
     } else {
       // Vista privada: cargar desde el backend
       const fetchAll = async () => {
         setLoading(true);
         await fetchPackages();
-        await fetchExtras();
+        if (showExtras) {
+          await fetchExtras(); // Solo cargar extras si showExtras es true
+        }
         setLoading(false);
       };
       fetchAll();
     }
     // eslint-disable-next-line
-  }, [isPublicView, artistId]); // NO incluyas packages ni initialPackages aquí
+  }, [isPublicView, artistId, showExtras]); // Agregar showExtras a las dependencias
 
   // Vista privada (propia)
   const fetchPackages = async () => {
@@ -212,13 +224,21 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
       {/* Grid de paquetes */}
       <div className="packages-row">
         {packages.map(pkg => (
-          <div className="artist-package-card" key={pkg.id}>
+          <div 
+            className={`artist-package-card ${selectionMode ? 'selectable' : ''} ${selectionMode && selectedPackage?.id === pkg.id ? 'selected' : ''}`}
+            key={pkg.id}
+            onClick={selectionMode ? () => onPackageSelect(pkg) : undefined}
+            style={selectionMode ? { cursor: 'pointer' } : {}}
+          >
             <div className="package-header-artist">
               <span className="package-title-artist">{pkg.title}</span>
               {!isPublicView && (
                 <button 
                   className="package-edit-icon" 
-                  onClick={() => setEditing(pkg)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Evitar selección cuando se edita
+                    setEditing(pkg);
+                  }}
                   title="Editar paquete"
                 >
                   <Edit size={25} />
@@ -296,8 +316,8 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
         )}
       </div>
 
-      {/* Sección de Extras - Mostrar en ambas vistas */}
-      {(extras.length > 0 || !isPublicView) && (
+      {/* Sección de Extras - SOLO MOSTRAR SI showExtras ES TRUE */}
+      {showExtras && (extras.length > 0 || !isPublicView) && (
         <div className="extras-section-artist">
           <div className="extras-header-artist">
             <span className="extras-title-artist">Extra</span>
@@ -362,8 +382,8 @@ const ArtistPackages = ({ isPublicView = false, artistId = null, initialPackages
         />
       )}
 
-      {/* Formulario inline para extras */}
-      {(editingExtra || showAddExtra) && (
+      {/* Formulario inline para extras - SOLO SI showExtras ES TRUE */}
+      {showExtras && (editingExtra || showAddExtra) && (
         <div className="extra-form-overlay">
           <ExtraForm
             extra={editingExtra}
@@ -677,7 +697,7 @@ function ExtraForm({ extra, onSave, onCancel, maxExtras, currentExtras }) {
       alert('El precio debe estar entre $1.000 y $100.000.000 COP');
       return;
     }
-    
+
     if (!extra && currentExtras >= maxExtras) {
       alert(`Máximo ${maxExtras} extras permitidos`);
       return;
