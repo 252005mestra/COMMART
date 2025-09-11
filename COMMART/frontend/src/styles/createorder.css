@@ -704,134 +704,124 @@
   line-height: 1.4;
 }
 
-/* ========== SOLO AGREGAR TEXTO JUSTIFICADO Y MÁS SEPARACIÓN A EXTRAS ========== */
-.create-order-extras-info {
-  margin-bottom: 2.5rem; /* Aumentado de 2rem a 2.5rem */
-}
-
-.create-order-extras-note {
-  margin-bottom: 1.5rem; /* Aumentado de 1rem a 1.5rem */
-  text-align: justify; /* Justificado */
-  line-height: 1.6; /* Aumentado de 1.4 a 1.6 */
-}
-
-.create-order-extras-description {
-  margin-bottom: 1.5rem; /* Aumentado de 1rem a 1.5rem */
-}
-
-.create-order-extras-description p {
-  margin-bottom: 1rem; /* Aumentado de 0.5rem a 1rem */
-  line-height: 1.6; /* Aumentado de 1.5 a 1.6 */
-  text-align: justify; /* Justificado */
-}
-
-.create-order-extras-rules {
-  line-height: 1.6; /* Añadido line-height */
-}
-
-.create-order-extras-rules li {
-  margin-bottom: 0.8rem; /* Aumentado de 0.4rem a 0.8rem */
-  text-align: justify; /* Justificado */
-}
-
-/* ========== Vista previa del pedido - NUEVA SECCIÓN ========== */
+/* ========== Modal de Vista Previa del Pedido - HORIZONTAL ========== */
 .order-preview-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 1rem;
 }
 
 .order-preview-modal {
   background: white;
-  border-radius: 20px;
-  width: 90vw;
-  max-width: 850px;
+  border-radius: 32px;
+  width: 95vw;
+  max-width: 1200px; /* Más ancho para contenido horizontal */
   max-height: 90vh;
-  overflow-y: auto;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   border: 3px solid #000;
   position: relative;
+  animation: orderPreviewFadeIn 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Sin scroll */
 }
 
-/* Header con logo como en el formulario */
+@keyframes orderPreviewFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Header del modal */
 .order-preview-header {
   text-align: center;
-  padding: 1.5rem 0 1rem 0;
+  padding: 1.5rem 2rem 1rem 2rem;
   position: relative;
   border-bottom: 2px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
 .order-preview-logo {
-  height: 3.5rem;
-  margin-bottom: 0.8rem;
+  height: 4rem; /* Reducido para ahorrar espacio */
+  margin-bottom: 0.5rem;
 }
 
 .order-preview-title {
   font-family: 'Goldman', sans-serif;
-  font-size: 1.6rem;
+  font-size: 1.6rem; /* Reducido para ahorrar espacio */
   color: #8B6D47;
   margin: 0;
   font-weight: 400;
   letter-spacing: 0.06em;
 }
 
-.order-preview-close {
-  position: absolute;
-  top: 1rem;
-  right: 1.5rem;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  color: #666;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 0.2s;
+/* Contenido principal horizontal */
+.order-preview-main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
-.order-preview-close:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: #333;
+/* Sección izquierda con referencias, paquetes y descripción */
+.order-preview-left-section {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  border-right: 2px solid #e0e0e0;
 }
 
-.order-preview-content {
-  padding: 2rem 2.5rem;
+/* Sección derecha con precios */
+.order-preview-right-section {
+  flex: 0 0 350px; /* Ancho fijo para la sección de precios */
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: white;
 }
 
-/* Secciones del modal */
+/* Estilos para las secciones existentes - más compactos */
 .order-preview-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem; /* Reducido para ahorrar espacio */
 }
 
-.order-preview-section:last-child {
-  margin-bottom: 0;
+.order-preview-section:not(:last-child) {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0; /* Línea más sutil */
 }
 
 .order-preview-section-title {
   font-family: 'Goldman', sans-serif;
-  font-size: 1.1rem;
-  color: #000;
-  margin-bottom: 1rem;
+  font-size: 1.2rem; /* Reducido ligeramente */
+  color: #000000;
+  margin: 0 0 0.8rem 0;
   font-weight: 400;
+  letter-spacing: 0.04em;
 }
 
-/* Referencias - Grid horizontal como en la imagen */
+/* Referencias más pequeñas */
 .order-preview-references {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: flex-start; /* Alineado a la izquierda */
 }
 
 .order-preview-reference-item {
-  width: 120px;
+  width: 120px; /* Reducido para ahorrar espacio */
   height: 120px;
   border-radius: 12px;
   overflow: hidden;
@@ -844,38 +834,49 @@
   object-fit: cover;
 }
 
-/* Grid de detalles - Similar a la imagen */
+/* Paquete y extras más compactos */
 .order-preview-details-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  display: flex;
+  gap: 0;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  padding: 0;
+}
+
+.order-preview-details-left,
+.order-preview-details-right {
+  flex: 1;
+  padding: 1rem;
+}
+
+.order-preview-details-grid:has(.order-preview-details-right) .order-preview-details-left {
+  border-right: 1px solid #e9ecef;
 }
 
 .order-preview-detail-section {
-  margin-bottom: 1.5rem;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  border: none;
 }
 
 .order-preview-detail-title {
   font-family: 'Goldman', sans-serif;
   font-size: 1rem;
-  color: #000;
-  margin-bottom: 0.8rem;
+  color: #000000;
+  margin: 0 0 0.5rem 0;
   font-weight: 400;
-}
-
-/* Información del paquete */
-.order-preview-package-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  letter-spacing: 0.04em;
 }
 
 .order-preview-package-name {
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #333;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .order-preview-view-package-btn {
@@ -887,55 +888,88 @@
   font-family: 'Goldman', sans-serif;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.2s;
-  align-self: flex-start;
+  transition: background 0.2s;
+  font-weight: 400;
+  letter-spacing: 0.04em;
 }
 
 .order-preview-view-package-btn:hover {
   background: #7A5D3F;
-  transform: translateY(-1px);
 }
 
-/* Lista de extras */
+/* Extras */
 .order-preview-extras-list {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.5rem;
 }
 
 .order-preview-extra-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #333;
-  padding: 0.3rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  font-weight: 600;
 }
 
-.order-preview-extra-item:last-child {
-  border-bottom: none;
+.order-preview-extra-item::before {
+  content: "•";
+  color: #8B6D47;
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
-/* Sección de precios - Igual que en la imagen */
-.order-preview-price-section {
+/* Descripción más compacta */
+.order-preview-description-box {
+  width: 100%;
+  min-height: 80px; /* Reducido */
+  max-height: 80px;
+  border: 2px solid #b3b792;
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.85rem; /* Reducido */
+  background: #f8f8f5;
+  color: #333;
+  line-height: 1.4;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: block;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* ========== Sección de precios (lado derecho) ========== */
+.order-preview-price-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  justify-content: center;
+}
+
+.order-preview-price-card {
   background: white;
-  border: 2px solid #D2AB80;
-  border-radius: 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 16px;
   padding: 1.5rem;
-  position: relative;
 }
 
 .order-preview-price-title {
   font-family: 'Goldman', sans-serif;
-  font-size: 1rem;
-  color: #000;
-  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  color: #000000;
+  margin: 0 0 0.5rem 0;
   font-weight: 400;
+  text-align: center;
 }
 
 .order-preview-price-note {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #666;
+  text-align: center;
   margin-bottom: 1rem;
   font-style: italic;
 }
@@ -951,6 +985,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0.5rem 0;
 }
 
 .order-preview-price-item span:first-child {
@@ -964,75 +999,74 @@
   border: 2px solid #B3B792;
   color: white;
   font-family: 'Goldman', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 400;
-  padding: 6px 16px;
-  border-radius: 15px;
+  padding: 6px 12px;
+  border-radius: 12px;
   letter-spacing: 0.04em;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.order-preview-total-price {
+/* Total destacado */
+.order-preview-total-card {
+  background: white;
+  border: 3px solid #8B6D47;
+  border-radius: 20px;
+  padding: 1.5rem;
   text-align: center;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 2px solid #D2AB80;
+}
+
+.order-preview-total-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  color: #8B6D47;
+  margin: 0 0 0.5rem 0;
+  font-weight: 400;
 }
 
 .order-preview-total-badge {
-  background-color: #8B6D47;
+  background: #8B6D47;
   color: white;
   font-family: 'Goldman', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 400;
-  padding: 10px 24px;
+  padding: 12px 24px;
   border-radius: 20px;
   letter-spacing: 0.04em;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   display: inline-block;
 }
 
-/* Descripción */
-.order-preview-description-box {
-  background: white;
-  border: 2px solid #D2AB80;
-  border-radius: 12px;
-  padding: 1.5rem;
-  font-family: 'Nunito Sans', sans-serif;
-  line-height: 1.5;
-  color: #333;
-  font-size: 0.95rem;
-}
-
-/* Mensaje informativo */
-.order-preview-info-message {
-  background: white;
-  border: 2px solid #D2AB80;
-  border-radius: 15px;
-  padding: 1rem;
-  text-align: center;
-  color: #8B6D47;
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 0.9rem;
-  margin-bottom: 2rem;
-  font-weight: 500;
-}
-
-/* Botones de acción */
+/* Mensaje informativo y botones */
 .order-preview-actions {
   display: flex;
   gap: 1.5rem;
   justify-content: center;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e0e0e0;
+  padding: 1.5rem 2rem;
+  border-top: 2px solid #e0e0e0;
+  background: #f8f9fa;
+  flex-shrink: 0;
+}
+
+.order-preview-info-message {
+  background: #e8f4fd;
+  border: 2px solid #b3d9f2;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #0066cc;
+  margin-bottom: 1rem;
 }
 
 .order-preview-cancel,
 .order-preview-confirm {
-  padding: 0.8rem 2.5rem;
+  padding: 0.8rem 2rem;
   border: none;
-  border-radius: 25px;
+  border-radius: 20px;
   font-family: 'Goldman', sans-serif;
-  font-size: 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 400;
@@ -1065,34 +1099,35 @@
   transform: none;
 }
 
-/* ========== Responsive para el modal ========== */
+/* Responsive */
+@media (max-width: 1024px) {
+  .order-preview-main-content {
+    flex-direction: column;
+  }
+  
+  .order-preview-left-section {
+    border-right: none;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  
+  .order-preview-right-section {
+    flex: none;
+  }
+  
+  .order-preview-modal {
+    max-width: 95vw;
+  }
+}
+
 @media (max-width: 768px) {
   .order-preview-modal {
-    width: 95vw;
-    margin: 1rem;
-  }
-  
-  .order-preview-header,
-  .order-preview-content {
-    padding: 1.5rem;
-  }
-  
-  .order-preview-details-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .order-preview-references {
-    justify-content: center;
-  }
-  
-  .order-preview-reference-item {
-    width: 100px;
-    height: 100px;
+    width: 98vw;
+    max-height: 95vh;
   }
   
   .order-preview-actions {
     flex-direction: column;
+    gap: 1rem;
   }
   
   .order-preview-cancel,
@@ -1100,3 +1135,4 @@
     width: 100%;
   }
 }
+

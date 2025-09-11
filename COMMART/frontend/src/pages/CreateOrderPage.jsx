@@ -397,7 +397,7 @@ const CreateOrderPage = () => {
           </div>
         </div>
 
-        {/* Modal de vista previa del pedido - DISEÑO SIMILAR A LA IMAGEN */}
+        {/* Modal de vista previa del pedido - HORIZONTAL */}
         {showPreview && (
           <div className="order-preview-overlay" onClick={(e) => {
             if (e.target.classList.contains('order-preview-overlay')) {
@@ -405,68 +405,85 @@ const CreateOrderPage = () => {
             }
           }}>
             <div className="order-preview-modal" onClick={(e) => e.stopPropagation()}>
-              {/* Header con logo igual que el formulario */}
+              {/* Header */}
               <div className="order-preview-header">
                 <img src="/src/assets/LogoCOMMART.png" alt="COMMART" className="order-preview-logo" />
                 <h2 className="order-preview-title">Vista Previa del Pedido</h2>
-                <button 
-                  className="order-preview-close" 
-                  onClick={() => setShowPreview(false)}
-                  type="button"
-                >
-                  <X size={24} />
-                </button>
               </div>
-              
-              <div className="order-preview-content">
-                {/* Sección de Referencias */}
-                <div className="order-preview-section">
-                  <h3 className="order-preview-section-title">Referencias:</h3>
-                  <div className="order-preview-references">
-                    {images.map((img, index) => (
-                      <div key={index} className="order-preview-reference-item">
-                        <img 
-                          src={URL.createObjectURL(img)} 
-                          alt={`Referencia ${index + 1}`}
-                          className="order-preview-reference-image"
-                        />
+
+              {/* Contenido principal horizontal */}
+              <div className="order-preview-main-content">
+                {/* Sección izquierda */}
+                <div className="order-preview-left-section">
+                  {/* Referencias */}
+                  <div className="order-preview-section">
+                    <h3 className="order-preview-section-title">Referencias:</h3>
+                    <div className="order-preview-references">
+                      {images.map((img, index) => (
+                        <div key={index} className="order-preview-reference-item">
+                          <img 
+                            src={URL.createObjectURL(img)} 
+                            alt={`Referencia ${index + 1}`}
+                            className="order-preview-reference-image"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Paquete y Extras */}
+                  <div className="order-preview-section">
+                    <div className="order-preview-details-grid">
+                      <div className="order-preview-details-left">
+                        <h4 className="order-preview-detail-title">Paquete:</h4>
+                        <div className="order-preview-package-info">
+                          <span className="order-preview-package-name">{selectedPackage?.title}</span>
+                          <button 
+                            className="order-preview-view-package-btn"
+                            onClick={() => {
+                              // Función para ver paquete
+                              setShowPackageModal(true);
+                            }}
+                          >
+                            Ver paquete
+                          </button>
+                        </div>
                       </div>
-                    ))}
+
+                      {selectedExtras.length > 0 && (
+                        <div className="order-preview-details-right">
+                          <h4 className="order-preview-detail-title">Extras:</h4>
+                          <div className="order-preview-extras-list">
+                            {selectedExtras.map(extra => (
+                              <div key={extra.id} className="order-preview-extra-item">
+                                <span>{extra.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Descripción */}
+                  <div className="order-preview-section">
+                    <h3 className="order-preview-section-title">Descripción:</h3>
+                    <div className="order-preview-description-box">
+                      {description}
+                    </div>
                   </div>
                 </div>
 
-                {/* Sección de Paquete y Extras */}
-                <div className="order-preview-details-grid">
-                  <div className="order-preview-details-left">
-                    <div className="order-preview-detail-section">
-                      <h4 className="order-preview-detail-title">Paquete:</h4>
-                      <div className="order-preview-package-info">
-                        <span className="order-preview-package-name">{selectedPackage?.title}</span>
-                        <button className="order-preview-view-package-btn">Ver paquete</button>
-                      </div>
-                    </div>
-
-                    {selectedExtras.length > 0 && (
-                      <div className="order-preview-detail-section">
-                        <h4 className="order-preview-detail-title">Extras:</h4>
-                        <div className="order-preview-extras-list">
-                          {selectedExtras.map(extra => (
-                            <div key={extra.id} className="order-preview-extra-item">
-                              <span>{extra.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="order-preview-details-right">
-                    <div className="order-preview-price-section">
-                      <h4 className="order-preview-price-title">Valor de la obra:</h4>
+                {/* Sección derecha - Precios */}
+                <div className="order-preview-right-section">
+                  <div className="order-preview-price-container">
+                    {/* Card de desglose de precios */}
+                    <div className="order-preview-price-card">
+                      <h3 className="order-preview-price-title">Valor de la obra:</h3>
                       <div className="order-preview-price-note">Generado automáticamente</div>
                       <div className="order-preview-price-breakdown">
                         <div className="order-preview-price-item">
-                          <span>{selectedPackage?.title}</span>
+                          <span>Paquete {selectedPackage?.title}</span>
                           <span className="order-preview-price-badge">{formatColombianPrice(selectedPackage?.price)}</span>
                         </div>
                         {selectedExtras.map(extra => (
@@ -476,44 +493,37 @@ const CreateOrderPage = () => {
                           </div>
                         ))}
                       </div>
-                      <div className="order-preview-total-price">
-                        <span className="order-preview-total-badge">{formatColombianPrice(calculateTotalPrice())}</span>
-                      </div>
+                    </div>
+
+                    {/* Card de total */}
+                    <div className="order-preview-total-card">
+                      <h3 className="order-preview-total-title">Valor total de la obra:</h3>
+                      <span className="order-preview-total-badge">{formatColombianPrice(calculateTotalPrice())}</span>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Descripción */}
-                <div className="order-preview-section">
-                  <h3 className="order-preview-section-title">Descripción:</h3>
-                  <div className="order-preview-description-box">
-                    {description}
-                  </div>
-                </div>
-
-                {/* Mensaje informativo */}
+              {/* Botones de acción */}
+              <div className="order-preview-actions">
                 <div className="order-preview-info-message">
                   Antes de enviar, revisa que toda la información de tu pedido sea correcta.
                 </div>
-
-                {/* Botones de acción */}
-                <div className="order-preview-actions">
-                  <button 
-                    className="order-preview-cancel" 
-                    onClick={() => setShowPreview(false)}
-                    type="button"
-                  >
-                    Cancelar
-                  </button>
-                  <button 
-                    className="order-preview-confirm" 
-                    onClick={handleConfirmOrder}
-                    disabled={submitting}
-                    type="button"
-                  >
-                    {submitting ? 'Enviando...' : 'Enviar'}
-                  </button>
-                </div>
+                <button 
+                  className="order-preview-cancel" 
+                  onClick={() => setShowPreview(false)}
+                  type="button"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  className="order-preview-confirm" 
+                  onClick={handleConfirmOrder}
+                  disabled={submitting}
+                  type="button"
+                >
+                  {submitting ? 'Enviando...' : 'Enviar'}
+                </button>
               </div>
             </div>
           </div>
