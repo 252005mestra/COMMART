@@ -1,22 +1,22 @@
 /* ========== Container principal más ancho ========== */
 .create-order-page-container {
-  max-width: 95vw; /* Cambio de 1200px a 95vw para usar casi todo el viewport */
-  width: 95vw;
+  max-width: 85vw; /* Reducido de 95vw a 85vw */
+  width: 85vw; /* Reducido de 95vw a 85vw */
   margin: 0 auto;
   padding: 2rem 1rem;
   font-family: 'Nunito Sans', sans-serif;
 }
 
-/* ========== Header con título y artista - TÍTULO A LA IZQUIERDA ========== */
+/* ========== Header con título y artista - MÁS A LA IZQUIERDA ========== */
 .create-order-header-section {
   text-align: left; /* Cambiado de center a left */
   margin-bottom: 3rem;
-  padding-left: 2rem; /* Agregar padding para alineación */
+  padding-left: calc(5% + 1rem); /* Reducido de 7.5% a 5% para moverlo más hacia la izquierda */
 }
 
 .create-order-title {
   font-family: 'Goldman', sans-serif;
-  font-size: 2.5rem;
+  font-size: 2rem; /* Aumentado de 1.8rem a 2rem */
   color: #8B6D47; /* Color café del proyecto */
   font-weight: 400;
   letter-spacing: 0.06em;
@@ -36,19 +36,18 @@
 }
 
 .create-order-artist-avatar {
-  width: 60px;
-  height: 60px;
+  width: 50px; /* Reducido de 60px a 50px */
+  height: 50px; /* Reducido de 60px a 50px */
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #8B6D47;
 }
 
-/* ========== Card principal del formulario - 90% DEL VIEWPORT ========== */
+/* ========== Card principal del formulario - MÁS PEQUEÑA ========== */
 .create-order-main-card {
   background: white;
   border-radius: 30px;
-  width: 90vw; /* 90% del viewport width */
-  max-width: 90vw; /* Máximo 90% del viewport */
+  width: 75vw; /* Reducido de 85vw a 75vw */
+  max-width: 80vw; /* Reducido de 90vw a 80vw */
   margin: 0 auto;
   box-shadow: 0 8px 2px rgba(0, 0, 0, 0.321);
   border: 3px solid #000;
@@ -58,19 +57,18 @@
 /* ========== Header de la card con logo y título ========== */
 .create-order-logo-section {
   text-align: center;
-  padding: 2rem 0 1.5rem 0;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 1.5rem 0 1rem 0; /* Reducido padding vertical */
   position: relative;
 }
 
 .create-order-logo {
-  height: 4rem;
-  margin-bottom: 1rem;
+  height: 4rem; /* Reducido de 5rem a 4rem */
+  margin-bottom: 0.8rem; /* Reducido de 1rem a 0.8rem */
 }
 
 .create-order-subtitle {
   font-family: 'Goldman', sans-serif;
-  font-size: 2rem;
+  font-size: 1.8rem; /* Reducido de 2rem a 1.8rem */
   color: #8B6D47;
   margin: 0;
   font-weight: 400;
@@ -90,52 +88,64 @@
 
 /* ========== Formulario ========== */
 .create-order-form {
-  padding: 2.5rem 3rem;
+  padding: 2rem 2.5rem; /* Reducido de 2.5rem 3rem a 2rem 2.5rem */
 }
 
 .create-order-form-section {
-  margin-bottom: 3rem;
+  margin-bottom: 4rem; /* Reducido de 5rem a 4rem */
+  position: relative;
+}
+
+/* ========== Dividers entre secciones - MÁS SEPARADOS ========== */
+.create-order-form-section:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: -2rem; /* Reducido de -2.5rem a -2rem */
+  left: 5%;
+  width: 90%;
+  height: 2px;
+  background: #e0e0e0;
 }
 
 .create-order-section-label {
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 1.2rem;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem; /* Reducido de 1.2rem a 1.1rem */
   color: #000000;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
+  font-weight: normal;
+  margin-bottom: 1.2rem; /* Reducido de 1.5rem a 1.2rem */
   display: block;
 }
 
 /* ========== Sección de paquetes con fondo naranja ========== */
 .create-order-packages-container {
   background: #D2AB80; /* Fondo naranja envolvente */
-  border-radius: 20px;
-  padding: 2rem;
+  border-radius: 35px; /* Reducido de 40px a 35px */
+  padding: 2.5rem; /* Reducido de 3rem a 2.5rem */
   position: relative;
 }
 
 /* ========== Grid más flexible para aprovechar el ancho ========== */
 .create-order-packages-container .packages-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Grid más flexible */
-  gap: 1.5rem; /* Reducir gap para aprovechar más espacio */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Reducido de 320px a 280px */
+  gap: 1.2rem; /* Reducido de 1.5rem a 1.2rem */
   justify-items: center;
   max-width: 100%;
   margin: 0;
 }
 
-/* ========== Paquetes adaptados - AUMENTAR ALTURA PARA EVITAR CORTES ========== */
+/* ========== Paquetes adaptados - MÁS PEQUEÑOS ========== */
 .create-order-packages-container .artist-package-card {
-  width: 350px !important; /* Ligeramente más pequeños para que quepan más */
-  height: 580px !important; /* Aumentado de 520px a 580px para evitar cortes */
+  width: 320px !important; /* Reducido de 350px a 320px */
+  height: 550px !important; /* Reducido de 580px a 550px */
   margin: 0;
   transform: none; /* Resetear transform por defecto */
 }
 
 /* Ajustar contenido interno de los paquetes para mejor distribución */
 .create-order-packages-container .package-content-artist {
-  padding: 1.3rem !important; /* Reducido de 1.5rem a 1.3rem */
-  gap: 0.6rem !important; /* Reducido de 0.7rem a 0.6rem para más espacio */
+  padding: 1.2rem !important; /* Reducido de 1.3rem a 1.2rem */
+  gap: 0.5rem !important; /* Reducido de 0.6rem a 0.5rem */
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -150,13 +160,13 @@
 }
 
 .create-order-packages-container .package-desc-text {
-  font-size: 0.85rem !important;
-  line-height: 1.4 !important;
-  max-height: 120px; /* Limitar altura máxima */
+  font-size: 0.8rem !important; /* Reducido de 0.85rem a 0.8rem */
+  line-height: 1.3 !important; /* Reducido de 1.4 a 1.3 */
+  max-height: 100px; /* Reducido de 120px a 100px */
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 6; /* Máximo 6 líneas */
+  -webkit-line-clamp: 5; /* Reducido de 6 a 5 líneas */
   -webkit-box-orient: vertical;
 }
 
@@ -167,11 +177,11 @@
 }
 
 .create-order-packages-container .package-sample-image {
-  height: 120px !important; /* Reducido de 140px a 120px */
+  height: 100px !important; /* Reducido de 120px a 100px */
 }
 
 .create-order-packages-container .package-samples-grid {
-  gap: 0.8rem !important; /* Reducir gap */
+  gap: 0.6rem !important; /* Reducido de 0.8rem a 0.6rem */
 }
 
 /* MANTENER TODOS LOS ESTILOS DE SELECCIÓN */
@@ -179,6 +189,8 @@
 .create-order-packages-container .artist-package-card:not(.selected) {
   opacity: 0.6;
   filter: grayscale(0.3);
+  transform: scale(0.95) !important; /* Añadido: hacer más pequeños los no seleccionados */
+  transition: all 0.3s ease !important; /* Suavizar la transición */
 }
 
 /* Estilo para el paquete seleccionado en la vista de pedido */
@@ -186,21 +198,33 @@
   opacity: 1;
   filter: none;
   border: 3px dashed #000000 !important;
-  transform: scale(1.05) !important; /* Ligeramente más grande cuando está seleccionado */
+  transform: scale(1.05) !important; /* Mantener: más grande cuando está seleccionado */
   box-shadow: 0 12px 4px rgba(0, 0, 0, 0.4) !important;
   z-index: 2;
+  transition: all 0.3s ease !important; /* Suavizar la transición */
 }
 
-/* ========== Descripción del dibujo ========== */
+/* Hover para paquetes no seleccionados en modo selección */
+.create-order-packages-container .artist-package-card:not(.selected):hover {
+  opacity: 0.8; /* Aumentar opacidad al hover */
+  transform: scale(0.98) !important; /* Crecer ligeramente al hover pero mantener más pequeño que el seleccionado */
+  transition: all 0.3s ease !important;
+}
+
+/* ========== Descripción del dibujo - CON LÍMITE DE CARACTERES ========== */
+.create-order-description-container {
+  position: relative;
+}
+
 .create-order-description-textarea {
   width: 100%;
-  min-height: 120px;
-  max-height: 120px;
+  min-height: 150px; /* Reducido de 180px a 150px */
+  max-height: 150px; /* Reducido de 180px a 150px */
   border: 2px solid #b3b792;
   border-radius: 12px;
-  padding: 1rem;
+  padding: 0.8rem; /* Reducido de 1rem a 0.8rem */
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 1rem;
+  font-size: 0.95rem; /* Reducido de 1rem a 0.95rem */
   background: #f8f8f5;
   resize: none;
   box-sizing: border-box;
@@ -217,21 +241,40 @@
   border-color: #e74c3c;
 }
 
-/* ========== Imágenes de referencia ========== */
+/* ========== Contador de caracteres para descripción - IGUAL AL PORTFOLIO ========== */
+.create-order-character-count {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.8rem; /* Reducido de 0.85rem a 0.8rem */
+  color: #666;
+  text-align: right;
+  margin-top: 0.3rem;
+}
+
+.create-order-character-count.warning {
+  color: #e74c3c;
+}
+
+.create-order-character-count.over-limit {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+/* ========== Imágenes de referencia - MÁS GRANDES Y CENTRADAS ========== */
 .create-order-images-upload-area {
   display: flex;
-  gap: 1.5rem;
+  gap: 2rem; /* Aumentado de 1.5rem a 2rem para mejor espaciado */
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center; /* Centrar las imágenes */
 }
 
 .create-order-image-preview {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 250px; /* Aumentado de 200px a 250px */
+  height: 250px; /* Aumentado de 200px a 250px */
   border-radius: 16px;
   overflow: hidden;
-  border: 3px solid #333;
+  border: 3px solid #000000;
 }
 
 .create-order-image-preview img {
@@ -240,6 +283,7 @@
   object-fit: cover;
 }
 
+/* ========== Botón de eliminar imagen - ICONO DE BASURA ========== */
 .create-order-remove-image-btn {
   position: absolute;
   top: 8px;
@@ -248,14 +292,14 @@
   border: 2px solid #e74c3c;
   color: #e74c3c;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px; /* Aumentado de 32px a 36px */
+  height: 36px; /* Aumentado de 32px a 36px */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s;
-  font-size: 16px;
+  font-size: 18px; /* Aumentado de 16px a 18px */
 }
 
 .create-order-remove-image-btn:hover {
@@ -263,10 +307,10 @@
   color: #fff;
 }
 
-/* ========== Área para agregar imagen (estilo de paquetes) ========== */
+/* ========== Área para agregar imagen - MÁS GRANDE ========== */
 .create-order-add-image-area {
-  width: 160px;
-  height: 160px;
+  width: 250px; /* Aumentado de 200px a 250px */
+  height: 250px; /* Aumentado de 200px a 250px */
   border: 3px dashed #333 !important;
   border-radius: 16px;
   background: #fff !important;
@@ -278,10 +322,10 @@
   transition: all 0.3s ease;
   color: #333 !important;
   font-family: 'Goldman', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.1rem; /* Aumentado de 1rem a 1.1rem */
   font-weight: 400;
   letter-spacing: 0.04em;
-  gap: 0.5rem;
+  gap: 0.6rem; /* Aumentado de 0.5rem a 0.6rem para mejor espaciado */
 }
 
 .create-order-add-image-area:hover {
@@ -290,10 +334,19 @@
   color: #666 !important;
 }
 
+/* ========== Icono de agregar - PLUS CIRCULAR ========== */
 .create-order-add-image-icon {
-  font-size: 3rem;
+  font-size: 56px; /* Aumentado de 48px a 56px */
   line-height: 1;
   font-weight: bold;
+  color: inherit;
+}
+
+.create-order-add-image-text {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem; /* Aumentado de 1rem a 1.1rem */
+  font-weight: 400;
+  letter-spacing: 0.04em;
   color: inherit;
 }
 
@@ -305,20 +358,19 @@
 /* ========== Botones del formulario ========== */
 .create-order-form-actions {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.2rem; /* Reducido de 1.5rem a 1.2rem */
   justify-content: center;
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e0e0e0;
+  margin-top: 2.5rem; /* Reducido de 3rem a 2.5rem */
+  padding-top: 1.5rem; /* Reducido de 2rem a 1.5rem */
 }
 
 .create-order-cancel-btn,
 .create-order-submit-btn {
-  padding: 0.9rem 3rem;
+  padding: 0.8rem 2.5rem; /* Reducido de 0.9rem 3rem a 0.8rem 2.5rem */
   border: none;
   border-radius: 25px;
   font-family: 'Goldman', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1rem; /* Reducido de 1.1rem a 1rem */
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 400;
@@ -354,7 +406,7 @@
 /* ========== Mensajes de error ========== */
 .create-order-field-error {
   color: #e74c3c;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* Reducido de 0.9rem a 0.85rem */
   margin-top: 0.5rem;
   font-family: 'Nunito Sans', sans-serif;
 }
@@ -363,12 +415,12 @@
   background: #fdf2f2;
   border: 1px solid #e74c3c;
   color: #e74c3c;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.8rem; /* Reducido de 0.75rem 1rem a 0.6rem 0.8rem */
   border-radius: 10px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem; /* Reducido de 1.5rem a 1.2rem */
   text-align: center;
   font-family: 'Nunito Sans', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* Reducido de 0.9rem a 0.85rem */
 }
 
 /* ========== Estados de carga ========== */
@@ -378,7 +430,7 @@
   justify-content: center;
   align-items: center;
   min-height: 60vh;
-  font-size: 1.2rem;
+  font-size: 1.1rem; /* Reducido de 1.2rem a 1.1rem */
   color: #666;
   font-family: 'Nunito Sans', sans-serif;
 }
@@ -386,24 +438,24 @@
 /* ========== Mensaje cuando no hay paquetes ========== */
 .create-order-no-packages-message {
   text-align: center;
-  padding: 3rem;
+  padding: 2.5rem; /* Reducido de 3rem a 2.5rem */
   color: #666;
 }
 
 .create-order-no-packages-message p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+  font-size: 1.1rem; /* Reducido de 1.2rem a 1.1rem */
+  margin-bottom: 1.5rem; /* Reducido de 2rem a 1.5rem */
   font-family: 'Nunito Sans', sans-serif;
 }
 
 .create-order-back-btn {
-  padding: 0.75rem 2rem;
+  padding: 0.7rem 1.8rem; /* Reducido de 0.75rem 2rem a 0.7rem 1.8rem */
   background: #8B6D47;
   color: white;
   border: none;
   border-radius: 20px;
   font-family: 'Goldman', sans-serif;
-  font-size: 1rem;
+  font-size: 0.95rem; /* Reducido de 1rem a 0.95rem */
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -415,40 +467,78 @@
 
 /* ========== Responsive Design ACTUALIZADO ========== */
 @media (max-width: 1400px) {
+  .create-order-header-section {
+    padding-left: calc(2.5% + 1rem); /* Reducido de 5% a 2.5% para pantallas medianas */
+  }
+  
   .create-order-packages-container .packages-row {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.2rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Reducido de 300px a 260px */
+    gap: 1rem; /* Reducido de 1.2rem a 1rem */
   }
   
   .create-order-packages-container .artist-package-card {
-    width: 330px !important;
-    height: 560px !important; /* Aumentado proporcionalmente */
+    width: 300px !important; /* Reducido de 330px a 300px */
+    height: 540px !important; /* Aumentado de 520px a 540px */
+  }
+  
+  .create-order-packages-container .package-sample-image {
+    height: 120px !important; /* Ajustado para pantallas medianas */
+  }
+  
+  /* Ajustar imágenes de referencia en pantallas medianas */
+  .create-order-image-preview,
+  .create-order-add-image-area {
+    width: 220px; /* Aumentado de 180px a 220px */
+    height: 220px; /* Aumentado de 180px a 220px */
+  }
+  
+  .create-order-add-image-icon {
+    font-size: 52px; /* Ajustado proporcionalmente */
   }
 }
 
 @media (max-width: 1024px) {
   .create-order-page-container {
-    width: 98vw;
-    max-width: 98vw;
-  }
-  
-  .create-order-main-card {
     width: 95vw;
     max-width: 95vw;
   }
   
+  .create-order-main-card {
+    width: 85vw; /* Reducido de 95vw a 85vw */
+    max-width: 90vw; /* Reducido de 95vw a 90vw */
+  }
+  
   .create-order-header-section {
-    padding-left: 1rem; /* Reducir padding en tablets */
+    padding-left: calc(1% + 1rem); /* Reducido de 2.5% a 1% para tablets */
   }
   
   .create-order-packages-container .packages-row {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Reducido de 280px a 240px */
+    gap: 0.8rem; /* Reducido de 1rem a 0.8rem */
   }
   
   .create-order-packages-container .artist-package-card {
-    width: 310px !important;
-    height: 520px !important; /* Aumentado proporcionalmente */
+    width: 280px !important; /* Reducido de 310px a 280px */
+    height: 500px !important; /* Aumentado de 480px a 500px */
+  }
+  
+  .create-order-packages-container .package-sample-image {
+    height: 110px !important; /* Ajustado para tablets */
+  }
+  
+  /* Ajustar imágenes de referencia en tablets */
+  .create-order-image-preview,
+  .create-order-add-image-area {
+    width: 200px; /* Aumentado de 160px a 200px */
+    height: 200px; /* Aumentado de 160px a 200px */
+  }
+  
+  .create-order-add-image-icon {
+    font-size: 48px; /* Ajustado para tablets */
+  }
+  
+  .create-order-images-upload-area {
+    gap: 1.5rem; /* Mantener buen espaciado en tablets */
   }
 }
 
@@ -473,23 +563,71 @@
     justify-content: center; /* Centrar en móviles */
     flex-direction: column;
     gap: 0.5rem;
+    font-size: 1.8rem; /* Aumentado de 1.6rem a 1.8rem para mantener proporción */
   }
   
   .create-order-form {
-    padding: 1.5rem 1rem;
+    padding: 1.2rem 0.8rem; /* Reducido de 1.5rem 1rem a 1.2rem 0.8rem */
+  }
+  
+  .create-order-form-section {
+    margin-bottom: 3rem; /* Reducido de 4rem a 3rem */
+  }
+  
+  .create-order-form-section:not(:last-child)::after {
+    bottom: -1.5rem; /* Reducido de -2rem a -1.5rem */
   }
   
   /* En móviles, grid de 2 columnas si caben */
   .create-order-packages-container .packages-row {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Reducido de 250px a 220px */
+    gap: 0.6rem; /* Reducido de 0.8rem a 0.6rem */
     justify-items: center;
   }
   
   .create-order-packages-container .artist-package-card {
     width: 100% !important;
-    max-width: 280px !important;
-    height: 460px !important; /* Aumentado proporcionalmente */
+    max-width: 250px !important; /* Reducido de 280px a 250px */
+    height: 440px !important; /* Aumentado de 420px a 440px */
+  }
+  
+  .create-order-packages-container .package-sample-image {
+    height: 95px !important; /* Ajustado para móviles */
+  }
+  
+  /* En móviles, cambiar a 2 columnas para las muestras si hay 3 */
+  .create-order-packages-container .package-samples-grid {
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 columnas en móviles */
+    gap: 0.6rem !important;
+  }
+  
+  /* Si hay solo 1 muestra, centrarla */
+  .create-order-packages-container .package-samples-grid:has(.package-sample-image:nth-child(1):last-child) {
+    grid-template-columns: 1fr !important;
+    justify-content: center;
+  }
+  
+  /* Mantener buen tamaño de imágenes de referencia en móviles */
+  .create-order-image-preview,
+  .create-order-add-image-area {
+    width: 180px; /* Aumentado de 140px a 180px */
+    height: 180px; /* Aumentado de 140px a 180px */
+  }
+  
+  .create-order-add-image-icon {
+    font-size: 44px; /* Ajustado para móviles */
+  }
+  
+  /* Centrar mejor las imágenes en móviles */
+  .create-order-images-upload-area {
+    justify-content: center;
+    gap: 1.2rem; /* Aumentado de 1rem a 1.2rem */
+  }
+  
+  /* Reducir altura del textarea en móviles */
+  .create-order-description-textarea {
+    min-height: 120px; /* Reducido de 140px a 120px */
+    max-height: 120px; /* Reducido de 140px a 120px */
   }
 }
 
@@ -505,23 +643,54 @@
     max-width: 98vw;
   }
   
-  .create-order_form {
-    padding: 1rem 0.5rem;
+  .create-order-form {
+    padding: 0.8rem 0.4rem; /* Reducido de 1rem 0.5rem a 0.8rem 0.4rem */
+  }
+  
+  .create-order-form-section {
+    margin-bottom: 2.5rem; /* Reducido de 3.5rem a 2.5rem */
+  }
+  
+  .create-order-form-section:not(:last-child)::after {
+    bottom: -1.25rem; /* Reducido de -1.75rem a -1.25rem */
   }
   
   /* Una sola columna en móviles muy pequeños */
   .create-order-packages-container .packages-row {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+    gap: 0.4rem; /* Reducido de 0.5rem a 0.4rem */
   }
   
   .create-order-packages-container .artist-package-card {
-    max-width: 260px !important;
-    height: 440px !important; /* Aumentado proporcionalmente */
+    max-width: 230px !important; /* Reducido de 260px a 230px */
+    height: 420px !important; /* Aumentado de 400px a 420px */
+  }
+  
+  .create-order-packages-container .package-sample-image {
+    height: 85px !important; /* Ajustado para móviles pequeños */
   }
   
   .create-order-packages-container .package-desc-text {
-    -webkit-line-clamp: 4 !important; /* Menos líneas en móviles pequeños */
-    max-height: 80px !important;
+    -webkit-line-clamp: 3 !important; /* Reducido de 4 a 3 líneas */
+    max-height: 60px !important; /* Reducido de 80px a 60px */
+  }
+  
+  /* Mantener buen tamaño para imágenes de referencia en móviles pequeños */
+  .create-order-image-preview,
+  .create-order-add-image-area {
+    width: 160px; /* Aumentado de 120px a 160px */
+    height: 160px; /* Aumentado de 120px a 160px */
+  }
+  
+  .create-order-add-image-icon {
+    font-size: 40px; /* Ajustado para móviles pequeños */
+  }
+  
+  /* Usar grid en móviles pequeños para mejor distribución */
+  .create-order-images-upload-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Aumentado de 120px a 160px */
+    gap: 1rem; /* Aumentado de 0.8rem a 1rem */
+    justify-items: center;
   }
 }

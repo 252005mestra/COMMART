@@ -7,6 +7,7 @@ import axios from 'axios';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import ArtistPackages from '../components/ArtistPackages';
+import { Trash2, CirclePlus } from 'lucide-react';
 import '../styles/createorder.css';
 
 const CreateOrderPage = () => {
@@ -17,11 +18,14 @@ const CreateOrderPage = () => {
   const [packages, setPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [description, setDescription] = useState('');
-  const [referenceImages, setReferenceImages] = useState([]);
+  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef();
+
+  // Límite de caracteres para descripción detallada
+  const DESCRIPTION_LIMIT = 800; // Suficiente para descripción muy detallada
 
   useEffect(() => {
     const fetchArtistData = async () => {
@@ -63,19 +67,33 @@ const CreateOrderPage = () => {
     setErrors(prev => ({ ...prev, package: '' }));
   };
 
+  const handleDescriptionChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= DESCRIPTION_LIMIT) {
+      setDescription(value);
+    }
+  };
+
+  const getCharacterCountClass = () => {
+    const remaining = DESCRIPTION_LIMIT - description.length;
+    if (remaining < 50) return 'create-order-character-count over-limit';
+    if (remaining < 100) return 'create-order-character-count warning';
+    return 'create-order-character-count';
+  };
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    if (referenceImages.length + files.length > 3) {
+    if (images.length + files.length > 3) {
       setErrors(prev => ({ ...prev, images: 'Máximo 3 imágenes de referencia' }));
       return;
     }
-    setReferenceImages(prev => [...prev, ...files]);
+    setImages(prev => [...prev, ...files]);
     setErrors(prev => ({ ...prev, images: '' }));
     e.target.value = '';
   };
 
-  const handleRemoveImage = (idx) => {
-    setReferenceImages(prev => prev.filter((_, i) => i !== idx));
+  const handleRemoveImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
   };
 
   const validateForm = () => {
@@ -110,7 +128,7 @@ const CreateOrderPage = () => {
       formData.append('total_price', selectedPackage.price);
       formData.append('description', description.trim());
       
-      referenceImages.forEach(img => {
+      images.forEach(img => {
         formData.append('reference_images', img);
       });
 
@@ -207,13 +225,18 @@ const CreateOrderPage = () => {
                 {/* Descripción */}
                 <div className="create-order-form-section">
                   <label className="create-order-section-label">2. Descripción de la ilustración</label>
-                  <textarea
-                    className={`create-order-description-textarea ${errors.description ? 'error' : ''}`}
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    placeholder="Quiero un dibujo de mis dos perritos corriendo"
-                    required
-                  />
+                  <div className="create-order-description-container">
+                    <textarea
+                      className="create-order-description-textarea"
+                      value={description}
+                      onChange={handleDescriptionChange}
+                      placeholder="Describe detalladamente el dibujo que deseas: estilo, colores, pose, expresión, fondo, elementos específicos, etc."
+                      maxLength={DESCRIPTION_LIMIT}
+                    />
+                    <div className={getCharacterCountClass()}>
+                      {description.length}/{DESCRIPTION_LIMIT} caracteres
+                    </div>
+                  </div>
                   {errors.description && <div className="create-order-field-error">{errors.description}</div>}
                 </div>
 
@@ -221,22 +244,22 @@ const CreateOrderPage = () => {
                 <div className="create-order-form-section">
                   <label className="create-order-section-label">3. Añade imágenes de referencia</label>
                   <div className="create-order-images-upload-area">
-                    {referenceImages.map((img, idx) => (
-                      <div className="create-order-image-preview" key={idx}>
+                    {images.map((img, index) => (
+                      <div className="create-order-image-preview" key={index}>
                         <img src={URL.createObjectURL(img)} alt="Referencia" />
-                        <button
-                          type="button"
-                          className="create-order-remove-image-btn"
-                          onClick={() => handleRemoveImage(idx)}
+                        <button 
+                          className="create-order-remove-image-btn" 
+                          onClick={() => handleRemoveImage(index)}
+                          title="Eliminar imagen"
                         >
-                          ×
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     ))}
-                    {referenceImages.length < 3 && (
-                      <div className="create-order-add-image-area" onClick={() => fileInputRef.current.click()}>
-                        <div className="create-order-add-image-icon">+</div>
-                        <span>Agregar</span>
+                    {images.length < 3 && (
+                      <div className="create-order-add-image-area" onClick={() => fileInputRef.current?.click()}>
+                        <CirclePlus size={48} className="create-order-add-image-icon" />
+                        <span className="create-order-add-image-text">Agregar</span>
                         <input
                           ref={fileInputRef}
                           type="file"
