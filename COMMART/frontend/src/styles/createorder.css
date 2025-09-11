@@ -465,232 +465,638 @@
   transform: translateY(-2px);
 }
 
-/* ========== Responsive Design ACTUALIZADO ========== */
-@media (max-width: 1400px) {
-  .create-order-header-section {
-    padding-left: calc(2.5% + 1rem); /* Reducido de 5% a 2.5% para pantallas medianas */
-  }
-  
-  .create-order-packages-container .packages-row {
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Reducido de 300px a 260px */
-    gap: 1rem; /* Reducido de 1.2rem a 1rem */
-  }
-  
-  .create-order-packages-container .artist-package-card {
-    width: 300px !important; /* Reducido de 330px a 300px */
-    height: 540px !important; /* Aumentado de 520px a 540px */
-  }
-  
-  .create-order-packages-container .package-sample-image {
-    height: 120px !important; /* Ajustado para pantallas medianas */
-  }
-  
-  /* Ajustar imágenes de referencia en pantallas medianas */
-  .create-order-image-preview,
-  .create-order-add-image-area {
-    width: 220px; /* Aumentado de 180px a 220px */
-    height: 220px; /* Aumentado de 180px a 220px */
-  }
-  
-  .create-order-add-image-icon {
-    font-size: 52px; /* Ajustado proporcionalmente */
-  }
+/* ========== Sección de Extras - FONDO BLANCO Y ESTILO SIMPLE ========== */
+.create-order-extras-info {
+  background: white; /* Cambiado de #f8f6f0 a blanco */
+  border: none; /* Removido border */
+  border-radius: 0; /* Removido border-radius */
+  padding: 0; /* Removido padding */
+  margin-bottom: 2rem; /* Aumentado margin */
+  font-family: 'Nunito Sans', sans-serif;
 }
 
-@media (max-width: 1024px) {
-  .create-order-page-container {
-    width: 95vw;
-    max-width: 95vw;
-  }
-  
-  .create-order-main-card {
-    width: 85vw; /* Reducido de 95vw a 85vw */
-    max-width: 90vw; /* Reducido de 95vw a 90vw */
-  }
-  
-  .create-order-header-section {
-    padding-left: calc(1% + 1rem); /* Reducido de 2.5% a 1% para tablets */
-  }
-  
-  .create-order-packages-container .packages-row {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Reducido de 280px a 240px */
-    gap: 0.8rem; /* Reducido de 1rem a 0.8rem */
-  }
-  
-  .create-order-packages-container .artist-package-card {
-    width: 280px !important; /* Reducido de 310px a 280px */
-    height: 500px !important; /* Aumentado de 480px a 500px */
-  }
-  
-  .create-order-packages-container .package-sample-image {
-    height: 110px !important; /* Ajustado para tablets */
-  }
-  
-  /* Ajustar imágenes de referencia en tablets */
-  .create-order-image-preview,
-  .create-order-add-image-area {
-    width: 200px; /* Aumentado de 160px a 200px */
-    height: 200px; /* Aumentado de 160px a 200px */
-  }
-  
-  .create-order-add-image-icon {
-    font-size: 48px; /* Ajustado para tablets */
-  }
-  
-  .create-order-images-upload-area {
-    gap: 1.5rem; /* Mantener buen espaciado en tablets */
-  }
+.create-order-extras-note {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #333;
+  font-weight: 600; /* Hacer más prominente */
 }
 
+.create-order-extras-description {
+  margin-bottom: 1rem;
+}
+
+.create-order-extras-description p {
+  font-size: 0.95rem;
+  color: #333; /* Más oscuro */
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.create-order-extras-rules {
+  font-size: 0.9rem;
+  color: #555; /* Más oscuro */
+  padding-left: 1.2rem;
+  margin-bottom: 0;
+}
+
+.create-order-extras-rules li {
+  margin-bottom: 0.4rem;
+}
+
+/* ========== Extras con estilo original del perfil ========== */
+.create-order-extras-container {
+  background: #D2AB80; /* MISMO FONDO NARANJA QUE LOS PAQUETES */
+  border-radius: 35px; /* Estilo original igual a los paquetes */
+  padding: 2.5rem; /* Mismo padding que los paquetes */
+  margin-top: 1.5rem;
+  position: relative;
+}
+
+/* Contenedor blanco interno para los extras */
+.create-order-extras-inner {
+  background: white;
+  border-radius: 40px;
+  border: 3px solid #000000;
+  box-shadow: 0 8px 2px rgba(0, 0, 0, 0.321);
+  overflow: hidden;
+}
+
+/* Header de extras igual que los paquetes */
+.create-order-extras-header {
+  background: white;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60px;
+  position: relative;
+}
+
+.create-order-extras-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 2rem;
+  color: #8B6D47;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-align: center;
+}
+
+/* Divider después del header */
+.create-order-extras-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  height: 2px;
+  background: rgba(19, 19, 19, 0.2);
+}
+
+/* Grid de extras igual que en el perfil */
+.create-order-extras-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 columnas como en el perfil */
+  gap: 0;
+  padding: 1.5rem;
+  min-height: 160px;
+}
+
+.create-order-extra-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  border-right: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 50px;
+  position: relative;
+}
+
+.create-order-extra-item:nth-child(odd) {
+  border-right: 1px solid #f0f0f0;
+}
+
+.create-order-extra-item:nth-child(even) {
+  border-right: none;
+}
+
+.create-order-extra-item:hover {
+  background: #f8f9fa;
+}
+
+/* Estilo cuando está seleccionado */
+.create-order-extra-item.selected {
+  background: #e8f5e8;
+  border-color: #4CAF50;
+}
+
+.create-order-extra-item.selected::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #4CAF50;
+}
+
+.create-order-extra-content {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex: 1;
+}
+
+.create-order-extra-bullet {
+  color: #8B6D47;
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.create-order-extra-name {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+}
+
+.create-order-extra-price {
+  background-color: #809671;
+  border: 3px solid #B3B792;
+  color: white;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 10px 24px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+.create-order-extra-selected-indicator {
+  width: 24px;
+  height: 24px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  margin-left: 0.5rem;
+}
+
+/* ========== Responsive para extras ========== */
 @media (max-width: 768px) {
-  .create-order-page-container {
-    padding: 1rem 0.5rem;
-    width: 100vw;
-    max-width: 100vw;
+  .create-order-extras-container {
+    padding: 1.5rem; /* Reducir padding en móviles */
   }
   
-  .create-order-main-card {
+  .create-order-extras-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  
+  .create-order-extra-item {
+    border-right: none;
+    padding: 1rem;
+  }
+  
+  .order-preview-modal {
     width: 95vw;
-    max-width: 95vw;
+    margin: 1rem;
   }
   
-  .create-order-header-section {
-    text-align: center; /* Volver a centrar en móviles */
-    padding-left: 0; /* Quitar padding en móviles */
+  .order-preview-header,
+  .order-preview-content {
+    padding: 1.5rem;
   }
   
-  .create-order-title {
-    justify-content: center; /* Centrar en móviles */
+  .order-preview-actions {
     flex-direction: column;
-    gap: 0.5rem;
-    font-size: 1.8rem; /* Aumentado de 1.6rem a 1.8rem para mantener proporción */
   }
   
-  .create-order-form {
-    padding: 1.2rem 0.8rem; /* Reducido de 1.5rem 1rem a 1.2rem 0.8rem */
-  }
-  
-  .create-order-form-section {
-    margin-bottom: 3rem; /* Reducido de 4rem a 3rem */
-  }
-  
-  .create-order-form-section:not(:last-child)::after {
-    bottom: -1.5rem; /* Reducido de -2rem a -1.5rem */
-  }
-  
-  /* En móviles, grid de 2 columnas si caben */
-  .create-order-packages-container .packages-row {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Reducido de 250px a 220px */
-    gap: 0.6rem; /* Reducido de 0.8rem a 0.6rem */
-    justify-items: center;
-  }
-  
-  .create-order-packages-container .artist-package-card {
-    width: 100% !important;
-    max-width: 250px !important; /* Reducido de 280px a 250px */
-    height: 440px !important; /* Aumentado de 420px a 440px */
-  }
-  
-  .create-order-packages-container .package-sample-image {
-    height: 95px !important; /* Ajustado para móviles */
-  }
-  
-  /* En móviles, cambiar a 2 columnas para las muestras si hay 3 */
-  .create-order-packages-container .package-samples-grid {
-    grid-template-columns: repeat(2, 1fr) !important; /* 2 columnas en móviles */
-    gap: 0.6rem !important;
-  }
-  
-  /* Si hay solo 1 muestra, centrarla */
-  .create-order-packages-container .package-samples-grid:has(.package-sample-image:nth-child(1):last-child) {
-    grid-template-columns: 1fr !important;
-    justify-content: center;
-  }
-  
-  /* Mantener buen tamaño de imágenes de referencia en móviles */
-  .create-order-image-preview,
-  .create-order-add-image-area {
-    width: 180px; /* Aumentado de 140px a 180px */
-    height: 180px; /* Aumentado de 140px a 180px */
-  }
-  
-  .create-order-add-image-icon {
-    font-size: 44px; /* Ajustado para móviles */
-  }
-  
-  /* Centrar mejor las imágenes en móviles */
-  .create-order-images-upload-area {
-    justify-content: center;
-    gap: 1.2rem; /* Aumentado de 1rem a 1.2rem */
-  }
-  
-  /* Reducir altura del textarea en móviles */
-  .create-order-description-textarea {
-    min-height: 120px; /* Reducido de 140px a 120px */
-    max-height: 120px; /* Reducido de 140px a 120px */
+  .order-preview-cancel,
+  .order-preview-confirm {
+    width: 100%;
   }
 }
 
-@media (max-width: 480px) {
-  .create-order-page-container {
-    width: 100vw;
-    max-width: 100vw;
-    padding: 1rem 0.25rem;
+/* ========== Asterisco obligatorio ========== */
+.create-order-required {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-left: 0.2rem;
+}
+
+/* ========== Nota de campo obligatorio ========== */
+.create-order-field-note {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 1rem;
+  font-family: 'Nunito Sans', sans-serif;
+  line-height: 1.4;
+}
+
+/* ========== SOLO AGREGAR TEXTO JUSTIFICADO Y MÁS SEPARACIÓN A EXTRAS ========== */
+.create-order-extras-info {
+  margin-bottom: 2.5rem; /* Aumentado de 2rem a 2.5rem */
+}
+
+.create-order-extras-note {
+  margin-bottom: 1.5rem; /* Aumentado de 1rem a 1.5rem */
+  text-align: justify; /* Justificado */
+  line-height: 1.6; /* Aumentado de 1.4 a 1.6 */
+}
+
+.create-order-extras-description {
+  margin-bottom: 1.5rem; /* Aumentado de 1rem a 1.5rem */
+}
+
+.create-order-extras-description p {
+  margin-bottom: 1rem; /* Aumentado de 0.5rem a 1rem */
+  line-height: 1.6; /* Aumentado de 1.5 a 1.6 */
+  text-align: justify; /* Justificado */
+}
+
+.create-order-extras-rules {
+  line-height: 1.6; /* Añadido line-height */
+}
+
+.create-order-extras-rules li {
+  margin-bottom: 0.8rem; /* Aumentado de 0.4rem a 0.8rem */
+  text-align: justify; /* Justificado */
+}
+
+/* ========== Vista previa del pedido - NUEVA SECCIÓN ========== */
+.order-preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.order-preview-modal {
+  background: white;
+  border-radius: 20px;
+  width: 90vw;
+  max-width: 850px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border: 3px solid #000;
+  position: relative;
+}
+
+/* Header con logo como en el formulario */
+.order-preview-header {
+  text-align: center;
+  padding: 1.5rem 0 1rem 0;
+  position: relative;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.order-preview-logo {
+  height: 3.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.order-preview-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.6rem;
+  color: #8B6D47;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.order-preview-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #666;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.order-preview-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+.order-preview-content {
+  padding: 2rem 2.5rem;
+}
+
+/* Secciones del modal */
+.order-preview-section {
+  margin-bottom: 2rem;
+}
+
+.order-preview-section:last-child {
+  margin-bottom: 0;
+}
+
+.order-preview-section-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  color: #000;
+  margin-bottom: 1rem;
+  font-weight: 400;
+}
+
+/* Referencias - Grid horizontal como en la imagen */
+.order-preview-references {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.order-preview-reference-item {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #000;
+}
+
+.order-preview-reference-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Grid de detalles - Similar a la imagen */
+.order-preview-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.order-preview-detail-section {
+  margin-bottom: 1.5rem;
+}
+
+.order-preview-detail-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  color: #000;
+  margin-bottom: 0.8rem;
+  font-weight: 400;
+}
+
+/* Información del paquete */
+.order-preview-package-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.order-preview-package-name {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.order-preview-view-package-btn {
+  background: #8B6D47;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 15px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.order-preview-view-package-btn:hover {
+  background: #7A5D3F;
+  transform: translateY(-1px);
+}
+
+/* Lista de extras */
+.order-preview-extras-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.order-preview-extra-item {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #333;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-preview-extra-item:last-child {
+  border-bottom: none;
+}
+
+/* Sección de precios - Igual que en la imagen */
+.order-preview-price-section {
+  background: white;
+  border: 2px solid #D2AB80;
+  border-radius: 15px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.order-preview-price-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  color: #000;
+  margin-bottom: 0.5rem;
+  font-weight: 400;
+}
+
+.order-preview-price-note {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.order-preview-price-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.order-preview-price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-preview-price-item span:first-child {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.order-preview-price-badge {
+  background-color: #809671;
+  border: 2px solid #B3B792;
+  color: white;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  padding: 6px 16px;
+  border-radius: 15px;
+  letter-spacing: 0.04em;
+}
+
+.order-preview-total-price {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #D2AB80;
+}
+
+.order-preview-total-badge {
+  background-color: #8B6D47;
+  color: white;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  padding: 10px 24px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  display: inline-block;
+}
+
+/* Descripción */
+.order-preview-description-box {
+  background: white;
+  border: 2px solid #D2AB80;
+  border-radius: 12px;
+  padding: 1.5rem;
+  font-family: 'Nunito Sans', sans-serif;
+  line-height: 1.5;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+/* Mensaje informativo */
+.order-preview-info-message {
+  background: white;
+  border: 2px solid #D2AB80;
+  border-radius: 15px;
+  padding: 1rem;
+  text-align: center;
+  color: #8B6D47;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+/* Botones de acción */
+.order-preview-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.order-preview-cancel,
+.order-preview-confirm {
+  padding: 0.8rem 2.5rem;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.order-preview-cancel {
+  background: #666;
+  color: white;
+}
+
+.order-preview-cancel:hover {
+  background: #555;
+  transform: translateY(-2px);
+}
+
+.order-preview-confirm {
+  background: #8B6D47;
+  color: white;
+}
+
+.order-preview-confirm:hover:not(:disabled) {
+  background: #7A5D3F;
+  transform: translateY(-2px);
+}
+
+.order-preview-confirm:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========== Responsive para el modal ========== */
+@media (max-width: 768px) {
+  .order-preview-modal {
+    width: 95vw;
+    margin: 1rem;
   }
   
-  .create-order-main-card {
-    width: 98vw;
-    max-width: 98vw;
+  .order-preview-header,
+  .order-preview-content {
+    padding: 1.5rem;
   }
   
-  .create-order-form {
-    padding: 0.8rem 0.4rem; /* Reducido de 1rem 0.5rem a 0.8rem 0.4rem */
-  }
-  
-  .create-order-form-section {
-    margin-bottom: 2.5rem; /* Reducido de 3.5rem a 2.5rem */
-  }
-  
-  .create-order-form-section:not(:last-child)::after {
-    bottom: -1.25rem; /* Reducido de -1.75rem a -1.25rem */
-  }
-  
-  /* Una sola columna en móviles muy pequeños */
-  .create-order-packages-container .packages-row {
+  .order-preview-details-grid {
     grid-template-columns: 1fr;
-    gap: 0.4rem; /* Reducido de 0.5rem a 0.4rem */
+    gap: 1.5rem;
   }
   
-  .create-order-packages-container .artist-package-card {
-    max-width: 230px !important; /* Reducido de 260px a 230px */
-    height: 420px !important; /* Aumentado de 400px a 420px */
+  .order-preview-references {
+    justify-content: center;
   }
   
-  .create-order-packages-container .package-sample-image {
-    height: 85px !important; /* Ajustado para móviles pequeños */
+  .order-preview-reference-item {
+    width: 100px;
+    height: 100px;
   }
   
-  .create-order-packages-container .package-desc-text {
-    -webkit-line-clamp: 3 !important; /* Reducido de 4 a 3 líneas */
-    max-height: 60px !important; /* Reducido de 80px a 60px */
+  .order-preview-actions {
+    flex-direction: column;
   }
   
-  /* Mantener buen tamaño para imágenes de referencia en móviles pequeños */
-  .create-order-image-preview,
-  .create-order-add-image-area {
-    width: 160px; /* Aumentado de 120px a 160px */
-    height: 160px; /* Aumentado de 120px a 160px */
-  }
-  
-  .create-order-add-image-icon {
-    font-size: 40px; /* Ajustado para móviles pequeños */
-  }
-  
-  /* Usar grid en móviles pequeños para mejor distribución */
-  .create-order-images-upload-area {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Aumentado de 120px a 160px */
-    gap: 1rem; /* Aumentado de 0.8rem a 1rem */
-    justify-items: center;
+  .order-preview-cancel,
+  .order-preview-confirm {
+    width: 100%;
   }
 }

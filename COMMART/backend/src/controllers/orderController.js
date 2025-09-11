@@ -12,7 +12,7 @@ import { createNotification } from '../models/notificationModel.js';
 export const createOrderController = async (req, res) => {
   try {
     const client_id = req.user.id;
-    const { artist_id, description, package_id, total_price } = req.body;
+    const { artist_id, description, package_id, total_price, extras } = req.body;
 
     if (!artist_id || !description || !package_id || !total_price) {
       return res.status(400).json({ message: 'Faltan campos obligatorios.' });
@@ -23,24 +23,35 @@ export const createOrderController = async (req, res) => {
       references_image = req.files.map(f => f.path.replace(/\\/g, '/')).join(',');
     }
 
+    // Procesar extras si existen
+    let extrasString = null;
+    if (extras) {
+      try {
+        const extrasArray = JSON.parse(extras);
+        extrasString = extrasArray.join(','); // Guardar IDs separados por comas
+      } catch (e) {
+        extrasString = extras; // Si ya es string, usarlo directamente
+      }
+    }
+
     const order = await createOrder({
       client_id,
       artist_id,
       package_id,
       description,
       references_image,
-      extras: null,
+      extras: extrasString,
       status: 'pending',
       total_price
     });
 
-    // Notificar al artista sobre el nuevo pedido (AHORA INCLUYE order_id)
+    // Crear notificación para el artista
     await createNotification({
-      user_id: artist_id, // El artista recibe la notificación
+      user_id: artist_id,
       type: 'order',
       message: `Tienes una nueva solicitud de pedido.`,
       link: `/artist/orders`,
-      order_id: order.id, // <-- CORRECCIÓN AQUÍ
+      order_id: order.id,
       is_read: false
     });
 
