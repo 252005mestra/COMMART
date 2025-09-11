@@ -14,6 +14,7 @@ import CreateOrder from './components/CreateOrder'
 import CreateOrderPage from './pages/CreateOrderPage'
 import OrderDetail from './pages/OrderDetail'
 import { useUser } from './context/UserContext'
+import AdminDashboard from './pages/AdminDashboard'
 
 const App = () => {
   const { profile } = useUser()
@@ -120,6 +121,12 @@ const App = () => {
             </PrivateRoute>
           }
         />
+
+        <Route
+          path='/admin/dashboard'
+          element={<AdminDashboard />}
+        />
+
       </Routes>
     </>
   )

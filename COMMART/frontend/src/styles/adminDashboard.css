@@ -1,0 +1,790 @@
+/* Reset y variables básicas */
+.admindash *,
+.admindash *::before,
+.admindash *::after {
+  box-sizing: border-box;
+}
+
+/* Layout principal */
+.admindash-root {
+  display: flex;
+  height: 100vh;
+  background: #f8f9fa;
+  font-family: 'Nunito Sans', sans-serif;
+  overflow: hidden;
+}
+
+/* SIDEBAR - ESTÁTICO EN DESKTOP */
+.admindash-sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  z-index: 100;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: none; /* Sin animación en desktop */
+  transform: translateX(0); /* Siempre visible en desktop */
+}
+
+.admindash-sidebar-header {
+  padding: 2rem 1.5rem 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+.admindash-sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.admindash-logo-circle {
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.admindash-sidebar-logo span {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.3rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+.admindash-sidebar-nav {
+  flex: 1;
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.admindash-nav-item {
+  background: none;
+  border: none;
+  color: #1f2937;
+  font-size: 1rem;
+  padding: 1rem 2rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.admindash-nav-item.active,
+.admindash-nav-item:hover {
+  background: #f3f4f6;
+  color: #8b5cf6;
+}
+
+/* Overlay para móvil - OCULTO EN DESKTOP */
+.admindash-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
+  z-index: 99;
+  display: none;
+}
+
+/* Main Content - CON MARGEN FIJO EN DESKTOP */
+.admindash-main-content {
+  flex: 1;
+  margin-left: 0; /* No necesario en desktop ya que está en flex */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.admindash-main-header {
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.admindash-header-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+.admindash-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.admindash-header-text h1 {
+  font-family: 'Goldman', sans-serif;
+  font-size: 2rem;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+  font-weight: 600;
+}
+.admindash-header-text p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 1rem;
+}
+.admindash-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Botón móvil - OCULTO EN DESKTOP */
+.admindash-mobile-menu-btn {
+  background: none;
+  border: none;
+  display: none; /* OCULTO EN DESKTOP */
+  align-items: center;
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+/* Dashboard content */
+.admindash-dashboard-main {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  background: #f8f9fa;
+}
+
+/* Overview section */
+.admindash-overview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Cards */
+.admindash-indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.admindash-indicator-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.admindash-indicator-card.small {
+  min-width: 180px;
+}
+.admindash-indicator-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.admindash-indicator-info h3 {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+.admindash-indicator-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #8b5cf6;
+}
+.admindash-indicator-change {
+  font-size: 0.9rem;
+  color: #10b981;
+}
+.admindash-indicator-icon {
+  background: #f3f4f6;
+  border-radius: 50%;
+  padding: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Charts */
+.admindash-overview-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+.admindash-chart-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.admindash-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.admindash-chart-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  color: #1f2937;
+  margin: 0;
+  font-weight: 600;
+}
+.admindash-time-selector {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 0.3rem 0.7rem;
+  font-size: 1rem;
+  background: #f3f4f6;
+  color: #1f2937;
+}
+.admindash-chart-wrapper {
+  width: 100%;
+  height: 250px;
+}
+.admindash-chart-wrapper.small {
+  height: 200px;
+}
+.admindash-chart-wrapper.large {
+  height: 400px;
+}
+
+/* Bottom Section Grid */
+.admindash-overview-bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.admindash-info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.admindash-info-card-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+/* Artists List */
+.admindash-artists-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.admindash-artist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.admindash-artist-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admindash-artist-info {
+  flex: 1;
+}
+
+.admindash-artist-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+  color: #333;
+}
+
+.admindash-artist-views {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Samples Grid */
+.admindash-samples-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.admindash-sample-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admindash-sample-image {
+  width: 100%;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.admindash-sample-info {
+  flex: 1;
+}
+
+.admindash-sample-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0;
+  color: #333;
+}
+
+.admindash-sample-artist {
+  font-size: 0.75rem;
+  color: #666;
+  margin: 0;
+}
+
+.admindash-artist-highlight {
+  color: #8b5cf6;
+  font-weight: 500;
+}
+
+.admindash-sample-date {
+  font-size: 0.7rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Orders Table */
+.admindash-orders-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  margin-top: 2rem;
+}
+.admindash-orders-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+.admindash-orders-table-container {
+  overflow-x: auto;
+}
+.admindash-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.admindash-orders-th,
+.admindash-orders-td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+.admindash-orders-th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+.admindash-orders-tr:last-child .admindash-orders-td {
+  border-bottom: none;
+}
+.admindash-order-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+/* Estado completado - Verde */
+.admindash-order-status.completed {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
+}
+
+/* Estado en proceso - Naranja */
+.admindash-order-status.in_progress,
+.admindash-order-status.pending {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+/* Estado rechazado y cancelado - Rojo */
+.admindash-order-status.rejected,
+.admindash-order-status.cancelled {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #dc3545;
+}
+
+/* Estado por defecto */
+.admindash-order-status:not(.completed):not(.in_progress):not(.pending):not(.rejected):not(.cancelled) {
+  background: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #6c757d;
+}
+
+/* Section styles for other views */
+.admindash-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admindash-section-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.5rem;
+  color: #1f2937;
+  margin: 0;
+  font-weight: 600;
+}
+
+.admindash-charts-full-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.admindash-chart-card.large {
+  padding: 2rem;
+}
+
+.admindash-section-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.admindash-section-subtitle {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.2rem;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.admindash-section-description {
+  color: #666;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.admindash-development-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #8b5cf6;
+  background: #f3f4f6;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.admindash-notice-icon {
+  flex-shrink: 0;
+}
+
+.admindash-notice-text {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ==================== RESPONSIVE MÓVIL ==================== */
+@media (max-width: 900px) {
+  /* En móviles, el sidebar se comporta como antes (desplegable) */
+  .admindash-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%); /* Oculto por defecto */
+    transition: transform 0.3s ease; /* Con animación */
+  }
+  
+  .admindash-sidebar.open {
+    transform: translateX(0); /* Visible cuando está abierto */
+  }
+  
+  .admindash-main-content {
+    margin-left: 0; /* Sin margen en móvil */
+    width: 100%;
+  }
+  
+  .admindash-mobile-menu-btn {
+    display: flex; /* MOSTRAR en móvil */
+  }
+  
+  .admindash-sidebar-overlay.open {
+    display: block; /* MOSTRAR overlay en móvil */
+  }
+}
+
+/* Responsive tablets */
+@media (max-width: 1200px) {
+  .admindash-indicators-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admindash-overview-charts-grid {
+    grid-template-columns: 1fr;
+  }
+  .admindash-overview-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive móviles pequeños */
+@media (max-width: 767px) {
+  .admindash-dashboard-main {
+    padding: 1rem;
+  }
+  .admindash-indicators-grid {
+    grid-template-columns: 1fr;
+  }
+  .admindash-overview-charts-grid {
+    grid-template-columns: 1fr;
+  }
+  .admindash-overview-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+  .admindash-orders-card {
+    padding: 1rem;
+  }
+}
+
+/* Estilos adicionales para las nuevas secciones */
+.ranking-number {
+  background: #8b5cf6;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.activity-dot {
+  width: 8px;
+  height: 8px;
+  background: #8b5cf6;
+  border-radius: 50%;
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+}
+
+.activity-text {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.activity-time {
+  display: block;
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Management Grid */
+.admindash-management-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.admindash-management-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.admindash-management-card:hover {
+  transform: translateY(-2px);
+}
+
+.management-card-icon {
+  color: #8b5cf6;
+  margin-bottom: 1rem;
+}
+
+.management-btn {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.2s ease;
+}
+
+.management-btn:hover {
+  background: #7c3aed;
+}
+
+/* Premium Plan Styles */
+.admindash-premium-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.premium-form-card,
+.premium-preview-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.premium-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  border: none;
+}
+
+.btn-primary {
+  background: #8b5cf6;
+  color: white;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.plan-preview {
+  border: 2px solid #8b5cf6;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.plan-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.plan-price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #8b5cf6;
+}
+
+.plan-benefits ul {
+  list-style: none;
+  padding: 0;
+}
+
+.plan-benefits li {
+  padding: 0.5rem 0;
+  color: #10b981;
+}
+
+@media (max-width: 768px) {
+  .admindash-premium-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .admindash-management-grid {
+    grid-template-columns: 1fr;
+  }
+}
