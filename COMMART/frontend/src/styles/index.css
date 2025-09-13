@@ -20,6 +20,37 @@ body, #root {
   background-attachment: fixed;  
 }
 
+/* ========== SCROLL CAFÉ GLOBAL PARA TODA LA PÁGINA ========== */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8B6D47; /* Color café para todos los scrolls */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7A5D3F; /* Color café más oscuro al hover */
+}
+
+::-webkit-scrollbar-corner {
+  background: #f1f1f1;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8B6D47 #f1f1f1;
+}
+
 /* Ocultar barra de scroll en móvil */
 @media (max-width: 768px) {
   html, body {

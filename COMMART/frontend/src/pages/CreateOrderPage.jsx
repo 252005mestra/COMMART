@@ -25,6 +25,8 @@ const CreateOrderPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showPackageModal, setShowPackageModal] = useState(false); // AÑADIDO: Estado para modal del paquete
+  const [showPackagePreview, setShowPackagePreview] = useState(false);
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef();
 
@@ -402,128 +404,252 @@ const CreateOrderPage = () => {
           <div className="order-preview-overlay" onClick={(e) => {
             if (e.target.classList.contains('order-preview-overlay')) {
               setShowPreview(false);
+              setShowPackagePreview(false);
             }
           }}>
             <div className="order-preview-modal" onClick={(e) => e.stopPropagation()}>
-              {/* Header */}
-              <div className="order-preview-header">
-                <img src="/src/assets/LogoCOMMART.png" alt="COMMART" className="order-preview-logo" />
-                <h2 className="order-preview-title">Vista Previa del Pedido</h2>
-              </div>
+              {/* Sección izquierda completa */}
+              <div className="order-preview-left-section">
+                {/* Header solo para la sección izquierda - SIN LOGO */}
+                <div className="order-preview-header">
+                  <h2 className="order-preview-title">
+                    {showPackagePreview ? 'Detalle del Paquete' : 'Vista Previa del Pedido'}
+                  </h2>
+                </div>
 
-              {/* Contenido principal horizontal */}
-              <div className="order-preview-main-content">
-                {/* Sección izquierda */}
-                <div className="order-preview-left-section">
-                  {/* Referencias */}
-                  <div className="order-preview-section">
-                    <h3 className="order-preview-section-title">Referencias:</h3>
-                    <div className="order-preview-references">
-                      {images.map((img, index) => (
-                        <div key={index} className="order-preview-reference-item">
-                          <img 
-                            src={URL.createObjectURL(img)} 
-                            alt={`Referencia ${index + 1}`}
-                            className="order-preview-reference-image"
-                          />
+                <div className="order-preview-left-content">
+                  {showPackagePreview ? (
+                    // Vista de detalle del paquete
+                    <div>
+                      <button
+                        className="order-preview-view-package-btn"
+                        style={{ marginBottom: 16 }}
+                        onClick={() => setShowPackagePreview(false)}
+                      >
+                        ← Volver
+                      </button>
+                      <div className="package-header-artist">
+                        <span className="package-title-artist">{selectedPackage.title}</span>
+                      </div>
+                      <div className="package-content-artist">
+                        <div className="package-price-section">
+                          <span className="package-price-label">Precio</span>
+                          <span className="package-price-amount">{formatColombianPrice(selectedPackage.price)}</span>
+                        </div>
+                        <div className="package-delivery-section">
+                          <span className="package-delivery-label">Tiempo estimado</span>
+                          <span className="package-delivery-time">
+                            {selectedPackage.delivery_time_days} {selectedPackage.delivery_time_days === 1 ? 'día' : 'días'}
+                          </span>
+                        </div>
+                        <div className="package-description-section">
+                          <div className="package-desc-title">Descripción</div>
+                          <div className="package-desc-text">
+                            {selectedPackage.description ? (
+                              <ul className="package-features-list">
+                                {selectedPackage.description.split('\n').map((line, idx) =>
+                                  line.trim() && <li key={idx}>{line.trim()}</li>
+                                )}
+                              </ul>
+                            ) : 'Sin descripción'}
+                          </div>
+                        </div>
+                        <div className="package-samples-section">
+                          <div className="package-samples-title">Muestra</div>
+                          {(selectedPackage.reference_image1 || selectedPackage.reference_image2) ? (
+                            <div className="package-samples-grid">
+                              {selectedPackage.reference_image1 && (
+                                <img
+                                  src={`http://localhost:5000/${selectedPackage.reference_image1}`}
+                                  alt="Muestra 1"
+                                  className="package-sample-image"
+                                />
+                              )}
+                              {selectedPackage.reference_image2 && (
+                                <img
+                                  src={`http://localhost:5000/${selectedPackage.reference_image2}`}
+                                  alt="Muestra 2"
+                                  className="package-sample-image"
+                                />
+                              )}
+                            </div>
+                          ) : (
+                            <div className="package-no-samples">Sin muestras</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Vista previa normal
+                    <>
+                      <div className="order-preview-info-message">
+                        Antes de enviar, revisa que toda la información de tu pedido sea correcta.
+                      </div>
+                      <div className="order-preview-section order-preview-references-section">
+                        <div className="order-preview-section-title">Referencias:</div>
+                        <div className="order-preview-references">
+                          {images.map((img, index) => (
+                            <div key={index} className="order-preview-reference-item">
+                              <img 
+                                src={URL.createObjectURL(img)} 
+                                alt={`Referencia ${index + 1}`}
+                                className="order-preview-reference-image"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="order-preview-section">
+                        <div className="order-preview-details-grid">
+                          <div className="order-preview-details-left">
+                            <h4 className="order-preview-detail-title">Paquete:</h4>
+                            <div className="order-preview-package-info">
+                              <span className="order-preview-package-name">{selectedPackage?.title}</span>
+                              <button 
+                                className="order-preview-view-package-btn"
+                                onClick={() => setShowPackagePreview(true)}
+                              >
+                                Ver paquete
+                              </button>
+                            </div>
+                          </div>
+                          {selectedExtras.length > 0 && (
+                            <div className="order-preview-details-right">
+                              <h4 className="order-preview-detail-title">Extras:</h4>
+                              <div className="order-preview-extras-list">
+                                {selectedExtras.map(extra => (
+                                  <div key={extra.id} className="order-preview-extra-item">
+                                    <span>{extra.name}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="order-preview-section">
+                        <h3 className="order-preview-section-title">Descripción:</h3>
+                        <div className="order-preview-description-box">
+                          {description}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+              {/* Sección derecha - Precios */}
+              <div className="order-preview-right-section">
+                <div className="order-preview-price-container">
+                  <div className="order-preview-price-card">
+                    <h3 className="order-preview-price-title">Resumen del pedido:</h3>
+                    <div className="order-preview-price-breakdown">
+                      <div className="order-preview-price-item">
+                        <span>Paquete {selectedPackage?.title}</span>
+                        <span className="order-preview-price-badge">{formatColombianPrice(selectedPackage?.price)}</span>
+                      </div>
+                      {selectedExtras.map(extra => (
+                        <div key={extra.id} className="order-preview-price-item">
+                          <span>{extra.name}</span>
+                          <span className="order-preview-price-badge">{formatColombianPrice(extra.price)}</span>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  {/* Paquete y Extras */}
-                  <div className="order-preview-section">
-                    <div className="order-preview-details-grid">
-                      <div className="order-preview-details-left">
-                        <h4 className="order-preview-detail-title">Paquete:</h4>
-                        <div className="order-preview-package-info">
-                          <span className="order-preview-package-name">{selectedPackage?.title}</span>
-                          <button 
-                            className="order-preview-view-package-btn"
-                            onClick={() => {
-                              // Función para ver paquete
-                              setShowPackageModal(true);
-                            }}
-                          >
-                            Ver paquete
-                          </button>
-                        </div>
+                  <div className="order-preview-total-card">
+                    <div className="order-preview-total-header">
+                      <div className="order-preview-total-left">
+                        <h3 className="order-preview-total-title">Valor total de la obra:</h3>
+                        <div className="order-preview-total-note">Generado automáticamente</div>
                       </div>
-
-                      {selectedExtras.length > 0 && (
-                        <div className="order-preview-details-right">
-                          <h4 className="order-preview-detail-title">Extras:</h4>
-                          <div className="order-preview-extras-list">
-                            {selectedExtras.map(extra => (
-                              <div key={extra.id} className="order-preview-extra-item">
-                                <span>{extra.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Descripción */}
-                  <div className="order-preview-section">
-                    <h3 className="order-preview-section-title">Descripción:</h3>
-                    <div className="order-preview-description-box">
-                      {description}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sección derecha - Precios */}
-                <div className="order-preview-right-section">
-                  <div className="order-preview-price-container">
-                    {/* Card de desglose de precios */}
-                    <div className="order-preview-price-card">
-                      <h3 className="order-preview-price-title">Valor de la obra:</h3>
-                      <div className="order-preview-price-note">Generado automáticamente</div>
-                      <div className="order-preview-price-breakdown">
-                        <div className="order-preview-price-item">
-                          <span>Paquete {selectedPackage?.title}</span>
-                          <span className="order-preview-price-badge">{formatColombianPrice(selectedPackage?.price)}</span>
-                        </div>
-                        {selectedExtras.map(extra => (
-                          <div key={extra.id} className="order-preview-price-item">
-                            <span>{extra.name}</span>
-                            <span className="order-preview-price-badge">{formatColombianPrice(extra.price)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Card de total */}
-                    <div className="order-preview-total-card">
-                      <h3 className="order-preview-total-title">Valor total de la obra:</h3>
                       <span className="order-preview-total-badge">{formatColombianPrice(calculateTotalPrice())}</span>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Botones de acción */}
+              {/* Botones de acción - REORGANIZADO */}
               <div className="order-preview-actions">
-                <div className="order-preview-info-message">
-                  Antes de enviar, revisa que toda la información de tu pedido sea correcta.
+                <div className="order-preview-buttons-container">
+                  <button className="order-preview-cancel" onClick={() => { setShowPreview(false); setShowPackagePreview(false); }}>
+                    Cancelar
+                  </button>
+                  <button 
+                    type="button" 
+                    className="order-preview-confirm" 
+                    onClick={handleConfirmOrder}
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Enviando...' : 'Enviar'}
+                  </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* AÑADIDO: Modal para mostrar detalles del paquete */}
+        {showPackageModal && selectedPackage && (
+          <div className="package-detail-overlay" onClick={(e) => {
+            if (e.target.classList.contains('package-detail-overlay')) {
+              setShowPackageModal(false);
+            }
+          }}>
+            <div className="package-detail-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="package-detail-header">
+                <h3 className="package-detail-title">{selectedPackage.title}</h3>
                 <button 
-                  className="order-preview-cancel" 
-                  onClick={() => setShowPreview(false)}
-                  type="button"
+                  className="package-detail-close"
+                  onClick={() => setShowPackageModal(false)}
+                  title="Cerrar"
                 >
-                  Cancelar
+                  <X size={24} />
                 </button>
-                <button 
-                  className="order-preview-confirm" 
-                  onClick={handleConfirmOrder}
-                  disabled={submitting}
-                  type="button"
-                >
-                  {submitting ? 'Enviando...' : 'Enviar'}
-                </button>
+              </div>
+              
+              <div className="package-detail-content">
+                <div className="package-detail-price">
+                  <span className="package-detail-price-label">Precio:</span>
+                  <span className="package-detail-price-amount">{formatColombianPrice(selectedPackage.price)}</span>
+                </div>
+                
+                <div className="package-detail-delivery">
+                  <span className="package-detail-delivery-label">Tiempo estimado:</span>
+                  <span className="package-detail-delivery-time">
+                    {selectedPackage.delivery_time_days} {selectedPackage.delivery_time_days === 1 ? 'día' : 'días'}
+                  </span>
+                </div>
+                
+                {selectedPackage.description && (
+                  <div className="package-detail-description">
+                    <h4 className="package-detail-description-title">Descripción:</h4>
+                    <div className="package-detail-description-text">
+                      {selectedPackage.description.split('\n').map((line, idx) => (
+                        line.trim() && <div key={idx}>• {line.trim()}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {(selectedPackage.reference_image1 || selectedPackage.reference_image2) && (
+                  <div className="package-detail-samples">
+                    <h4 className="package-detail-samples-title">Muestras:</h4>
+                    <div className="package-detail-samples-grid">
+                      {selectedPackage.reference_image1 && (
+                        <img 
+                          src={`http://localhost:5000/${selectedPackage.reference_image1}`} 
+                          alt="Muestra 1" 
+                          className="package-detail-sample-image"
+                        />
+                      )}
+                      {selectedPackage.reference_image2 && (
+                        <img 
+                          src={`http://localhost:5000/${selectedPackage.reference_image2}`} 
+                          alt="Muestra 2" 
+                          className="package-detail-sample-image"
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
