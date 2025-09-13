@@ -160,7 +160,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
 }
 
@@ -1185,4 +1184,101 @@
   font-family: 'Nunito Sans', sans-serif;
   font-size: 1rem;
   color: #222;
+}
+
+/* ========== Modal de Éxito del Pedido ========== */
+.order-success-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(30, 30, 30, 0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.order-success-modal {
+  background: #fff;
+  border-radius: 28px;
+  border: 4px solid #a38a5b;
+  box-shadow: 0 8px 32px rgba(60, 48, 36, 0.13);
+  padding: 2.5rem 2rem 2rem 2rem;
+  min-width: 340px;
+  max-width: 95vw;
+  text-align: center;
+  position: relative;
+}
+
+/* Animación para el icono de éxito */
+.order-success-icon svg {
+  animation: successIconPop 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-origin: center;
+}
+@keyframes successIconPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) rotate(-30deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15) rotate(8deg);
+  }
+  80% {
+    transform: scale(0.95) rotate(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.order-success-icon {
+  margin-bottom: 1.5rem;
+}
+
+.order-success-message {
+  font-size: 1.25rem;
+  margin-bottom: 2.2rem;
+  color: #222;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.order-success-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 2.5rem;
+  margin-top: 1rem;
+}
+
+.order-success-exit {
+  background: none;
+  border: none;
+  color: #222;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.5rem 2rem;
+  transition: color 0.2s;
+}
+
+.order-success-exit:hover {
+  color: #8B6D47;
+}
+
+.order-success-view {
+  background: #7d6847;
+  color: #fff;
+  border: none;
+  border-radius: 22px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.2rem;
+  padding: 0.5rem 2.5rem;
+  box-shadow: none;
+  transition: background 0.2s;
+}
+
+.order-success-view:hover {
+  background: #a38a5b;
 }

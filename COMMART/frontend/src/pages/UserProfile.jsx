@@ -8,10 +8,14 @@ import axios from 'axios';
 import UserListModal from '../components/UserListModal';
 import ProfileTabsSection from '../components/ProfileTabsSection';
 import Footer from '../components/Footer';
+import AlertModal from '../components/AlertModal';
 
 const UserProfile = () => {
   const { profile, removeFavoriteArtist, fetchProfile } = useUser();
   const fileInputRef = useRef(null);
+
+  // Estado para alertas
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
 
   // Estados para imagen y modal de confirmación
   const [imagePreview, setImagePreview] = useState(
@@ -30,11 +34,11 @@ const UserProfile = () => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        alert('Solo se permiten archivos de imagen');
+        setAlert({ open: true, type: 'error', message: 'Solo se permiten archivos de imagen' });
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert('La imagen no puede ser mayor a 5MB');
+        setAlert({ open: true, type: 'error', message: 'La imagen no puede ser mayor a 5MB' });
         return;
       }
       const reader = new FileReader();
@@ -69,11 +73,11 @@ const UserProfile = () => {
       setPendingImage(null);
       setPendingImageUrl(null);
       
-      alert('Foto de perfil actualizada correctamente');
+      setAlert({ open: true, type: 'success', message: 'Foto de perfil actualizada correctamente' });
       
     } catch (err) {
       console.error('Error al actualizar la foto de perfil:', err);
-      alert('Error al actualizar la foto de perfil');
+      setAlert({ open: true, type: 'error', message: 'Error al actualizar la foto de perfil' });
     }
   };
 
@@ -228,6 +232,12 @@ const UserProfile = () => {
       </main>
 
       <Footer />
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
     </>
   );
 };

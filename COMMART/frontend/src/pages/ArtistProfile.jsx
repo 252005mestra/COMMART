@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import ArtistPortfolio from '../components/ArtistPortfolio';
 import ProfileTabsSection from '../components/ProfileTabsSection';
 import ArtistPackages from '../components/ArtistPackages';
+import AlertModal from '../components/AlertModal';
 
 const ArtistProfile = () => {
   const { profile, removeFavoriteArtist, fetchProfile } = useUser();
@@ -14,12 +15,15 @@ const ArtistProfile = () => {
   const [artistData, setArtistData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Estado para alertas
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
+
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         const [stylesRes, langsRes, profileRes] = await Promise.all([
           axios.get('http://localhost:5000/api/auth/styles'),
           axios.get('http://localhost:5000/api/auth/languages'),
@@ -27,16 +31,15 @@ const ArtistProfile = () => {
             withCredentials: true
           })
         ]);
-        
+
         setAllStyles(stylesRes.data);
         setAllLanguages(langsRes.data);
         setArtistData(profileRes.data);
-        
+
       } catch (error) {
         console.error('Error al cargar datos:', error);
         // Si falla obtener el perfil de artista, usar el perfil general
         if (error.response?.status === 404) {
-          // Si no tiene perfil de artista, crear uno básico con los datos del usuario
           setArtistData({
             ...profile,
             bio: null,
@@ -69,27 +72,31 @@ const ArtistProfile = () => {
   const handleSave = async (formData) => {
     try {
       const response = await axios.put(
-        'http://localhost:5000/api/auth/artist-profile', 
-        formData, 
+        'http://localhost:5000/api/auth/artist-profile',
+        formData,
         {
           withCredentials: true,
           headers: { 'Content-Type': 'multipart/form-data' }
         }
       );
-      
+
       // Actualizar datos locales con la respuesta
       if (response.data.profile) {
         setArtistData(response.data.profile);
       }
-      
+
       // Actualizar también el contexto de usuario
       await fetchProfile();
-      
-      alert('Perfil actualizado exitosamente');
-      
+
+      setAlert({ open: true, type: 'success', message: 'Perfil actualizado exitosamente' });
+
     } catch (error) {
       console.error('Error al actualizar perfil:', error);
-      alert('Error al actualizar el perfil: ' + (error.response?.data?.message || error.message));
+      setAlert({
+        open: true,
+        type: 'error',
+        message: 'Error al actualizar el perfil: ' + (error.response?.data?.message || error.message)
+      });
     }
   };
 
@@ -98,10 +105,10 @@ const ArtistProfile = () => {
       <>
         <MainNav />
         <main className="main-content">
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
             minHeight: '60vh',
             fontSize: '18px',
             color: '#666'
@@ -119,10 +126,10 @@ const ArtistProfile = () => {
       <>
         <MainNav />
         <main className="main-content">
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
             minHeight: '60vh',
             fontSize: '18px',
             color: '#666'
@@ -171,6 +178,12 @@ const ArtistProfile = () => {
         )}
       </main>
       <Footer />
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
     </>
   );
 };

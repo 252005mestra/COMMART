@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import InfoCard from './InfoCard';
 import ArtistPackages from './ArtistPackages';
+import AlertModal from './AlertModal';
 import '../styles/profiletabs.css';
 import { useUser } from '../context/UserContext';
 
@@ -10,7 +11,9 @@ const PAGE_SIZE = 6;
 
 const ProfileTabsSection = ({ data, isArtist, isPublicView = false, artistId = null, onFavoriteToggle }) => {
   const [favoriteLoading, setFavoriteLoading] = useState({});
-  
+  // Estado para alertas
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
+
   // Estado para navegación de tabs
   const [tabStartIndex, setTabStartIndex] = useState(0);
   
@@ -226,22 +229,24 @@ const ProfileTabsSection = ({ data, isArtist, isPublicView = false, artistId = n
   // ⭐ FUNCIÓN DIRECTA: Quitar de favoritos SIN MODAL
   const handleFavoriteToggle = async (artist) => {
     if (favoriteLoading[artist.id]) return;
-    // Actualización optimista: quitar de favoritos localmente
     setFavoriteLoading(prev => ({ ...prev, [artist.id]: true }));
     setRemovedFavoriteIds(prev => new Set([...prev, artist.id]));
 
     try {
       if (onFavoriteToggle) {
-        await onFavoriteToggle(artist); // Llama a removeFavoriteArtist y fetchProfile
+        await onFavoriteToggle(artist);
       }
     } catch (error) {
-      // Revertir si falla
       setRemovedFavoriteIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(artist.id);
         return newSet;
       });
-      alert('Error al quitar de favoritos. Inténtalo de nuevo.');
+      setAlert({
+        open: true,
+        type: 'error',
+        message: 'Error al quitar de favoritos. Inténtalo de nuevo.'
+      });
     } finally {
       setFavoriteLoading(prev => ({ ...prev, [artist.id]: false }));
     }
@@ -351,6 +356,13 @@ const ProfileTabsSection = ({ data, isArtist, isPublicView = false, artistId = n
         
         {activeTab !== 'packages' && renderPagination()}
       </div>
+
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
     </div>
   );
 };

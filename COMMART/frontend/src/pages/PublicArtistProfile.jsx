@@ -6,12 +6,16 @@ import Footer from '../components/Footer';
 import ArtistPortfolio from '../components/ArtistPortfolio';
 import ProfileTabsSection from '../components/ProfileTabsSection';
 import { useUser } from '../context/UserContext';
-import CreateOrder from '../components/CreateOrder'; // Asegúrate de que el import sea correcto
+import CreateOrder from '../components/CreateOrder';
+import AlertModal from '../components/AlertModal';
 
 const PublicArtistProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { profile, fetchProfile } = useUser();
+
+  // Estado para alertas
+  const [alert, setAlert] = useState({ open: false, type: 'error', message: '' });
 
   // Redirigir si el usuario intenta ver su propio perfil público
   useEffect(() => {
@@ -71,7 +75,7 @@ const PublicArtistProfile = () => {
           : Math.max(0, (prev.followers || 0) - 1)
       }));
     } catch (error) {
-      alert('Error al procesar la acción. Inténtalo de nuevo.');
+      setAlert({ open: true, type: 'error', message: 'Error al procesar la acción. Inténtalo de nuevo.' });
     } finally {
       setActionLoading(prev => ({ ...prev, follow: false }));
     }
@@ -89,7 +93,7 @@ const PublicArtistProfile = () => {
       setIsFavorite(prev => !prev);
       await fetchProfile();
     } catch (error) {
-      alert('Error al procesar la acción. Inténtalo de nuevo.');
+      setAlert({ open: true, type: 'error', message: 'Error al procesar la acción. Inténtalo de nuevo.' });
     } finally {
       setActionLoading(prev => ({ ...prev, favorite: false }));
     }
@@ -173,7 +177,6 @@ const PublicArtistProfile = () => {
           />
         )}
 
-
         {/* Modal para crear pedido */}
         {showOrderModal && (
           <div
@@ -203,6 +206,12 @@ const PublicArtistProfile = () => {
         )}
       </main>
       <Footer />
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
     </>
   );
 };

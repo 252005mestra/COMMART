@@ -27,6 +27,7 @@ const CreateOrderPage = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [showPackageModal, setShowPackageModal] = useState(false); // AÑADIDO: Estado para modal del paquete
   const [showPackagePreview, setShowPackagePreview] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef();
 
@@ -167,22 +168,22 @@ const CreateOrderPage = () => {
       formData.append('package_id', selectedPackage.id);
       formData.append('total_price', calculateTotalPrice());
       formData.append('description', description.trim());
-      
+
       if (selectedExtras.length > 0) {
         formData.append('extras', JSON.stringify(selectedExtras.map(e => e.id)));
       }
-      
+
       images.forEach(img => {
         formData.append('reference_images', img);
       });
 
       await createOrder(formData);
-      navigate('/orders', { 
-        state: { message: 'Pedido enviado correctamente al artista' }
-      });
+
+      setShowPreview(false);
+      setShowSuccessModal(true); // Mostrar modal de éxito
     } catch (error) {
-      setErrors({ 
-        general: error.response?.data?.message || 'Error al enviar el pedido' 
+      setErrors({
+        general: error.response?.data?.message || 'Error al enviar el pedido'
       });
       setShowPreview(false);
     } finally {
@@ -650,6 +651,43 @@ const CreateOrderPage = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* AÑADIDO: Modal de éxito */}
+        {showSuccessModal && (
+          <div className="order-success-modal-overlay">
+            <div className="order-success-modal">
+              <div className="order-success-icon">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#16b86a" strokeWidth="4"/>
+                  <polyline points="30,55 46,70 70,38" fill="none" stroke="#16b86a" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div className="order-success-message">
+                Tu pedido ha sido enviado exitosamente
+              </div>
+              <div className="order-success-actions">
+                <button
+                  className="order-success-exit"
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    navigate(`/artist/${artistId}`);
+                  }}
+                >
+                  Salir
+                </button>
+                <button
+                  className="order-success-view"
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    navigate('/orders');
+                  }}
+                >
+                  Ver
+                </button>
               </div>
             </div>
           </div>

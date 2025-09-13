@@ -125,8 +125,6 @@ const RegisterModal = ({ onClose, onSwitchToLogin }) => {
         password,
         confirmPassword,
       });
-
-      alert('¡Usuario registrado exitosamente!');
       onClose();
       setTimeout(onSwitchToLogin, 100);
     } catch (error) {

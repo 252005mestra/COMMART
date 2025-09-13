@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import AlertModal from '../components/AlertModal';
 
 const STAGES = [
   { key: 'plan', label: 'Planeación' },
@@ -24,6 +25,7 @@ const OrderDetail = ({ user }) => {
   const [clientUser, setClientUser] = useState(null);
   const [artistUser, setArtistUser] = useState(null);
   const [selectedStage, setSelectedStage] = useState('plan');
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
   const messageListRef = useRef(null);
 
   useEffect(() => {
@@ -86,7 +88,9 @@ const OrderDetail = ({ user }) => {
         { phase: selectedStage, message: msg },
         { withCredentials: true }
       );
-    } catch (e) {}
+    } catch (e) {
+      setAlert({ open: true, type: 'error', message: 'Error al enviar el mensaje.' });
+    }
   };
 
   const handleAdvancePhase = async () => {
@@ -94,36 +98,44 @@ const OrderDetail = ({ user }) => {
     if (currentIdx === -1 || currentIdx >= STAGES.length - 1) return;
 
     const nextStage = STAGES[currentIdx + 1].key;
-    await axios.put(
-      `http://localhost:5000/api/orders/${order.id}/phase`,
-      { next_phase: nextStage },
-      { withCredentials: true }
-    );
-    // Recarga el pedido para actualizar la fase
-    const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-    setOrder(res.data);
-    setSelectedStage(res.data.current_stage);
-    setSampleFiles([]);
-    setPreviewUrls([]);
+    try {
+      await axios.put(
+        `http://localhost:5000/api/orders/${order.id}/phase`,
+        { next_phase: nextStage },
+        { withCredentials: true }
+      );
+      // Recarga el pedido para actualizar la fase
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      setSelectedStage(res.data.current_stage);
+      setSampleFiles([]);
+      setPreviewUrls([]);
+    } catch (err) {
+      setAlert({ open: true, type: 'error', message: 'Error al avanzar de fase.' });
+    }
   };
 
   const handleUploadSamples = async () => {
     if (!sampleFiles.length) return;
-    for (const file of sampleFiles) {
-      const formData = new FormData();
-      formData.append('phase', selectedStage);
-      formData.append('sample_image', file);
-      await axios.post(
-        `http://localhost:5000/api/orders/${order.id}/sample`,
-        formData,
-        { withCredentials: true }
-      );
+    try {
+      for (const file of sampleFiles) {
+        const formData = new FormData();
+        formData.append('phase', selectedStage);
+        formData.append('sample_image', file);
+        await axios.post(
+          `http://localhost:5000/api/orders/${order.id}/sample`,
+          formData,
+          { withCredentials: true }
+        );
+      }
+      setSampleFiles([]);
+      setPreviewUrls([]);
+      // Recarga el pedido para ver las muestras subidas y habilitar el avance de fase
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+    } catch (err) {
+      setAlert({ open: true, type: 'error', message: 'Error al subir muestras.' });
     }
-    setSampleFiles([]);
-    setPreviewUrls([]);
-    // Recarga el pedido para ver las muestras subidas y habilitar el avance de fase
-    const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-    setOrder(res.data);
   };
 
   const handleToggleInvoice = () => {
@@ -171,7 +183,7 @@ const OrderDetail = ({ user }) => {
       });
       setShowInvoice(true);
     } catch (err) {
-      alert(err.response?.data?.message || 'Error al registrar el pago');
+      setAlert({ open: true, type: 'error', message: err.response?.data?.message || 'Error al registrar el pago' });
     }
   };
 
@@ -183,37 +195,52 @@ const OrderDetail = ({ user }) => {
 
   // Función para aceptar pedido
   const handleAccept = async () => {
-    await axios.put(
-      `http://localhost:5000/api/orders/${order.id}/status`,
-      { status: 'in_progress' },
-      { withCredentials: true }
-    );
-    await reloadOrder();
+    try {
+      await axios.put(
+        `http://localhost:5000/api/orders/${order.id}/status`,
+        { status: 'in_progress' },
+        { withCredentials: true }
+      );
+      await reloadOrder();
+      setAlert({ open: true, type: 'success', message: 'Pedido aceptado.' });
+    } catch (err) {
+      setAlert({ open: true, type: 'error', message: 'Error al aceptar el pedido.' });
+    }
   };
 
   // Función para rechazar pedido
   const handleReject = async () => {
     const reason = window.prompt('Motivo del rechazo:');
     if (!reason) return;
-    await axios.put(
-      `http://localhost:5000/api/orders/${order.id}/status`,
-      { status: 'rejected', reason },
-      { withCredentials: true }
-    );
-    await reloadOrder();
+    try {
+      await axios.put(
+        `http://localhost:5000/api/orders/${order.id}/status`,
+        { status: 'rejected', reason },
+        { withCredentials: true }
+      );
+      await reloadOrder();
+      setAlert({ open: true, type: 'success', message: 'Pedido rechazado.' });
+    } catch (err) {
+      setAlert({ open: true, type: 'error', message: 'Error al rechazar el pedido.' });
+    }
   };
 
   // Función para marcar como completado (solo cliente, fase final)
   const handleMarkAsCompleted = async () => {
     if (order.current_stage !== 'final' || order.status === 'completed') return;
-    await axios.put(
-      `http://localhost:5000/api/orders/${order.id}/status`,
-      { status: 'completed' },
-      { withCredentials: true }
-    );
-    // Recargar pedido
-    const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-    setOrder(res.data);
+    try {
+      await axios.put(
+        `http://localhost:5000/api/orders/${order.id}/status`,
+        { status: 'completed' },
+        { withCredentials: true }
+      );
+      // Recargar pedido
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      setAlert({ open: true, type: 'success', message: 'Pedido marcado como completado.' });
+    } catch (err) {
+      setAlert({ open: true, type: 'error', message: 'Error al marcar como completado.' });
+    }
   };
 
   // Solo permitir mensajes y muestras en la fase actual y si no está finalizado
@@ -263,6 +290,12 @@ const OrderDetail = ({ user }) => {
         <div>
           <b>Motivo:</b> {order.rejection_reason || 'Sin motivo especificado'}
         </div>
+        <AlertModal
+          open={alert.open}
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert(a => ({ ...a, open: false }))}
+        />
       </div>
     );
   }
@@ -295,6 +328,12 @@ const OrderDetail = ({ user }) => {
           </div>
         </div>
         <p>Podrás ver el proceso cuando el artista acepte tu pedido.</p>
+        <AlertModal
+          open={alert.open}
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert(a => ({ ...a, open: false }))}
+        />
       </div>
     );
   }
@@ -340,6 +379,12 @@ const OrderDetail = ({ user }) => {
             Rechazar pedido
           </button>
         </div>
+        <AlertModal
+          open={alert.open}
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert(a => ({ ...a, open: false }))}
+        />
       </div>
     );
   }
@@ -459,16 +504,21 @@ const OrderDetail = ({ user }) => {
             onChange={async (e) => {
               const file = e.target.files[0];
               if (!file) return;
-              const formData = new FormData();
-              formData.append('final_image', file);
-              await axios.post(
-                `http://localhost:5000/api/orders/${order.id}/final`,
-                formData,
-                { withCredentials: true }
-              );
-              // Recarga el pedido para mostrar el archivo final
-              const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-              setOrder(res.data);
+              try {
+                const formData = new FormData();
+                formData.append('final_image', file);
+                await axios.post(
+                  `http://localhost:5000/api/orders/${order.id}/final`,
+                  formData,
+                  { withCredentials: true }
+                );
+                // Recarga el pedido para mostrar el archivo final
+                const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+                setOrder(res.data);
+                setAlert({ open: true, type: 'success', message: 'Arte final subido correctamente.' });
+              } catch (err) {
+                setAlert({ open: true, type: 'error', message: 'Error al subir el arte final.' });
+              }
             }}
           />
           {order.completed_image && (
@@ -535,15 +585,19 @@ const OrderDetail = ({ user }) => {
           style={{ background: '#e74c3c', color: 'white', marginTop: 12 }}
           onClick={async () => {
             if (window.confirm('¿Seguro que quieres cancelar este pedido por falta de pago?')) {
-              await axios.put(
-                `http://localhost:5000/api/orders/${order.id}/status`,
-                { status: 'cancelled' },
-                { withCredentials: true }
-              );
-              alert('Pedido cancelado.');
-              // Recarga el pedido
-              const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-              setOrder(res.data);
+              try {
+                await axios.put(
+                  `http://localhost:5000/api/orders/${order.id}/status`,
+                  { status: 'cancelled' },
+                  { withCredentials: true }
+                );
+                setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
+                // Recarga el pedido
+                const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+                setOrder(res.data);
+              } catch (err) {
+                setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
+              }
             }
           }}
         >
@@ -558,15 +612,19 @@ const OrderDetail = ({ user }) => {
           style={{ background: '#e74c3c', color: 'white', marginTop: 12 }}
           onClick={async () => {
             if (window.confirm('¿Seguro que quieres cancelar este pedido?')) {
-              await axios.put(
-                `http://localhost:5000/api/orders/${order.id}/status`,
-                { status: 'cancelled' },
-                { withCredentials: true }
-              );
-              alert('Pedido cancelado.');
-              // Recarga el pedido
-              const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-              setOrder(res.data);
+              try {
+                await axios.put(
+                  `http://localhost:5000/api/orders/${order.id}/status`,
+                  { status: 'cancelled' },
+                  { withCredentials: true }
+                );
+                setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
+                // Recarga el pedido
+                const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+                setOrder(res.data);
+              } catch (err) {
+                setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
+              }
             }
           }}
         >
@@ -589,20 +647,26 @@ const OrderDetail = ({ user }) => {
           Marcar como completado
         </button>
       )}
-          {/* Botón para avanzar de fase */}
-          {user.role === 'artist'
-            && !isFinal
-            && selectedStage === order.current_stage
-            && selectedPhaseImages.length > 0
-            && (
-              <button
-                style={{ marginTop: 16, background: '#7d5938', color: 'white' }}
-                onClick={handleAdvancePhase}
-              >
-                Avanzar a la siguiente fase
-              </button>
-            )
-          }
+      {/* Botón para avanzar de fase */}
+      {user.role === 'artist'
+        && !isFinal
+        && selectedStage === order.current_stage
+        && selectedPhaseImages.length > 0
+        && (
+          <button
+            style={{ marginTop: 16, background: '#7d5938', color: 'white' }}
+            onClick={handleAdvancePhase}
+          >
+            Avanzar a la siguiente fase
+          </button>
+        )
+      }
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
     </div>
   );
 };

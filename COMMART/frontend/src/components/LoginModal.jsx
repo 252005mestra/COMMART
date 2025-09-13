@@ -53,7 +53,6 @@ const LoginModal = ({ onClose, onSwitchToRegister, onForgotPassword }) => {
         { withCredentials: true }
       );
       await fetchProfile(); // <-- ACTUALIZA EL PERFIL INMEDIATAMENTE
-      alert('¡Inicio de sesión exitoso!');
       navigate('/home');
       onClose();
     } catch (error) {

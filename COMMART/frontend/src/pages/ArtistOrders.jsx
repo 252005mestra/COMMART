@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import { useUser } from '../context/UserContext';
+import AlertModal from '../components/AlertModal';
 
 const ArtistOrders = () => {
   const { profile } = useUser();
@@ -16,6 +17,9 @@ const ArtistOrders = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [orderToReject, setOrderToReject] = useState(null);
+
+  // Estado para alertas
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -67,7 +71,7 @@ const ArtistOrders = () => {
         )
       );
     } catch {
-      alert('Error al actualizar el estado.');
+      setAlert({ open: true, type: 'error', message: 'Error al actualizar el estado.' });
     } finally {
       setActionLoading(null);
     }
@@ -91,7 +95,7 @@ const ArtistOrders = () => {
       setRejectionReason('');
       setOrderToReject(null);
     } catch {
-      alert('Error al rechazar el pedido');
+      setAlert({ open: true, type: 'error', message: 'Error al rechazar el pedido' });
     }
   };
 
@@ -262,6 +266,14 @@ const ArtistOrders = () => {
           </div>
         </div>
       )}
+
+      {/* AlertModal para mostrar errores */}
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
     </>
   );
 };

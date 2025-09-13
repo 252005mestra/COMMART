@@ -4,12 +4,16 @@ import axios from 'axios';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import { Camera, CircleUserRound, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import AlertModal from '../components/AlertModal';
 import '../styles/editprofile.css';
 
 const EditProfile = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+
+  // Estado para alertas
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
 
   // Estados para imagen y modal de confirmación
   const [imagePreview, setImagePreview] = useState(null);
@@ -415,7 +419,7 @@ const EditProfile = () => {
 
       setIsArtist(true);
       setShowArtistConfirm(false);
-      alert('¡Cuenta de artista activada exitosamente!');
+      setAlert({ open: true, type: 'success', message: '¡Cuenta de artista activada exitosamente!' });
     } catch (error) {
       const msg = error.response?.data?.message || 'Error al activar cuenta de artista';
       setArtistActivationError(msg);
@@ -465,7 +469,7 @@ const EditProfile = () => {
         }
       });
 
-      alert('Perfil actualizado exitosamente');
+      setAlert({ open: true, type: 'success', message: 'Perfil actualizado exitosamente' });
 
       const userResponse = await axios.get('http://localhost:5000/api/auth/profile', {
         withCredentials: true
@@ -859,6 +863,14 @@ const EditProfile = () => {
           </div>
         </div>
       )}
+
+      {/* AlertModal para mostrar mensajes */}
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
 
       <Footer />
     </>

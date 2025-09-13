@@ -3,6 +3,7 @@ import { Edit2, Trash2, Plus, X, Camera, Star, StarOff, CircleUserRound, CircleA
 import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
 import UserListModal from './UserListModal';
+import AlertModal from './AlertModal';
 import '../styles/artistportfolio.css';
 
 const ArtistPortfolio = ({
@@ -25,6 +26,9 @@ const ArtistPortfolio = ({
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingImage, setPendingImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
+
+  // ALERTA MODAL
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
 
   // Estados locales para edición
   const [bio, setBio] = useState('');
@@ -101,7 +105,7 @@ const ArtistPortfolio = ({
     if (style && !styles.includes(style) && styles.length < 3) {
       setStyles([...styles, style]);
     } else if (styles.length >= 3) {
-      alert('Máximo 3 estilos permitidos');
+      setAlert({ open: true, type: 'error', message: 'Máximo 3 estilos permitidos' });
     }
   };
 
@@ -113,7 +117,7 @@ const ArtistPortfolio = ({
     if (lang && !languages.includes(lang) && languages.length < 3) {
       setLanguages([...languages, lang]);
     } else if (languages.length >= 3) {
-      alert('Máximo 3 idiomas permitidos');
+      setAlert({ open: true, type: 'error', message: 'Máximo 3 idiomas permitidos' });
     }
   };
 
@@ -126,15 +130,13 @@ const ArtistPortfolio = ({
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        alert('Solo se permiten archivos de imagen');
+        setAlert({ open: true, type: 'error', message: 'Solo se permiten archivos de imagen' });
         return;
       }
-      
       if (file.size > 5 * 1024 * 1024) {
-        alert('La imagen no puede ser mayor a 5MB');
+        setAlert({ open: true, type: 'error', message: 'La imagen no puede ser mayor a 5MB' });
         return;
       }
-      
       const reader = new FileReader();
       reader.onload = (ev) => {
         setPendingImage(file);
@@ -162,32 +164,28 @@ const ArtistPortfolio = ({
   const handleAddPortfolioImage = (e) => {
     const file = e.target.files[0];
     const totalImages = portfolio.length + newImages.length;
-    
     if (file && totalImages < 6) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('La imagen no puede ser mayor a 5MB');
+        setAlert({ open: true, type: 'error', message: 'La imagen no puede ser mayor a 5MB' });
         return;
       }
-
       if (!file.type.startsWith('image/')) {
-        alert('Solo se permiten archivos de imagen');
+        setAlert({ open: true, type: 'error', message: 'Solo se permiten archivos de imagen' });
         return;
       }
-
       const reader = new FileReader();
       reader.onload = (ev) => {
         setNewImages(prev => [...prev, { file, preview: ev.target.result }]);
       };
       reader.readAsDataURL(file);
     } else if (totalImages >= 6) {
-      alert('Máximo 6 imágenes en el portafolio');
+      setAlert({ open: true, type: 'error', message: 'Máximo 6 imágenes en el portafolio' });
     }
   };
 
   // Eliminar imagen del portafolio
   const handleRemoveImage = async () => {
     const currentImage = getCurrentImage();
-    
     if (currentImage.type === 'existing') {
       // Eliminar imagen existente de la base de datos
       try {
@@ -209,7 +207,7 @@ const ArtistPortfolio = ({
         
       } catch (error) {
         console.error('Error al eliminar imagen:', error);
-        alert('Error al eliminar la imagen');
+        setAlert({ open: true, type: 'error', message: 'Error al eliminar la imagen' });
       }
     } else if (currentImage.type === 'new') {
       // Eliminar imagen nueva del estado local
@@ -262,7 +260,7 @@ const ArtistPortfolio = ({
       
     } catch (error) {
       console.error('Error al guardar:', error);
-      alert('Error al guardar los cambios');
+      setAlert({ open: true, type: 'error', message: 'Error al guardar los cambios' });
     } finally {
       setLoading(false);
     }

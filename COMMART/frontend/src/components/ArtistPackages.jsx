@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Edit, Trash2, X, CirclePlus } from 'lucide-react';
 import { formatColombianPrice, formatPriceInput, parsePrice, parsePriceForDB, isValidPrice } from '../utils/priceFormatter';
+import AlertModal from './AlertModal';
 import '../styles/artistpackages.css';
 
 const MAX_PACKAGES = 3;
@@ -25,6 +26,9 @@ const ArtistPackages = ({
   const [showAdd, setShowAdd] = useState(false);
   const [editingExtra, setEditingExtra] = useState(null);
   const [showAddExtra, setShowAddExtra] = useState(false);
+
+  // Estado para alertas
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
 
   // Cargar paquetes y extras solo una vez según la vista
   useEffect(() => {
@@ -148,9 +152,10 @@ const ArtistPackages = ({
       setEditing(null);
       setShowAdd(false);
       await fetchPackages();
+      setAlert({ open: true, type: 'success', message: 'Paquete guardado correctamente' });
     } catch (error) {
       console.error('Error al guardar paquete:', error);
-      alert('Error al guardar el paquete');
+      setAlert({ open: true, type: 'error', message: 'Error al guardar el paquete' });
     }
   };
 
@@ -162,9 +167,10 @@ const ArtistPackages = ({
           withCredentials: true 
         });
         await fetchPackages();
+        setAlert({ open: true, type: 'success', message: 'Paquete eliminado correctamente' });
       } catch (error) {
         console.error('Error al eliminar paquete:', error);
-        alert('Error al eliminar el paquete');
+        setAlert({ open: true, type: 'error', message: 'Error al eliminar el paquete' });
       }
     }
   };
@@ -194,9 +200,10 @@ const ArtistPackages = ({
       setEditingExtra(null);
       setShowAddExtra(false);
       await fetchExtras();
+      setAlert({ open: true, type: 'success', message: 'Extra guardado correctamente' });
     } catch (error) {
       console.error('Error al guardar extra:', error);
-      alert('Error al guardar el extra');
+      setAlert({ open: true, type: 'error', message: 'Error al guardar el extra' });
     }
   };
 
@@ -208,9 +215,10 @@ const ArtistPackages = ({
           withCredentials: true 
         });
         await fetchExtras();
+        setAlert({ open: true, type: 'success', message: 'Extra eliminado correctamente' });
       } catch (error) {
         console.error('Error al eliminar extra:', error);
-        alert('Error al eliminar el extra');
+        setAlert({ open: true, type: 'error', message: 'Error al eliminar el extra' });
       }
     }
   };
@@ -321,9 +329,10 @@ const ArtistPackages = ({
         <div className="extras-section-artist">
           <div className="extras-header-artist">
             <span className="extras-title-artist">Extra</span>
-            {!isPublicView && (
-              <button 
-                className="extras-edit-btn" 
+            {/* Solo mostrar el botón si NO es vista pública y no se ha alcanzado el máximo */}
+            {!isPublicView && extras.length < MAX_EXTRAS && (
+              <button
+                className="extras-edit-btn"
                 onClick={() => setShowAddExtra(true)}
                 title="Agregar extra"
               >
@@ -379,6 +388,7 @@ const ArtistPackages = ({
           pkg={editing}
           onSave={handleSavePackage}
           onCancel={() => { setEditing(null); setShowAdd(false); }}
+          setAlert={setAlert}
         />
       )}
 
@@ -391,15 +401,24 @@ const ArtistPackages = ({
             onCancel={() => { setEditingExtra(null); setShowAddExtra(false); }}
             maxExtras={MAX_EXTRAS}
             currentExtras={extras.length}
+            setAlert={setAlert}
           />
         </div>
       )}
+
+      {/* AlertModal para mostrar mensajes */}
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
     </div>
   );
 };
 
 // Modal para crear/editar paquete
-function PackageModal({ pkg, onSave, onCancel }) {
+function PackageModal({ pkg, onSave, onCancel, setAlert }) {
   const [form, setForm] = useState({
     title: pkg?.title || '',
     description: pkg?.description || '',
@@ -486,12 +505,12 @@ function PackageModal({ pkg, onSave, onCancel }) {
   const handleSubmit = e => {
     e.preventDefault();
     if (!form.title.trim() || !form.price) {
-      alert('El título y el precio son obligatorios');
+      setAlert && setAlert({ open: true, type: 'error', message: 'El título y el precio son obligatorios' });
       return;
     }
     const numericPrice = parsePrice(form.price);
     if (!isValidPrice(numericPrice)) {
-      alert('El precio debe estar entre $1.000 y $100.000.000 COP');
+      setAlert && setAlert({ open: true, type: 'error', message: 'El precio debe estar entre $1.000 y $100.000.000 COP' });
       return;
     }
     const finalForm = { ...form, price: numericPrice };
@@ -511,7 +530,7 @@ function PackageModal({ pkg, onSave, onCancel }) {
         window.location.reload(); // Temporal - mejor pasar función de recarga
       } catch (error) {
         console.error('Error al eliminar paquete:', error);
-        alert('Error al eliminar el paquete');
+        setAlert && setAlert({ open: true, type: 'error', message: 'Error al eliminar el paquete' });
       }
     }
   };
@@ -671,7 +690,7 @@ function PackageModal({ pkg, onSave, onCancel }) {
 }
 
 // Formulario para crear/editar extra
-function ExtraForm({ extra, onSave, onCancel, maxExtras, currentExtras }) {
+function ExtraForm({ extra, onSave, onCancel, maxExtras, currentExtras, setAlert }) {
   const [form, setForm] = useState({
     name: extra?.name || '',
     price: extra
@@ -686,20 +705,20 @@ function ExtraForm({ extra, onSave, onCancel, maxExtras, currentExtras }) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    
+
     if (!form.name.trim() || !form.price) {
-      alert('El nombre y el precio son obligatorios');
+      setAlert && setAlert({ open: true, type: 'error', message: 'El nombre y el precio son obligatorios' });
       return;
     }
 
     const numericPrice = parsePrice(form.price);
     if (!isValidPrice(numericPrice)) {
-      alert('El precio debe estar entre $1.000 y $100.000.000 COP');
+      setAlert && setAlert({ open: true, type: 'error', message: 'El precio debe estar entre $1.000 y $100.000.000 COP' });
       return;
     }
 
     if (!extra && currentExtras >= maxExtras) {
-      alert(`Máximo ${maxExtras} extras permitidos`);
+      setAlert && setAlert({ open: true, type: 'error', message: `Máximo ${maxExtras} extras permitidos` });
       return;
     }
 
