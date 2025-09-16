@@ -191,3 +191,13 @@ export const getExtrasByArtistPublic = (artistId) => {
     );
   });
 };
+
+// Obtener todos los extras
+export const getAllExtrasModel = () => {
+  return new Promise((resolve, reject) => {
+    dbConnection.query('SELECT * FROM extras', (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};

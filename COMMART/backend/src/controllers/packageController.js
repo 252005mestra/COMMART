@@ -8,7 +8,8 @@ import {
   createExtra,
   updateExtra,
   deleteExtra,
-  updatePackageImageField // NUEVA FUNCIÓN
+  updatePackageImageField, // NUEVA FUNCIÓN
+  getAllExtrasModel
 } from '../models/packageModel.js';
 
 // ========== PAQUETES ==========
@@ -202,5 +203,14 @@ export const getArtistPackagesPublic = async (req, res) => {
   } catch (err) {
     console.error('Error al obtener paquetes públicos:', err);
     res.status(500).json({ message: 'Error al obtener paquetes.' });
+  }
+};
+
+export const getAllExtras = async (req, res) => {
+  try {
+    const extras = await getAllExtrasModel();
+    res.json(extras);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener todos los extras.' });
   }
 };

@@ -7,6 +7,7 @@ import {
   updateOrderFields
 } from '../models/orderModel.js';
 import { createNotification } from '../models/notificationModel.js';
+import dbConnection from '../config/db.js'; // <-- AÑADIR ESTA LÍNEA
 
 // Crear pedido
 export const createOrderController = async (req, res) => {

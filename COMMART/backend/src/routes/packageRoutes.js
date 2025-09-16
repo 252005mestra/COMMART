@@ -12,7 +12,8 @@ import {
   updateArtistExtra,
   deleteArtistExtra,
   deletePackageImage,
-  getArtistPackagesPublic // <-- AGREGA ESTA LÍNEA
+  getArtistPackagesPublic, // <-- AGREGA ESTA LÍNEA
+  getAllExtras
 } from '../controllers/packageController.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 
@@ -70,5 +71,6 @@ router.delete('/my/extras/:id', verifyToken, deleteArtistExtra);
 // Agregar esta ruta ANTES de las rutas que requieren autenticación
 router.get('/artist/:artistId/extras', getArtistExtrasPublic); // Ruta pública para extras
 router.get('/artist/:artistId', getArtistPackagesPublic); // <-- Agrega esto antes de rutas que requieren verifyToken
+router.get('/all/extras', getAllExtras); // <-- NUEVA RUTA
 
 export default router;

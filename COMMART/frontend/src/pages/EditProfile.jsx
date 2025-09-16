@@ -5,6 +5,7 @@ import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import { Camera, CircleUserRound, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import AlertModal from '../components/AlertModal';
+import ConfirmModal from '../components/ConfirmModal';
 import '../styles/editprofile.css';
 
 const EditProfile = () => {
@@ -684,27 +685,55 @@ const EditProfile = () => {
       </main>
 
       {/* Modal de confirmación para cambio de contraseña */}
-      {showPasswordConfirmModal && (
-        <div className="modal-overlay">
-          <div className="confirmation-modal">
-            <h3>¿Deseas cambiar tu contraseña?</h3>
-            <div className="confirmation-buttons">
-              <button
-                className="cancel-modal-btn"
-                onClick={() => setShowPasswordConfirmModal(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="continue-modal-btn"
-                onClick={handlePasswordConfirmContinue}
-              >
-                Continuar
-              </button>
+      <ConfirmModal
+        open={showPasswordConfirmModal}
+        message="¿Deseas cambiar tu contraseña?"
+        onCancel={() => setShowPasswordConfirmModal(false)}
+        onConfirm={handlePasswordConfirmContinue}
+        confirmText="Continuar"
+        cancelText="Cancelar"
+      />
+
+      {/* Modal de confirmación para activar artista */}
+      <ConfirmModal
+        open={showArtistConfirm}
+        message={
+          <>
+            <div style={{ marginBottom: '1.2rem', marginTop: 0 }}>
+              ¿Estas seguro que deseas activar tu cuenta como <b>ARTISTA</b>?
+            </div>
+            <div style={{ fontWeight: 700, marginBottom: '2rem' }}>
+              (RECUERDA: No podrás desactivar esta opción una vez activada)
+            </div>
+          </>
+        }
+        onCancel={handleCancelArtistActivation}
+        onConfirm={handleArtistActivation}
+        confirmText={artistActivationLoading ? 'Activando...' : 'Aceptar'}
+        cancelText="Cancelar"
+        loading={artistActivationLoading}
+      />
+
+      {/* Modal de confirmación de imagen */}
+      <ConfirmModal
+        open={showConfirm}
+        message={
+          <div>
+            <h3 className="modal-title-goldman" style={{ marginBottom: 16 }}>¿Deseas cambiar tu foto de perfil?</h3>
+            <div style={{ margin: '1rem 0' }}>
+              <img
+                src={pendingImageUrl}
+                alt="Vista previa"
+                style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '3px solid #b3b792' }}
+              />
             </div>
           </div>
-        </div>
-      )}
+        }
+        onCancel={handleCancelChange}
+        onConfirm={handleConfirmChange}
+        confirmText="Confirmar"
+        cancelText="Cancelar"
+      />
 
       {/* Modal de cambio de contraseña */}
       {showPasswordModal && (
@@ -714,7 +743,6 @@ const EditProfile = () => {
               <img src="/src/assets/LogoCOMMART.png" alt="COMMART" className="modal-logo" />
               <h2>Cambiar Contraseña</h2>
             </div>
-
             <form
               className="password-change-form"
               onSubmit={e => e.preventDefault()}
@@ -818,48 +846,6 @@ const EditProfile = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de confirmación para activar artista */}
-      {showArtistConfirm && (
-        <div className="modal-overlay">
-          <div className="confirmation-modal">
-            <p style={{ marginBottom: '1.2rem', marginTop: 0 }}>
-              ¿Estas seguro que deseas activar tu cuenta como <b>ARTISTA</b>?
-            </p>
-            <p style={{ fontWeight: 700, marginBottom: '2rem' }}>
-              (RECUERDA: No podrás desactivar esta opción una vez activada)
-            </p>
-            <div className="confirmation-buttons">
-              <button className="cancel-modal-btn" onClick={handleCancelArtistActivation}>
-                Cancelar
-              </button>
-              <button className="continue-modal-btn" onClick={handleArtistActivation}>
-                Aceptar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de confirmación de imagen */}
-      {showConfirm && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: 350, textAlign: 'center' }}>
-            <h3 className="modal-title-goldman">¿Deseas cambiar tu foto de perfil?</h3>
-            <div style={{ margin: '1rem 0' }}>
-              <img
-                src={pendingImageUrl}
-                alt="Vista previa"
-                style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '3px solid #b3b792' }}
-              />
-            </div>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <button className="cancel-btn" onClick={handleCancelChange}>Cancelar</button>
-              <button className="save-btn" onClick={handleConfirmChange}>Confirmar</button>
-            </div>
           </div>
         </div>
       )}

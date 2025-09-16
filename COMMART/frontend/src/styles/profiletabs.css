@@ -11,13 +11,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; 
+  gap: 6rem; 
   background: transparent;
   padding: 1.2rem 0 0rem 0; 
   border-bottom: 2px solid #ddd;
   position: relative;
   margin-bottom: 1rem;
   min-height: 60px;
+  text-align: center;
 }
 
 .profile-tabs-visible-container {
@@ -277,132 +278,5 @@ border-bottom: 4px solid #7A8A6E;
   to {
     opacity: 0;
     transform: translateY(30px) scale(0.8);
-  }
-}
-
-/* Estilos existentes... */
-
-/* Modal de confirmación para quitar favoritos */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000;
-}
-
-.confirmation-modal {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  max-width: 420px;
-  width: 90%;
-  text-align: center;
-  border: 3px solid #7d5938;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-.confirmation-modal-icon {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: center;
-}
-
-.modal-title-goldman {
-  font-family: 'Goldman', sans-serif;
-  font-size: 1.25rem;
-  color: #7d5938;
-  font-weight: 400;
-  margin-bottom: 1rem;
-  letter-spacing: 0.02em;
-}
-
-.confirmation-modal-text {
-  color: #555;
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 1rem;
-  line-height: 1.4;
-  margin-bottom: 2rem;
-}
-
-.confirmation-modal-text strong {
-  color: #7d5938;
-  font-weight: 600;
-}
-
-.confirmation-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.cancel-modal-btn {
-  background: transparent;
-  border: 2px solid #ccc;
-  color: #666;
-  padding: 0.7rem 1.5rem;
-  border-radius: 12px;
-  font-family: 'Goldman', sans-serif;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 100px;
-}
-
-.cancel-modal-btn:hover {
-  border-color: #999;
-  color: #333;
-}
-
-.confirm-modal-btn {
-  background: #e74c3c;
-  border: 2px solid #e74c3c;
-  color: white;
-  padding: 0.7rem 1.5rem;
-  border-radius: 12px;
-  font-family: 'Goldman', sans-serif;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 100px;
-}
-
-.confirm-modal-btn:hover {
-  background: #c0392b;
-  border-color: #c0392b;
-}
-
-.cancel-modal-btn:disabled,
-.confirm-modal-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.confirm-modal-btn:disabled {
-  background: #ccc;
-  border-color: #ccc;
-  color: #666;
-}
-
-/* Responsive para modal */
-@media (max-width: 480px) {
-  .confirmation-modal {
-    width: 95%;
-    padding: 1.5rem;
-  }
-  
-  .confirmation-buttons {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-  
-  .cancel-modal-btn,
-  .confirm-modal-btn {
-    width: 100%;
   }
 }

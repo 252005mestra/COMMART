@@ -342,74 +342,6 @@ input:focus {
   background: #ccc !important;
 }
 
-/* ========== Modales ========== */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-/* ========== Modal de confirmación ========== */
-.confirmation-modal {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
-  border: 3px solid #8B6D47;
-}
-
-.confirmation-modal h3 {
-  font-family: 'Goldman';
-  font-size: 1.2rem;
-  color: #333;
-  margin: 0 0 2rem 0;
-  font-weight: normal;
-}
-
-.confirmation-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.cancel-modal-btn,
-.continue-modal-btn {
-  padding: 0.75rem 2rem;
-  border: none;
-  border-radius: 25px;
-  font-family: 'Goldman';
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.cancel-modal-btn {
-  background: #666;
-  color: white;
-}
-
-.cancel-modal-btn:hover {
-  background: #555;
-}
-
-.continue-modal-btn {
-  background: #8B6D47;
-  color: white;
-}
-
-.continue-modal-btn:hover {
-  background: #7A5D3F;
-}
-
 /* ========== Modal de cambio de contraseña ========== */
 .password-change-modal {
   background: white;
@@ -417,7 +349,6 @@ input:focus {
   padding: 2rem;
   max-width: 450px;
   width: 90%;
-  border: 5px solid #593f28;
 }
 
 .modal-header {

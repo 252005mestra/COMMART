@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Edit, Trash2, X, CirclePlus } from 'lucide-react';
 import { formatColombianPrice, formatPriceInput, parsePrice, parsePriceForDB, isValidPrice } from '../utils/priceFormatter';
 import AlertModal from './AlertModal';
+import ConfirmModal from './ConfirmModal';
 import '../styles/artistpackages.css';
 
 const MAX_PACKAGES = 3;
@@ -29,6 +30,10 @@ const ArtistPackages = ({
 
   // Estado para alertas
   const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
+
+  // Estados para confirmación de eliminación
+  const [showDeletePackageId, setShowDeletePackageId] = useState(null);
+  const [showDeleteExtraId, setShowDeleteExtraId] = useState(null);
 
   // Cargar paquetes y extras solo una vez según la vista
   useEffect(() => {
@@ -161,17 +166,21 @@ const ArtistPackages = ({
 
   // Eliminar paquete
   const handleDeletePackage = async (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este paquete?')) {
-      try {
-        await axios.delete(`http://localhost:5000/api/packages/my/${id}`, { 
-          withCredentials: true 
-        });
-        await fetchPackages();
-        setAlert({ open: true, type: 'success', message: 'Paquete eliminado correctamente' });
-      } catch (error) {
-        console.error('Error al eliminar paquete:', error);
-        setAlert({ open: true, type: 'error', message: 'Error al eliminar el paquete' });
-      }
+    setShowDeletePackageId(id);
+  };
+
+  const confirmDeletePackage = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/packages/my/${id}`, {
+        withCredentials: true
+      });
+      await fetchPackages();
+      setAlert({ open: true, type: 'success', message: 'Paquete eliminado correctamente' });
+    } catch (error) {
+      console.error('Error al eliminar paquete:', error);
+      setAlert({ open: true, type: 'error', message: 'Error al eliminar el paquete' });
+    } finally {
+      setShowDeletePackageId(null);
     }
   };
 
@@ -209,17 +218,21 @@ const ArtistPackages = ({
 
   // Eliminar extra
   const handleDeleteExtra = async (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este extra?')) {
-      try {
-        await axios.delete(`http://localhost:5000/api/packages/my/extras/${id}`, { 
-          withCredentials: true 
-        });
-        await fetchExtras();
-        setAlert({ open: true, type: 'success', message: 'Extra eliminado correctamente' });
-      } catch (error) {
-        console.error('Error al eliminar extra:', error);
-        setAlert({ open: true, type: 'error', message: 'Error al eliminar el extra' });
-      }
+    setShowDeleteExtraId(id);
+  };
+
+  const confirmDeleteExtra = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/packages/my/extras/${id}`, {
+        withCredentials: true
+      });
+      await fetchExtras();
+      setAlert({ open: true, type: 'success', message: 'Extra eliminado correctamente' });
+    } catch (error) {
+      console.error('Error al eliminar extra:', error);
+      setAlert({ open: true, type: 'error', message: 'Error al eliminar el extra' });
+    } finally {
+      setShowDeleteExtraId(null);
     }
   };
 
@@ -406,6 +419,26 @@ const ArtistPackages = ({
         </div>
       )}
 
+      {/* ConfirmModal para eliminar paquete */}
+      <ConfirmModal
+        open={!!showDeletePackageId}
+        message="¿Estás seguro de que quieres eliminar este paquete? Esta acción no se puede deshacer."
+        onCancel={() => setShowDeletePackageId(null)}
+        onConfirm={() => confirmDeletePackage(showDeletePackageId)}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+      />
+
+      {/* ConfirmModal para eliminar extra */}
+      <ConfirmModal
+        open={!!showDeleteExtraId}
+        message="¿Estás seguro de que quieres eliminar este extra?"
+        onCancel={() => setShowDeleteExtraId(null)}
+        onConfirm={() => confirmDeleteExtra(showDeleteExtraId)}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+      />
+
       {/* AlertModal para mostrar mensajes */}
       <AlertModal
         open={alert.open}
@@ -519,19 +552,22 @@ function PackageModal({ pkg, onSave, onCancel, setAlert }) {
   };
 
   // Eliminar paquete
-  const handleDelete = async () => {
-    if (window.confirm('¿Estás seguro de eliminar este paquete? Esta acción no se puede deshacer.')) {
-      try {
-        await axios.delete(`http://localhost:5000/api/packages/my/${pkg.id}`, { 
-          withCredentials: true 
-        });
-        onCancel(); // Cerrar modal
-        // Recargar paquetes (necesitas pasar esta función desde el componente padre)
-        window.location.reload(); // Temporal - mejor pasar función de recarga
-      } catch (error) {
-        console.error('Error al eliminar paquete:', error);
-        setAlert && setAlert({ open: true, type: 'error', message: 'Error al eliminar el paquete' });
-      }
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/api/packages/my/${pkg.id}`, {
+        withCredentials: true
+      });
+      onCancel(); // Cerrar modal
+      window.location.reload(); // Temporal - mejor pasar función de recarga
+    } catch (error) {
+      console.error('Error al eliminar paquete:', error);
+      setAlert && setAlert({ open: true, type: 'error', message: 'Error al eliminar el paquete' });
+    } finally {
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -685,6 +721,15 @@ function PackageModal({ pkg, onSave, onCancel, setAlert }) {
           </div>
         </form>
       </div>
+      {/* ConfirmModal para eliminar paquete desde el modal de edición */}
+      <ConfirmModal
+        open={showDeleteConfirm}
+        message="¿Estás seguro de eliminar este paquete? Esta acción no se puede deshacer."
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={confirmDelete}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+      />
     </div>
   );
 }
