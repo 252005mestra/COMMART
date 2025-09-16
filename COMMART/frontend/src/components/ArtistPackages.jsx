@@ -470,6 +470,9 @@ function PackageModal({ pkg, onSave, onCancel, setAlert }) {
     pkg?.reference_image2 ? `http://localhost:5000/${pkg.reference_image2}` : null
   );
 
+  // AÑADIR ESTE ESTADO QUE FALTA:
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const fileInputRef1 = React.useRef();
   const fileInputRef2 = React.useRef();
 

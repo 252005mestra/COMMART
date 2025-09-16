@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CircleCheck, CircleX } from 'lucide-react';
 
 // Modal simple para mostrar motivo de rechazo
 function MotivoModal({ open, motivo, onClose }) {
@@ -88,10 +89,15 @@ export default function MyOrderCard({
         </div>
       );
     }
-    if (order.status === 'accepted') {
+    if (order.status === 'accepted' || order.status === 'in_progress') {
       return (
         <div className="myorder-status-box accepted">
-          <span className="status-accepted">Aceptado</span>
+          <div className="status-accepted-content">
+            <div className="status-check-icon">
+              <CircleCheck size={32} />
+            </div>
+            <span className="status-accepted-text">Aceptado</span>
+          </div>
           <button className="myorder-btn" onClick={() => onGoToOrder(order.id)}>IR</button>
         </div>
       );
@@ -99,7 +105,12 @@ export default function MyOrderCard({
     if (order.status === 'rejected') {
       return (
         <div className="myorder-status-box rejected">
-          <span className="status-rejected">Rechazado</span>
+          <div className="status-rejected-content">
+            <div className="status-rejected-icon">
+              <CircleX size={32} />
+            </div>
+            <span className="status-rejected-text">Rechazado</span>
+          </div>
           <button className="myorder-btn" onClick={() => setShowMotivo(true)}>MOTIVO</button>
         </div>
       );

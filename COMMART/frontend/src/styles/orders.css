@@ -366,10 +366,10 @@
 .myorder-status-box {
   background: #fff;
   border-radius: 16px 0 0 0 !important;
-  padding: 1.1rem 2.2rem;
+  padding: 1rem 1.8rem; /* REDUCIDO: de 1.1rem 2.2rem a 1rem 1.8rem */
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   font-family: 'Goldman', sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.1rem; /* REDUCIDO: de 1.2rem a 1.1rem */
   margin: 0;
   color: #7d5938;
   display: flex;
@@ -377,6 +377,117 @@
   justify-content: center;
   height: 48px;
   border-right: 2px solid #b3b792b5;
+  width: 260px; /* REDUCIDO: de 280px a 260px */
+  min-width: 260px; /* REDUCIDO: de 280px a 260px */
+  max-width: 260px; /* REDUCIDO: de 280px a 260px */
+}
+
+/* Estados de pedidos - Aceptado y Rechazado - MISMO ANCHO QUE WAITING */
+.myorder-status-box.accepted {
+  background: #fff;
+  border: none;
+  border-right: 2px solid #b3b792b5;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* CAMBIADO: de center a space-between */
+  gap: 1rem;
+  padding: 1rem 1.8rem;
+  border-radius: 16px 0 0 0;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  margin: 0;
+  height: 48px;
+  min-height: 48px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+}
+
+.myorder-status-box.rejected {
+  background: #fff;
+  border: none;
+  border-right: 2px solid #b3b792b5;
+  color: #e74c3c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* CAMBIADO: de center a space-between */
+  gap: 1rem;
+  padding: 1rem 1.8rem;
+  border-radius: 16px 0 0 0;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  margin: 0;
+  height: 48px;
+  min-height: 48px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+}
+
+.status-accepted-content,
+.status-rejected-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.status-check-icon,
+.status-rejected-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.status-check-icon {
+  color: #10b981;
+}
+
+.status-rejected-icon {
+  color: #e74c3c;
+}
+
+.status-accepted-text {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #10b981;
+  text-align: center;
+}
+
+.status-rejected-text {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #e74c3c;
+  text-align: center;
+}
+
+.myorder-btn {
+  background: #7d5938;
+  color: #fff;
+  border: none;
+  border-radius: 40px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.2rem; /* AUMENTADO: de 1rem a 1.2rem */
+  padding: 0.8rem 2rem; /* AUMENTADO: de 0.6rem 1.6rem a 0.8rem 2.4rem */
+  cursor: pointer;
+  transition: background 0.2s;
+  font-weight: normal;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  height: fit-content;
+  min-width: 150px; /* AUMENTADO: de 90px a 120px */
+  flex-shrink: 0;
+  box-shadow: 0 6px 2px rgba(0, 0, 0, 0.321);
+}
+
+.myorder-btn:hover {
+  background: #593f28;
 }
 
 /* Derecha - aumentada */

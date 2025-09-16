@@ -4,13 +4,14 @@ import {
   updatePackage,
   deletePackage,
   getExtrasByArtist,
-  getExtrasByArtistPublic, // NUEVA FUNCIÓN
+  getExtrasByArtistPublic,
   createExtra,
   updateExtra,
   deleteExtra,
-  updatePackageImageField, // NUEVA FUNCIÓN
+  updatePackageImageField,
   getAllExtrasModel
 } from '../models/packageModel.js';
+import dbConnection from '../config/db.js'; // AGREGAR ESTA IMPORTACIÓN
 
 // ========== PAQUETES ==========
 
@@ -28,6 +29,34 @@ export const getArtistPackages = async (req, res) => {
 export const createArtistPackage = async (req, res) => {
   try {
     const artist_id = req.user.id;
+    
+    // VERIFICAR Y CREAR PERFIL DE ARTISTA SI NO EXISTE
+    const artistProfileExists = await new Promise((resolve, reject) => {
+      dbConnection.query(
+        'SELECT user_id FROM artist_profiles WHERE user_id = ?',
+        [artist_id],
+        (err, results) => {
+          if (err) return reject(err);
+          resolve(results.length > 0);
+        }
+      );
+    });
+
+    // SI NO EXISTE EL PERFIL, CREARLO
+    if (!artistProfileExists) {
+      console.log(`Creando perfil de artista para usuario ${artist_id}`);
+      await new Promise((resolve, reject) => {
+        dbConnection.query(
+          'INSERT INTO artist_profiles (user_id, bio, availability, price_policy) VALUES (?, ?, ?, ?)',
+          [artist_id, null, 1, null],
+          (err, result) => {
+            if (err) return reject(err);
+            resolve(result);
+          }
+        );
+      });
+    }
+    
     const data = { ...req.body, artist_id };
     
     // Convertir precio a número decimal
