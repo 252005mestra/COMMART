@@ -1,42 +1,98 @@
 import OrdersSidebar from '../components/OrdersSidebar';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
+import ArtistOrdersTabsSection from '../components/ArtistOrdersTabsSection';
 import { useUser } from '../context/UserContext';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ConfirmModal from '../components/ConfirmModal';
+import AlertModal from '../components/AlertModal';
 import '../styles/orders.css';
 
 const ArtistOrders = () => {
   const { profile } = useUser();
   const [orders, setOrders] = useState([]);
+  const [allClients, setAllClients] = useState([]);
+  const [allExtras, setAllExtras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [orderToReject, setOrderToReject] = useState(null);
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      const res = await axios.get('http://localhost:5000/api/orders/artist', { withCredentials: true });
-      setOrders(res.data);
-      setLoading(false);
+    const fetchData = async () => {
+      try {
+        const [ordersRes, clientsRes, extrasRes] = await Promise.all([
+          axios.get('http://localhost:5000/api/orders/artist', { withCredentials: true }),
+          axios.get('http://localhost:5000/api/auth/users', { withCredentials: true }), // Obtener todos los usuarios/clientes
+          axios.get('http://localhost:5000/api/packages/all/extras', { withCredentials: true }),
+        ]);
+        setOrders(ordersRes.data);
+        setAllClients(clientsRes.data);
+        setAllExtras(extrasRes.data);
+        setLoading(false);
+      } catch (err) {
+        setAlert({ open: true, type: 'error', message: 'Error al cargar pedidos.' });
+        setLoading(false);
+      }
     };
-    fetchOrders();
+    fetchData();
   }, []);
 
   const handleAccept = async (orderId) => {
-    await axios.put(`http://localhost:5000/api/orders/${orderId}/status`, { status: 'in_progress' }, { withCredentials: true });
-    setOrders(orders => orders.map(o => o.id === orderId ? { ...o, status: 'in_progress' } : o));
+    try {
+      await axios.put(`http://localhost:5000/api/orders/${orderId}/status`, { status: 'in_progress' }, { withCredentials: true });
+      setOrders(orders => orders.map(o => o.id === orderId ? { ...o, status: 'in_progress' } : o));
+      setAlert({ open: true, type: 'success', message: 'Pedido aceptado correctamente.' });
+    } catch (err) {
+      setAlert({ open: true, type: 'error', message: 'Error al aceptar el pedido.' });
+    }
+  };
+
+  const handleRejectClick = (orderId) => {
+    setOrderToReject(orderId);
+    setShowRejectModal(true);
   };
 
   const handleReject = async () => {
-    if (!rejectionReason.trim()) return;
-    await axios.put(`http://localhost:5000/api/orders/${orderToReject}/status`, { status: 'rejected', reason: rejectionReason }, { withCredentials: true });
-    setOrders(orders => orders.map(o => o.id === orderToReject ? { ...o, status: 'rejected', rejection_reason: rejectionReason } : o));
-    setShowRejectModal(false);
-    setRejectionReason('');
-    setOrderToReject(null);
+    if (!rejectionReason.trim()) {
+      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo para el rechazo.' });
+      return;
+    }
+    try {
+      await axios.put(`http://localhost:5000/api/orders/${orderToReject}/status`, { 
+        status: 'rejected', 
+        reason: rejectionReason 
+      }, { withCredentials: true });
+      
+      setOrders(orders => orders.map(o => 
+        o.id === orderToReject 
+          ? { ...o, status: 'rejected', rejection_reason: rejectionReason } 
+          : o
+      ));
+      
+      setShowRejectModal(false);
+      setRejectionReason('');
+      setOrderToReject(null);
+      setAlert({ open: true, type: 'success', message: 'Pedido rechazado.' });
+    } catch (err) {
+      setAlert({ open: true, type: 'error', message: 'Error al rechazar el pedido.' });
+    }
   };
+
+  if (loading) return (
+    <>
+      <MainNav />
+      <div className="orders-layout">
+        <OrdersSidebar />
+        <main className="orders-main-content">
+          <div>Cargando pedidos...</div>
+        </main>
+      </div>
+      <Footer />
+    </>
+  );
 
   return (
     <>
@@ -44,67 +100,16 @@ const ArtistOrders = () => {
       <div className="orders-layout">
         <OrdersSidebar />
         <main className="orders-main-content">
-          <div className="orders-tabs">
-            <span className="orders-tab active">Pedidos que me han realizado</span>
-          </div>
-          <div className="orders-header">
-            <h2>Solicitudes Recibidas</h2>
-          </div>
-          <div className="orders-list">
-            {loading ? (
-              <div>Cargando...</div>
-            ) : orders.length === 0 ? (
-              <div>No tienes pedidos recibidos.</div>
-            ) : (
-              orders.map(order => (
-                <div key={order.id} className="order-card">
-                  <div className="order-card-left">
-                    <div className="order-description">{order.description}</div>
-                    <div className="order-status-actions">
-                      {order.status === 'pending' && (
-                        <>
-                          <button onClick={() => handleAccept(order.id)}>Aceptar</button>
-                          <button onClick={() => { setOrderToReject(order.id); setShowRejectModal(true); }}>Rechazar</button>
-                        </>
-                      )}
-                      {order.status === 'in_progress' && (
-                        <span className="order-status accepted">Aceptado</span>
-                      )}
-                      {order.status === 'rejected' && (
-                        <span className="order-status rejected">Rechazado</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="order-card-right">
-                    <div className="order-references">
-                      <div>Referencias:</div>
-                      <div className="order-images">
-                        {order.references_image && order.references_image.split(',').map((img, idx) => (
-                          <img
-                            key={idx}
-                            src={`http://localhost:5000/${img}`}
-                            alt={`Referencia ${idx + 1}`}
-                            className="order-reference-img"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <div>Paquete: {order.package_name || 'Estándar'}</div>
-                    <div>Extras: {order.extras || 'Ninguno'}</div>
-                    <div className="order-client-row">
-                      <span>Pedido realizado por:</span>
-                      <span className="order-client">{order.client_username || order.client_id}</span>
-                    </div>
-                    <div className="order-date-row">
-                      Pedido recibido el {order.created_at && new Date(order.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <ArtistOrdersTabsSection
+            orders={orders}
+            allClients={allClients}
+            allExtras={allExtras}
+            onAccept={handleAccept}
+            onReject={handleRejectClick}
+          />
         </main>
       </div>
+      
       <ConfirmModal
         open={showRejectModal}
         message={
@@ -115,16 +120,27 @@ const ArtistOrders = () => {
               onChange={e => setRejectionReason(e.target.value)}
               placeholder="Explica el motivo del rechazo"
               rows={3}
-              style={{ width: '100%' }}
+              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
             />
           </div>
         }
-        onCancel={() => setShowRejectModal(false)}
+        onCancel={() => {
+          setShowRejectModal(false);
+          setRejectionReason('');
+          setOrderToReject(null);
+        }}
         onConfirm={handleReject}
         confirmText="Rechazar"
         cancelText="Cancelar"
-        loading={false}
       />
+
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
+      
       <Footer />
     </>
   );
