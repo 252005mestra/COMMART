@@ -138,6 +138,7 @@ const OrdersTabsSection = ({ orders, allExtras = [], allArtists = [] }) => {
                   <MyOrderCard
                     order={cardData}
                     onGoToOrder={handleGoToOrder}
+                    showProcessView={activeTab === 'proceso'}
                   />
                 </div>
               );

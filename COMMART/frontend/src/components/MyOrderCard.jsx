@@ -76,6 +76,7 @@ function ReferenceCarousel({ open, images, onClose }) {
 export default function MyOrderCard({
   order,
   onGoToOrder, // función para ir al tab "en proceso"
+  showProcessView = false, // Nueva prop para indicar si estamos en la vista de proceso
 }) {
   const [showMotivo, setShowMotivo] = useState(false);
   const [showCarousel, setShowCarousel] = useState(false);
@@ -90,6 +91,20 @@ export default function MyOrderCard({
       );
     }
     if (order.status === 'accepted' || order.status === 'in_progress') {
+      // Si estamos en la vista de proceso, mostrar el botón "VER PROCESO"
+      if (showProcessView) {
+        return (
+          <div className="myorder-status-box accepted" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <button 
+              className="myorder-btn" 
+              onClick={() => window.location.href = `/orders/${order.id}`}
+            >
+              VER PROCESO
+            </button>
+          </div>
+        );
+      }
+      // Vista normal (tab "realizados")
       return (
         <div className="myorder-status-box accepted">
           <div className="status-accepted-content">
@@ -131,9 +146,6 @@ export default function MyOrderCard({
           {statusBox}
         </div>
       </div>
-
-      {/* Divider vertical entre izquierda y derecha - QUITADO */}
-      {/* <div className="myorder-divider-vertical" /> */}
 
       {/* Derecha: información principal */}
       <div className="myorder-right">
