@@ -1,0 +1,427 @@
+/* ========== Cards independientes del OrderDataCard ========== */
+.orderdata-card {
+  background: white;
+  border-radius: 28px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  border: 3px solid #000000;
+  overflow: hidden;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 1.5rem auto; /* AÑADIDO: margen inferior para separar cards */
+  font-family: 'Nunito Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== Fila superior: Usuario y fecha ========== */
+.orderdata-row {
+  padding: 1.5rem 1.8rem;
+  border-bottom: 2px solid #b3b792;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 60px;
+  box-sizing: border-box;
+}
+
+.orderdata-row-top {
+  background: #f8f8f5;
+}
+
+.orderdata-user {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.orderdata-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.orderdata-username {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  color: #000000;
+  font-weight: normal;
+  letter-spacing: 0.04em;
+}
+
+.orderdata-date {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #333;
+  text-align: right;
+  line-height: 1.3;
+}
+
+.orderdata-date b {
+  color: #000;
+  font-weight: 600;
+}
+
+/* ========== Secciones del contenido ========== */
+.orderdata-section {
+  padding: 1.5rem 1.8rem;
+  border-bottom: 2px solid #b3b792;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.orderdata-section:last-child {
+  border-bottom: none;
+}
+
+.orderdata-label {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  color: #000000;
+  font-weight: normal;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+/* ========== Referencias en stack ========== */
+.orderdata-references-stack {
+  position: relative;
+  height: 70px;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.orderdata-reference-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  border: 2px solid #fff;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #eee;
+  transition: transform 0.2s;
+}
+
+.orderdata-reference-img:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* ========== Grid para paquete y extras ========== */
+.orderdata-details-grid {
+  display: flex;
+  gap: 0;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.orderdata-details-grid > div {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.orderdata-details-grid > div:first-child {
+  border-right: 1px solid #e9ecef;
+}
+
+.orderdata-package-name {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
+  margin: 0;
+}
+
+.orderdata-viewpackage-btn {
+  background: #8B6D47;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  align-self: flex-start;
+  margin-top: 0.3rem;
+}
+
+.orderdata-viewpackage-btn:hover {
+  background: #7A5D3F;
+}
+
+/* ========== Descripción ========== */
+.orderdata-description {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.5;
+  background: #f8f8f5;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #8B6D47 #f1f1f1;
+}
+
+.orderdata-description::-webkit-scrollbar {
+  width: 4px;
+}
+
+.orderdata-description::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.orderdata-description::-webkit-scrollbar-thumb {
+  background: #8B6D47;
+  border-radius: 2px;
+}
+
+.orderdata-description::-webkit-scrollbar-thumb:hover {
+  background: #7A5D3F;
+}
+
+/* ========== Card de precios ========== */
+.orderdata-price-card {
+  background: white;
+  border: 3px solid #8B6D47;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 1.5rem 1.8rem;
+  position: relative;
+}
+
+.orderdata-price-card::after {
+  content: '';
+  position: absolute;
+  top: 3.5rem;
+  left: 5%;
+  width: 90%;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.orderdata-price-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  margin-top: 1.2rem;
+  max-height: calc(4 * 3rem);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #8B6D47 #f1f1f1;
+  padding: 1.5rem;
+  min-height: auto;
+}
+
+.orderdata-price-breakdown::-webkit-scrollbar {
+  width: 4px;
+}
+
+.orderdata-price-breakdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.orderdata-price-breakdown::-webkit-scrollbar-thumb {
+  background: #8B6D47;
+  border-radius: 2px;
+}
+
+.orderdata-price-breakdown::-webkit-scrollbar-thumb:hover {
+  background: #7A5D3F;
+}
+
+.orderdata-price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.orderdata-price-item:last-child {
+  border-bottom: none;
+}
+
+.orderdata-price-item span:first-child {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  color: #333;
+}
+
+.orderdata-price-badge {
+  background: #B3B792;
+  color: white;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.9rem;
+  padding: 6px 16px;
+  border-radius: 15px;
+  letter-spacing: 0.04em;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ========== Total destacado ========== */
+.orderdata-total-card {
+  text-align: center;
+  padding: 1.5rem;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.orderdata-total-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.2rem;
+  color: #000000;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.orderdata-total-note {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+  font-style: italic;
+}
+
+.orderdata-total-badge {
+  background: #809671;
+  color: white;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 400;
+  padding: 12px 24px;
+  border-radius: 40px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: 0.5rem;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .orderdata-card {
+    border-radius: 20px;
+    max-width: 100%;
+  }
+
+  .orderdata-row {
+    padding: 1.2rem 1.5rem;
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .orderdata-user {
+    align-self: flex-start;
+  }
+
+  .orderdata-date {
+    text-align: left;
+    align-self: flex-start;
+  }
+
+  .orderdata-section {
+    padding: 1.2rem 1.5rem;
+  }
+
+  .orderdata-details-grid {
+    flex-direction: column;
+  }
+
+  .orderdata-details-grid > div:first-child {
+    border-right: none;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .orderdata-price-card {
+    margin: 1.2rem 1.5rem;
+    padding: 1.2rem;
+  }
+
+  .orderdata-references-stack {
+    height: 60px;
+  }
+
+  .orderdata-reference-img {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .orderdata-card {
+    border-radius: 16px;
+  }
+
+  .orderdata-row {
+    padding: 1rem 1.2rem;
+  }
+
+  .orderdata-section {
+    padding: 1rem 1.2rem;
+  }
+
+  .orderdata-price-card {
+    margin: 1rem 1.2rem;
+    padding: 1rem;
+  }
+
+  .orderdata-avatar {
+    width: 35px;
+    height: 35px;
+  }
+
+  .orderdata-username {
+    font-size: 1rem;
+  }
+
+  .orderdata-date {
+    font-size: 0.85rem;
+  }
+
+  .orderdata-label {
+    font-size: 0.95rem;
+  }
+
+  .orderdata-description {
+    font-size: 0.9rem;
+    padding: 0.8rem;
+    max-height: 100px;
+  }
+
+  .orderdata-references-stack {
+    height: 50px;
+  }
+
+  .orderdata-reference-img {
+    width: 45px;
+    height: 45px;
+  }
+}

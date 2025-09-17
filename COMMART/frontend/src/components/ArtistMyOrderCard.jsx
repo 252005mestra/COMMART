@@ -1,64 +1,22 @@
 import React, { useState } from 'react';
 import { CircleCheck, CircleX } from 'lucide-react';
-import ConfirmModal from './ConfirmModal'; // ⭐ AÑADIR ESTE IMPORT
+import ConfirmModal from './ConfirmModal';
+import ReferenceCarousel from './ReferenceCarousel'; 
 
-// Modal simple para mostrar motivo de rechazo
+// Modal actualizada para mostrar motivo de rechazo
 function MotivoModal({ open, motivo, onClose }) {
   if (!open) return null;
-  return (
-    <div className="order-modal-overlay">
-      <div className="order-modal-content">
-        <h3 className="order-modal-title">Motivo de cancelación</h3>
-        <div className="order-modal-motivo">{motivo}</div>
-        <button className="order-modal-btn" onClick={onClose}>Aceptar</button>
-      </div>
-    </div>
-  );
-}
-
-// Carrusel mejorado estilo Google Drive
-function ReferenceCarousel({ open, images, onClose }) {
-  const [idx, setIdx] = useState(0);
-  
-  React.useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    
-    if (open) {
-      document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
-    }
-  }, [open, onClose]);
-  
-  if (!open) return null;
-  
-  const prev = () => setIdx(i => (i - 1 + images.length) % images.length);
-  const next = () => setIdx(i => (i + 1) % images.length);
 
   return (
-    <div className="image-expanded-overlay" onClick={onClose}>
-      <div className="image-expanded-container" onClick={(e) => e.stopPropagation()}>
-        <button className="image-expanded-close" onClick={onClose}>×</button>
-        
-        {images.length > 1 && (
-          <>
-            <button className="image-expanded-arrow left" onClick={prev}>‹</button>
-            <button className="image-expanded-arrow right" onClick={next}>›</button>
-          </>
-        )}
-        
-        <img 
-          src={images[idx]} 
-          alt={`Referencia ${idx + 1}`} 
-          className="image-expanded" 
-        />
-        
-        {images.length > 1 && (
-          <div className="image-expanded-counter">
-            {idx + 1} de {images.length}
-          </div>
-        )}
+    <div className="motivo-modal-overlay" onClick={onClose}>
+      <div className="motivo-modal-content" onClick={(e) => e.stopPropagation()}>
+        <h2 className="motivo-modal-title">Motivo de cancelación</h2>
+        <div className="motivo-modal-content-section">
+          <p className="motivo-modal-text">{motivo || 'Sin motivo especificado'}</p>
+        </div>
+        <button className="motivo-modal-button" onClick={onClose}>
+          Aceptar
+        </button>
       </div>
     </div>
   );
@@ -73,7 +31,7 @@ export default function ArtistMyOrderCard({
 }) {
   const [showMotivo, setShowMotivo] = useState(false);
   const [showCarousel, setShowCarousel] = useState(false);
-  const [showAcceptConfirm, setShowAcceptConfirm] = useState(false); // ⭐ AÑADIR ESTE ESTADO
+  const [showAcceptConfirm, setShowAcceptConfirm] = useState(false);
 
   // Estado visual para artistas
   const statusBox = (() => {
@@ -183,16 +141,6 @@ export default function ArtistMyOrderCard({
     return null;
   })();
 
-  // ⭐ AÑADIR ESTAS FUNCIONES
-  const handleAcceptConfirm = () => {
-    setShowAcceptConfirm(false);
-    onAccept && onAccept(order.id);
-  };
-
-  const handleAcceptCancel = () => {
-    setShowAcceptConfirm(false);
-  };
-
   return (
     <div className="myorder-card">
       {/* Izquierda: descripción y estado */}
@@ -279,13 +227,14 @@ export default function ArtistMyOrderCard({
         images={order.references}
         onClose={() => setShowCarousel(false)}
       />
-      
-      {/* ⭐ AÑADIR ESTE MODAL DE CONFIRMACIÓN */}
       <ConfirmModal
         open={showAcceptConfirm}
         message="¿Estás seguro que quieres aceptar este pedido?"
-        onCancel={handleAcceptCancel}
-        onConfirm={handleAcceptConfirm}
+        onCancel={() => setShowAcceptConfirm(false)}
+        onConfirm={() => {
+          setShowAcceptConfirm(false);
+          onAccept && onAccept(order.id);
+        }}
         confirmText="Aceptar"
         cancelText="Cancelar"
       />

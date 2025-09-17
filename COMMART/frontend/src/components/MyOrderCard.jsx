@@ -1,73 +1,21 @@
 import React, { useState } from 'react';
 import { CircleCheck, CircleX } from 'lucide-react';
+import ReferenceCarousel from './ReferenceCarousel';
 
-// Modal simple para mostrar motivo de rechazo
+// Modal actualizada para mostrar motivo de rechazo
 function MotivoModal({ open, motivo, onClose }) {
   if (!open) return null;
-  return (
-    <div className="order-modal-overlay">
-      <div className="order-modal-content">
-        <h3 className="order-modal-title">Motivo de cancelación</h3>
-        <div className="order-modal-motivo">{motivo}</div>
-        <button className="order-modal-btn" onClick={onClose}>Aceptar</button>
-      </div>
-    </div>
-  );
-}
-
-// Carrusel mejorado estilo Google Drive
-function ReferenceCarousel({ open, images, onClose }) {
-  const [idx, setIdx] = useState(0);
-  
-  React.useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    
-    if (open) {
-      document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
-    }
-  }, [open, onClose]);
-  
-  if (!open) return null;
-  
-  const prev = () => setIdx(i => (i - 1 + images.length) % images.length);
-  const next = () => setIdx(i => (i + 1) % images.length);
 
   return (
-    <div className="image-expanded-overlay" onClick={onClose}>
-      <div className="image-expanded-container" onClick={(e) => e.stopPropagation()}>
-        {/* Botón cerrar */}
-        <button className="image-expanded-close" onClick={onClose}>
-          ×
+    <div className="motivo-modal-overlay" onClick={onClose}>
+      <div className="motivo-modal-content" onClick={(e) => e.stopPropagation()}>
+        <h2 className="motivo-modal-title">Motivo de cancelación</h2>
+        <div className="motivo-modal-content-section">
+          <p className="motivo-modal-text">{motivo || 'Sin motivo especificado'}</p>
+        </div>
+        <button className="motivo-modal-button" onClick={onClose}>
+          Aceptar
         </button>
-        
-        {/* Flechas de navegación */}
-        {images.length > 1 && (
-          <>
-            <button className="image-expanded-arrow left" onClick={prev}>
-              ‹
-            </button>
-            <button className="image-expanded-arrow right" onClick={next}>
-              ›
-            </button>
-          </>
-        )}
-        
-        {/* Imagen */}
-        <img 
-          src={images[idx]} 
-          alt={`Referencia ${idx + 1}`} 
-          className="image-expanded" 
-        />
-        
-        {/* Contador */}
-        {images.length > 1 && (
-          <div className="image-expanded-counter">
-            {idx + 1} de {images.length}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -75,8 +23,8 @@ function ReferenceCarousel({ open, images, onClose }) {
 
 export default function MyOrderCard({
   order,
-  onGoToOrder, // función para ir al tab "en proceso"
-  showProcessView = false, // Nueva prop para indicar si estamos en la vista de proceso
+  onGoToOrder,
+  showProcessView = false,
 }) {
   const [showMotivo, setShowMotivo] = useState(false);
   const [showCarousel, setShowCarousel] = useState(false);

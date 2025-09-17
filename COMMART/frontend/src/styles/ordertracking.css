@@ -1,0 +1,162 @@
+/* ========== Layout principal de dos columnas ========== */
+.ordertracking-main-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100%;
+  gap: 0; /* Sin gap para que se vea integrado */
+}
+
+/* Columna izquierda: seguimiento de fases - 65% del ancho */
+.ordertracking-tracking-col {
+  flex: 1 1 65%;
+  min-width: 0;
+  padding: 2.5rem 2rem;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  overflow-y: visible;
+}
+
+/* Columna derecha: datos del pedido - 35% del ancho - PEGADO AL BORDE */
+.ordertracking-data-col {
+  flex: 0 0 35%;
+  min-width: 320px; /* REDUCIDO de 350px a 320px */
+  max-width: 35%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: transparent;
+  align-self: stretch; /* CAMBIADO: que ocupe toda la altura disponible */
+  margin-right: 0; /* CAMBIADO: quitar margen derecho */
+  box-sizing: border-box;
+}
+
+/* Layout con fondo naranja y header verde - altura automática */
+.ordertracking-data-section-bg {
+  background: #d2ab80;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  overflow: hidden;
+  margin-right: 0; /* AÑADIDO: quitar margen derecho */
+}
+
+/* Header verde - igual que en las tabs SIN BORDE REDONDEADO DERECHO */
+.ordertracking-data-green-header {
+  background: #8fa381;
+  color: #fff;
+  padding: 1.2rem 1.5rem; /* REDUCIDO padding horizontal */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  flex-shrink: 0;
+  border-bottom: 4px solid #7A8A6E;
+  text-align: center;
+}
+
+.ordertracking-data-green-header h2 {
+  margin: 0;
+  font-family: 'Goldman', sans-serif;
+  font-weight: normal;
+  font-size: 1.8rem; /* REDUCIDO de 2rem a 1.8rem */
+  letter-spacing: 0.04em;
+}
+
+/* Contenido con fondo naranja - altura automática */
+.ordertracking-data-content {
+  padding: 1.2rem; /* REDUCIDO de 1.5rem a 1.2rem */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: transparent;
+  box-sizing: border-box;
+  border-radius: 0; /* CAMBIADO: quitar borde redondeado */
+  flex: 1; /* AÑADIDO: tomar espacio disponible */
+}
+
+/* Asegurar que el OrderDataCard se adapte bien */
+.ordertracking-data-content .orderdata-card {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  flex: 1; /* AÑADIDO: expandir en el contenedor */
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1200px) {
+  .ordertracking-tracking-col {
+    flex: 1 1 60%;
+  }
+  
+  .ordertracking-data-col {
+    flex: 0 0 40%;
+    max-width: 40%;
+    margin-right: 1rem;
+    min-width: 280px; /* REDUCIDO */
+  }
+  
+  .ordertracking-data-green-header h2 {
+    font-size: 1.6rem; /* MÁS PEQUEÑO en tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  .ordertracking-main-layout {
+    flex-direction: column;
+    min-height: auto;
+    gap: 1rem; /* AÑADIDO: separación en móvil */
+  }
+  
+  .ordertracking-tracking-col {
+    flex: none;
+    width: 100%;
+    padding: 2rem 1rem;
+  }
+  
+  .ordertracking-data-col {
+    flex: none;
+    max-width: none;
+    width: 100%;
+    min-width: 0;
+    margin-right: 0;
+    margin-bottom: 2rem;
+  }
+  
+  .ordertracking-data-section-bg {
+    border-radius: 20px;
+    margin: 0 1rem;
+  }
+  
+  .ordertracking-data-green-header {
+    border-radius: 20px 20px 0 0;
+    padding: 1rem 1.2rem;
+  }
+  
+  .ordertracking-data-green-header h2 {
+    font-size: 1.5rem; /* MÁS PEQUEÑO en móvil */
+  }
+  
+  .ordertracking-data-content {
+    padding: 1rem;
+    border-radius: 0 0 20px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ordertracking-data-col {
+    min-width: 0;
+  }
+  
+  .ordertracking-data-green-header h2 {
+    font-size: 1.3rem; /* AÚN MÁS PEQUEÑO en móviles pequeños */
+  }
+  
+  .ordertracking-data-content {
+    padding: 0.8rem;
+  }
+}

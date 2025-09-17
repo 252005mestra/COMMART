@@ -12,7 +12,7 @@ import ArtistOrders from './pages/ArtistOrders'
 import ClientOrders from './pages/ClientOrders'
 import CreateOrder from './components/CreateOrder'
 import CreateOrderPage from './pages/CreateOrderPage'
-import OrderDetail from './pages/OrderDetail'
+import OrderTracking from './pages/OrderTracking'
 import { useUser } from './context/UserContext'
 import AdminDashboard from './pages/AdminDashboard'
 
@@ -108,7 +108,7 @@ const App = () => {
           path="/orders/:id"
           element={
             <PrivateRoute>
-              <OrderDetail user={profile} />
+              <OrderTracking user={profile} />
             </PrivateRoute>
           }
         />
