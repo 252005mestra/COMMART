@@ -31,27 +31,65 @@ const OrderTracking = ({ user }) => {
   const [selectedStage, setSelectedStage] = useState('plan');
   const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
   const [showPackageModal, setShowPackageModal] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [selectedExtras, setSelectedExtras] = useState([]);
   const messageListRef = useRef(null);
 
   useEffect(() => {
     const fetchOrderAndUsers = async () => {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5000/api/orders/${id}`, { withCredentials: true });
-      setOrder(res.data);
+      try {
+        const res = await axios.get(`http://localhost:5000/api/orders/${id}`, { withCredentials: true });
+        setOrder(res.data);
 
-      // Obtener datos de cliente y artista
-      const [clientRes, artistRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/auth/users/${res.data.client_id}`, { withCredentials: true }),
-        axios.get(`http://localhost:5000/api/auth/users/${res.data.artist_id}`, { withCredentials: true }),
-      ]);
-      setClientUser(clientRes.data);
-      setArtistUser(artistRes.data);
+        // Obtener datos de cliente y artista
+        const [clientRes, artistRes] = await Promise.all([
+          axios.get(`http://localhost:5000/api/auth/users/${res.data.client_id}`, { withCredentials: true }),
+          axios.get(`http://localhost:5000/api/auth/users/${res.data.artist_id}`, { withCredentials: true }),
+        ]);
 
-      // Seleccionar la fase actual por defecto
-      setSelectedStage(res.data.current_stage);
+        setClientUser(clientRes.data);
+        setArtistUser(artistRes.data);
 
-      setLoading(false);
+        // AGREGAR: Obtener datos del paquete
+        if (res.data.package_id) {
+          try {
+            const packageRes = await axios.get(`http://localhost:5000/api/packages/artist/${res.data.artist_id}`, { withCredentials: true });
+            const selectedPkg = packageRes.data.find(pkg => pkg.id === res.data.package_id);
+            setSelectedPackage(selectedPkg);
+          } catch (err) {
+            console.error('Error al obtener paquete:', err);
+          }
+        }
+
+        // AGREGAR: Obtener datos de extras
+        if (res.data.extras) {
+          try {
+            const extrasRes = await axios.get(`http://localhost:5000/api/packages/all/extras`, { withCredentials: true });
+            let extrasIds = [];
+            
+            if (typeof res.data.extras === 'string') {
+              extrasIds = res.data.extras.split(',').map(id => id.trim());
+            } else if (Array.isArray(res.data.extras)) {
+              extrasIds = res.data.extras;
+            }
+            
+            const selectedExtras = extrasRes.data.filter(extra => 
+              extrasIds.includes(String(extra.id))
+            );
+            setSelectedExtras(selectedExtras);
+          } catch (err) {
+            console.error('Error al obtener extras:', err);
+          }
+        }
+
+      } catch (err) {
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchOrderAndUsers();
   }, [id]);
 
@@ -714,11 +752,13 @@ const OrderTracking = ({ user }) => {
               <div className="ordertracking-data-content">
                 <OrderDataCard
                   order={order}
-                  clientUser={clientUser}
+                  clientUser={order.clientUser}
+                  artistUser={artistUser}
                   images={order.references_image ? order.references_image.split(',').map(img => `http://localhost:5000/${img}`) : []}
-                  selectedPackage={order.package}
-                  selectedExtras={order.extras || []}
+                  selectedPackage={selectedPackage}
+                  selectedExtras={selectedExtras}
                   onViewPackage={() => setShowPackageModal(true)}
+                  currentUserId={user.id} // <-- Asegúrate de pasar esto
                 />
               </div>
             </div>

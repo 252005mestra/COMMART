@@ -6,6 +6,7 @@ import {
   updateOrderStatus,
   updateOrderFields
 } from '../models/orderModel.js';
+import { findUserByIdModel } from '../models/userModel.js';
 import { createNotification } from '../models/notificationModel.js';
 import dbConnection from '../config/db.js'; // <-- AÑADIR ESTA LÍNEA
 
@@ -93,12 +94,20 @@ export const getOrderDetailsController = async (req, res) => {
     const orderId = req.params.id;
     const order = await getOrderById(orderId);
     if (!order) return res.status(404).json({ message: 'Pedido no encontrado.' });
+
     // Solo el artista o el cliente pueden ver el pedido
     if (order.artist_id !== req.user.id && order.client_id !== req.user.id) {
       return res.status(403).json({ message: 'No autorizado.' });
     }
+
+    // Obtener datos completos del cliente y artista
+    const clientUser = await findUserByIdModel(order.client_id);
+    const artistUser = await findUserByIdModel(order.artist_id);
+
     res.json({
       ...order,
+      clientUser,
+      artistUser,
       current_stage: order.current_stage // o order.phase, según el nombre real
     });
   } catch (error) {
