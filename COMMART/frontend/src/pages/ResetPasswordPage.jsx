@@ -17,27 +17,30 @@ const ResetPasswordPage = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+  const containsXSSChars = (input) => /[<>"'&/]/.test(input);
+
   // Validaciones en tiempo real
   const validatePassword = (password) => {
     if (!password) return 'La contraseña es obligatoria.';
-    if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
-    if (!/(?=.*[a-z])/.test(password)) return 'Debe contener al menos una letra minúscula.';
-    if (!/(?=.*[A-Z])/.test(password)) return 'Debe contener al menos una letra mayúscula.';
-    if (!/(?=.*\d)/.test(password)) return 'Debe contener al menos un número.';
-    if (!/(?=.*[\W_])/.test(password)) return 'Debe contener al menos un carácter especial.';
+    if (containsXSSChars(password)) return 'La contraseña contiene caracteres peligrosos como < > " \' / &';
+    if (/\s/.test(password)) return 'La contraseña no puede contener espacios.';
+    if (!passwordRegex.test(password)) {
+      return 'La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.';
+    }
     return null;
   };
 
   const handleNewPasswordChange = (e) => {
     const value = e.target.value;
     setNewPassword(value);
-    
+
     const passwordError = validatePassword(value);
     setFieldErrors(prev => ({
       ...prev,
       newPassword: passwordError
     }));
-    
+
     // Revalidar confirmación si existe
     if (confirmPassword && value !== confirmPassword) {
       setFieldErrors(prev => ({
@@ -55,7 +58,7 @@ const ResetPasswordPage = () => {
   const handleConfirmPasswordChange = (e) => {
     const value = e.target.value;
     setConfirmPassword(value);
-    
+
     if (!value) {
       setFieldErrors(prev => ({
         ...prev,
@@ -97,8 +100,7 @@ const ResetPasswordPage = () => {
     setMsg('');
     
     try {
-      await axios.post('http://localhost:5000/api/auth/reset-password', {
-        token,
+      await axios.post(`http://localhost:5000/api/auth/reset-password/${token}`, {
         newPassword
       });
       

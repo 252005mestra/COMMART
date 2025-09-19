@@ -662,7 +662,7 @@ export const forgotPasswordController = async (req, res) => {
 
     // Generar token y guardar en la base de datos
     const token = crypto.randomBytes(32).toString('hex');
-    const expiry = Date.now() + 3600000; // 1 hora
+    const expiry = Date.now() + 30 * 60 * 1000; // 30 minutos
     await setResetTokenModel(user.id, token, expiry);
 
     // Configura tu transporter con tus credenciales
@@ -721,7 +721,6 @@ export const resetPasswordController = async (req, res) => {
     // Verificar expiración del token
     // Si tu campo es BIGINT (milisegundos):
     if (!user || !user.reset_token_expiry || user.reset_token_expiry < Date.now()) {
-      // Token inválido o expirado
       return res.status(400).json({ message: 'Token inválido o expirado.' });
     }
     // Si tu campo es DATETIME, usa:
