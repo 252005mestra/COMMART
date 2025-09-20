@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import UserListModal from './UserListModal';
 import AlertModal from './AlertModal';
+import ConfirmModal from './ConfirmModal';
 import '../styles/artistportfolio.css';
 
 const ArtistPortfolio = ({
@@ -618,10 +619,13 @@ const ArtistPortfolio = ({
           title="Seguidos"
         />
 
-        {showConfirm && (
-          <div className="modal-overlay">
-            <div className="modal-content" style={{ maxWidth: 350, textAlign: 'center' }}>
-              <h3 className="modal-title-goldman">¿Deseas cambiar tu foto de perfil?</h3>
+        <ConfirmModal
+          open={showConfirm}
+          message={
+            <div>
+              <h3 className="modal-title-goldman" style={{ marginBottom: 16, fontWeight: 'normal' }}>
+                ¿Deseas cambiar tu foto de perfil?
+              </h3>
               <div style={{ margin: '1rem 0' }}>
                 <img
                   src={profileImagePreview}
@@ -635,13 +639,13 @@ const ArtistPortfolio = ({
                   }}
                 />
               </div>
-              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-                <button className="cancel-btn" onClick={handleCancelChange}>Cancelar</button>
-                <button className="save-btn" onClick={handleConfirmChange}>Confirmar</button>
-              </div>
             </div>
-          </div>
-        )}
+          }
+          onCancel={handleCancelChange}
+          onConfirm={handleConfirmChange}
+          confirmText="Confirmar"
+          cancelText="Cancelar"
+        />
       </div>
     );
   }

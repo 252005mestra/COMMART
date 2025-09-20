@@ -114,13 +114,14 @@ const ArtistOrders = () => {
         open={showRejectModal}
         message={
           <div>
-            <div style={{ marginBottom: 16 }}>Motivo del rechazo</div>
+            <div style={{ marginBottom: 16, fontWeight: 700, fontFamily: "'Nunito Sans', sans-serif" }}>
+              Motivo del rechazo
+            </div>
             <textarea
+              className="confirm-modal-textarea"
               value={rejectionReason}
               onChange={e => setRejectionReason(e.target.value)}
               placeholder="Explica el motivo del rechazo"
-              rows={3}
-              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
             />
           </div>
         }

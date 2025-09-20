@@ -15,6 +15,9 @@ import CreateOrderPage from './pages/CreateOrderPage'
 import OrderTracking from './pages/OrderTracking'
 import { useUser } from './context/UserContext'
 import AdminDashboard from './pages/AdminDashboard'
+import Terms from './pages/Terms'
+import Privacy from './pages/Privacy'
+import Help from './pages/Help'
 
 const App = () => {
   const { profile } = useUser()
@@ -125,6 +128,21 @@ const App = () => {
         <Route
           path='/admin/dashboard'
           element={<AdminDashboard />}
+        />
+
+        <Route 
+          path="/terms" 
+          element={<Terms />}
+        />
+
+        <Route 
+          path="/privacy" 
+          element={<Privacy />} 
+        />
+
+        <Route 
+          path="/help" 
+          element={<Help />} 
         />
 
       </Routes>

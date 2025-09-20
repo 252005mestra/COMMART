@@ -1,0 +1,186 @@
+.legal-main {
+  max-width: 900px;
+  margin: 2.5rem auto;
+  padding: 2.5rem 1.5rem;
+  border-radius: 32px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  font-family: 'Nunito Sans', sans-serif;
+  color: #222;
+  line-height: 1.7;
+}
+
+.legal-main h1 {
+  font-family: 'Goldman', sans-serif;
+  font-size: 2.2rem;
+  color: #7d5938;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.legal-main h2 {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.3rem;
+  color: #593f28;
+  margin-top: 2rem;
+  margin-bottom: 0.7rem;
+  letter-spacing: 0.03em;
+}
+
+.legal-main ul {
+  margin: 0 0 1.5rem 1.5rem;
+  padding: 0;
+  list-style: disc inside;
+}
+
+.legal-main li {
+  margin-bottom: 0.7rem;
+  font-size: 1rem;
+}
+
+.legal-main p, .legal-main section {
+  margin-bottom: 1.2rem;
+  font-size: 1.05rem;
+}
+
+.legal-main a {
+  color: #7d5938;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.legal-main a:hover {
+  color: #593f28;
+}
+
+.legal-cards-bg {
+  min-height: 100vh;
+  padding: 2.5rem 0 0 0;
+}
+
+.legal-card-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.legal-card {
+  background: #fff;
+  border: 3px solid #7d5938;
+  border-radius: 22px;
+  box-shadow: 0 4px 24px rgba(125, 89, 56, 0.08);
+  padding: 3.5rem; /* Aumentado el padding */
+  font-family: 'Nunito Sans', sans-serif;
+  color: #111;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+.legal-card .legal-card-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 2.1rem;
+  color: #7d5938;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.legal-card h2 {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.3rem;
+  color: #7d5938; /* Cambiado de #593f28 a #7d5938 */
+  margin-top: 2rem;
+  margin-bottom: 0.7rem;
+  letter-spacing: 0.03em;
+  font-weight: 400;
+}
+
+.legal-card .icon {
+  color: #7d5938;
+  font-size: 2.2rem;
+}
+
+.legal-card ul {
+  margin: 1rem 0 1.5rem 1.5rem;
+  padding: 0;
+  list-style: disc inside;
+}
+
+.legal-card li {
+  margin-bottom: 0.7rem;
+  font-size: 1.05rem;
+  font-family: 'Nunito Sans', sans-serif;
+  color: #111;
+}
+
+.legal-card p {
+  margin-bottom: 1.1rem;
+  font-size: 1.05rem;
+  font-family: 'Nunito Sans', sans-serif;
+  color: #111;
+}
+
+.legal-card a {
+  color: #7d5938;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.legal-card a:hover {
+  color: #593f28;
+}
+
+.legal-card p,
+.legal-card li,
+.legal-card ul {
+  text-align: justify;
+}
+
+/* Logo COMMART encima de la card legal */
+.legal-logo-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  z-index: 2;
+  position: relative;
+}
+
+.legal-logo {
+  width: 160px;
+  height: auto;
+  margin-bottom: 0;
+  user-select: none;
+  filter: drop-shadow(0 2px 8px rgba(125, 89, 56, 0.10));
+}
+
+@media (max-width: 600px) {
+  .legal-main {
+    padding: 1.2rem 0.5rem;
+    border-radius: 18px;
+  }
+  .legal-main h1 {
+    font-size: 1.3rem;
+  }
+  .legal-main h2 {
+    font-size: 1.05rem;
+  }
+  .legal-card-container {
+    padding: 0 0.5rem;
+  }
+  .legal-card {
+    padding: 1.2rem 0.7rem;
+    border-radius: 12px;
+  }
+  .legal-card .legal-card-title {
+    font-size: 1.3rem;
+  }
+  .legal-card h2 {
+    font-size: 1.05rem;
+  }
+}

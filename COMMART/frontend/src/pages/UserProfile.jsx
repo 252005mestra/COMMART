@@ -9,6 +9,7 @@ import UserListModal from '../components/UserListModal';
 import ProfileTabsSection from '../components/ProfileTabsSection';
 import Footer from '../components/Footer';
 import AlertModal from '../components/AlertModal';
+import ConfirmModal from '../components/ConfirmModal';
 
 const UserProfile = () => {
   const { profile, removeFavoriteArtist, fetchProfile } = useUser();
@@ -175,10 +176,11 @@ const UserProfile = () => {
         />
 
         {/* Modal de confirmación para cambio de imagen */}
-        {showConfirm && (
-          <div className="modal-overlay">
-            <div className="modal-content" style={{ maxWidth: 350, textAlign: 'center' }}>
-              <h3 style={{ fontFamily: 'Goldman', fontSize: '1.2rem', margin: '0 0 1rem 0' }}>
+        <ConfirmModal
+          open={showConfirm}
+          message={
+            <div>
+              <h3 className="modal-title-goldman" style={{ marginBottom: 16, fontWeight: 'normal' }}>
                 ¿Deseas cambiar tu foto de perfil?
               </h3>
               <div style={{ margin: '1rem 0' }}>
@@ -194,41 +196,13 @@ const UserProfile = () => {
                   }}
                 />
               </div>
-              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-                <button 
-                  className="cancel-btn" 
-                  onClick={handleCancelChange}
-                  style={{
-                    background: '#666',
-                    color: 'white',
-                    padding: '0.5rem 1.5rem',
-                    border: 'none',
-                    borderRadius: '25px',
-                    cursor: 'pointer',
-                    fontFamily: 'Goldman'
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button 
-                  className="save-btn" 
-                  onClick={handleConfirmChange}
-                  style={{
-                    background: '#8B6D47',
-                    color: 'white',
-                    padding: '0.5rem 1.5rem',
-                    border: 'none',
-                    borderRadius: '25px',
-                    cursor: 'pointer',
-                    fontFamily: 'Goldman'
-                  }}
-                >
-                  Confirmar
-                </button>
-              </div>
             </div>
-          </div>
-        )}
+          }
+          onCancel={handleCancelChange}
+          onConfirm={handleConfirmChange}
+          confirmText="Confirmar"
+          cancelText="Cancelar"
+        />
       </main>
 
       <Footer />

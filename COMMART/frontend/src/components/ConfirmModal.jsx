@@ -6,7 +6,7 @@ const ConfirmModal = ({
   message,
   onCancel,
   onConfirm,
-  confirmText = 'Continuar',
+  confirmText = 'Aceptar',
   cancelText = 'Cancelar',
   loading = false,
 }) => {
@@ -15,7 +15,7 @@ const ConfirmModal = ({
     <div className="confirm-modal-overlay">
       <div className="confirm-modal-content">
         <div className="confirm-modal-message">
-          <span style={{ fontStyle: 'italic', fontSize: '1.15rem' }}>{message}</span>
+          <span style={{ fontSize: '1.15rem' }}>{message}</span>
         </div>
         <div className="confirm-modal-actions">
           <button className="confirm-modal-cancel-btn" onClick={onCancel} disabled={loading}>

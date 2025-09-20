@@ -5,6 +5,7 @@ import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import AlertModal from '../components/AlertModal';
 import OrderDataCard from '../components/OrderDataCard';
+import ConfirmModal from '../components/ConfirmModal';
 import '../styles/ordertracking.css';
 
 const STAGES = [
@@ -33,6 +34,10 @@ const OrderTracking = ({ user }) => {
   const [showPackageModal, setShowPackageModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [selectedExtras, setSelectedExtras] = useState([]);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
   const messageListRef = useRef(null);
 
   useEffect(() => {
@@ -253,18 +258,43 @@ const OrderTracking = ({ user }) => {
 
   // Función para rechazar pedido
   const handleReject = async () => {
-    const reason = window.prompt('Motivo del rechazo:');
-    if (!reason) return;
+    if (!rejectReason.trim()) {
+      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo para el rechazo.' });
+      return;
+    }
     try {
       await axios.put(
         `http://localhost:5000/api/orders/${order.id}/status`,
-        { status: 'rejected', reason },
+        { status: 'rejected', reason: rejectReason },
         { withCredentials: true }
       );
+      setShowRejectModal(false);
+      setRejectReason('');
       await reloadOrder();
       setAlert({ open: true, type: 'success', message: 'Pedido rechazado.' });
     } catch (err) {
       setAlert({ open: true, type: 'error', message: 'Error al rechazar el pedido.' });
+    }
+  };
+
+  // Función para cancelar pedido
+  const handleCancelOrder = async () => {
+    if (!cancelReason.trim()) {
+      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo para la cancelación.' });
+      return;
+    }
+    try {
+      await axios.put(
+        `http://localhost:5000/api/orders/${order.id}/status`,
+        { status: 'cancelled', reason: cancelReason },
+        { withCredentials: true }
+      );
+      setShowCancelModal(false);
+      setCancelReason('');
+      await reloadOrder();
+      setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
+    } catch (err) {
+      setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
     }
   };
 
@@ -428,7 +458,7 @@ const OrderTracking = ({ user }) => {
             </button>
             <button
               style={{ background: '#e74c3c', color: 'white' }}
-              onClick={handleReject}
+              onClick={() => setShowRejectModal(true)}
             >
               Rechazar pedido
             </button>
@@ -692,66 +722,37 @@ const OrderTracking = ({ user }) => {
               </div>
             </div>
             <div className="ordertracking-actions-row">
-              {/* Botón de pagar */}
+              {/* Botón de pagar: solo cliente, solo en sketch, solo si hay bocetos y favorito elegido y no pagado */}
               {user.role === 'client'
-                && ['plan', 'sketch'].includes(order.current_stage)
+                && order.current_stage === 'sketch'
                 && !order.is_paid
+                && order.sketch_image // Asegúrate de tener este campo con los bocetos subidos
+                && order.selected_sketch // Asegúrate de tener este campo cuando el cliente elige el favorito
                 && !isFinal && (
                 <button className="ordertracking-pay-btn" onClick={handlePay}>Realizar Pago</button>
               )}
 
-              {/* Cancelar por artista (solo en sketch, no pagado, no finalizado/cancelado/rechazado) */}
+              {/* Cancelar por artista (plan o sketch, no pagado, no finalizado/cancelado/rechazado) */}
               {user.role === 'artist'
-                && order.current_stage === 'sketch'
+                && ['plan', 'sketch'].includes(order.current_stage)
+                && !order.is_paid
+                && !['completed', 'cancelled', 'rejected'].includes(order.status) && (
+                <button
+                  className="ordertracking-cancel-btn"
+                  onClick={() => setShowCancelModal(true)}
+                >
+                  Cancelar Pedido
+                </button>
+              )}
+
+              {/* Cancelar por cliente (plan o sketch, no pagado, no finalizado/cancelado/rechazado) */}
+              {user.role === 'client'
+                && ['plan', 'sketch'].includes(order.current_stage)
                 && !order.is_paid
                 && !isFinal && (
                 <button
                   className="ordertracking-cancel-btn"
-                  onClick={async () => {
-                    if (window.confirm('¿Seguro que quieres cancelar este pedido por falta de pago?')) {
-                      try {
-                        await axios.put(
-                          `http://localhost:5000/api/orders/${order.id}/status`,
-                          { status: 'cancelled' },
-                          { withCredentials: true }
-                        );
-                        setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
-                        // Recarga el pedido
-                        const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-                        setOrder(res.data);
-                      } catch (err) {
-                        setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
-                      }
-                    }
-                  }}
-                >
-                  Cancelar pedido por falta de pago
-                </button>
-              )}
-
-              {/* Cancelar por cliente (solo antes de sketch, no finalizado/cancelado/rechazado) */}
-              {user.role === 'client'
-                && ['plan'].includes(order.current_stage)
-                && !isFinal && (
-                <button
-                  className="ordertracking-cancel-btn"
-                  onClick={async () => {
-                    if (window.confirm('¿Seguro que quieres cancelar este pedido?')) {
-                      try {
-                        await axios.put(
-                          `http://localhost:5000/api/orders/${order.id}/status`,
-                          { status: 'cancelled' },
-                          { withCredentials: true }
-                        );
-                        setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
-                        // Recarga el pedido
-                        const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-                        setOrder(res.data);
-                      } catch (err) {
-                        setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
-                      }
-                    }
-                  }}
+                  onClick={() => setShowCancelModal(true)}
                 >
                   Cancelar Pedido
                 </button>
@@ -761,6 +762,53 @@ const OrderTracking = ({ user }) => {
         </div>
       </main>
       <Footer />
+
+      {/* Modales de confirmación */}
+      <ConfirmModal
+        open={showRejectModal}
+        message={
+          <div>
+            <div style={{ marginBottom: 16, fontWeight: 700, fontFamily: "'Nunito Sans', sans-serif" }}>
+              Motivo de la cancelación
+            </div>
+            <textarea
+              className="confirm-modal-textarea"
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              placeholder="Explica el motivo de la cancelación"
+            />
+          </div>
+        }
+        onCancel={() => {
+          setShowRejectModal(false);
+          setRejectReason('');
+        }}
+        onConfirm={handleReject}
+        confirmText="Rechazar"
+        cancelText="Cancelar"
+      />
+
+      <ConfirmModal
+        open={showCancelModal}
+        message={
+          <div>
+            <div style={{ marginBottom: 16 }}>Motivo de la cancelación</div>
+            <textarea
+              className="confirm-modal-textarea"
+              value={cancelReason}
+              onChange={e => setCancelReason(e.target.value)}
+              placeholder="Explica el motivo de la cancelación"
+            />
+          </div>
+        }
+        onCancel={() => {
+          setShowCancelModal(false);
+          setCancelReason('');
+        }}
+        onConfirm={handleCancelOrder}
+        confirmText="Cancelar pedido"
+        cancelText="Volver"
+      />
     </>
   );
 };

@@ -3,25 +3,6 @@ import { CircleCheck, CircleX } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import ReferenceCarousel from './ReferenceCarousel'; 
 
-// Modal actualizada para mostrar motivo de rechazo
-function MotivoModal({ open, motivo, onClose }) {
-  if (!open) return null;
-
-  return (
-    <div className="motivo-modal-overlay" onClick={onClose}>
-      <div className="motivo-modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2 className="motivo-modal-title">Motivo de cancelación</h2>
-        <div className="motivo-modal-content-section">
-          <p className="motivo-modal-text">{motivo || 'Sin motivo especificado'}</p>
-        </div>
-        <button className="motivo-modal-button" onClick={onClose}>
-          Aceptar
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function ArtistMyOrderCard({
   order,
   onGoToOrder,
@@ -44,7 +25,7 @@ export default function ArtistMyOrderCard({
           justifyContent: 'space-around',
           alignItems: 'center'
         }}>
-          {/* Botón Aceptar - ícono arriba, texto abajo */}
+          {/* Botón Aceptar */}
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column',
@@ -57,7 +38,7 @@ export default function ArtistMyOrderCard({
             transition: 'background-color 0.2s',
             minWidth: '80px'
           }}
-          onClick={() => setShowAcceptConfirm(true)} // ⭐ CAMBIAR ESTA LÍNEA
+          onClick={() => setShowAcceptConfirm(true)}
           onMouseEnter={e => e.target.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'}
           onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}>
             <div className="status-check-icon">
@@ -71,7 +52,7 @@ export default function ArtistMyOrderCard({
             </span>
           </div>
 
-          {/* Botón Rechazar - ícono arriba, texto abajo */}
+          {/* Botón Rechazar */}
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column',
@@ -197,7 +178,7 @@ export default function ArtistMyOrderCard({
             </div>
           </div>
           
-          {/* Columna 1, Fila 2: Cliente (CAMBIADO) */}
+          {/* Columna 1, Fila 2: Cliente */}
           <div className="myorder-info-col myorder-info-artist">
             <span className="myorder-info-label">Pedido realizado por:</span>
             <div className="myorder-artist-row" style={{ cursor: 'pointer' }} onClick={() => window.location.href = `/user/${order.clientId}`}>
@@ -217,10 +198,20 @@ export default function ArtistMyOrderCard({
       </div>
       
       {/* Modales */}
-      <MotivoModal
+      <ConfirmModal
         open={showMotivo}
-        motivo={order.rejectionReason}
-        onClose={() => setShowMotivo(false)}
+        message={
+          <div>
+            <div style={{ marginBottom: 16, fontWeight: 600 }}>Motivo de rechazo/cancelación</div>
+            <div style={{ whiteSpace: 'pre-line' }}>
+              {order.rejectionReason || 'Sin motivo especificado'}
+            </div>
+          </div>
+        }
+        onCancel={() => setShowMotivo(false)}
+        onConfirm={() => setShowMotivo(false)}
+        confirmText="Aceptar"
+        cancelText="Cerrar"
       />
       <ReferenceCarousel
         open={showCarousel}

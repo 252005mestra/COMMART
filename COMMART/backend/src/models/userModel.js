@@ -65,7 +65,7 @@ export const findUserByIdModel = (id, includePassword = false) => {
 export const getAllUsersModel = () => {
   return new Promise((resolve, reject) => {
     dbConnection.query(
-      'SELECT id, username, email, registered_at, is_artist, role FROM users ORDER BY registered_at DESC',
+      'SELECT id, username, email, profile_image, registered_at, is_artist, role FROM users ORDER BY registered_at DESC',
       (err, results) => {
         if (err) return reject(err);
         resolve(results);
