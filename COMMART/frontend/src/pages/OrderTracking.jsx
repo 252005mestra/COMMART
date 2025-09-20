@@ -451,7 +451,7 @@ const OrderTracking = ({ user }) => {
       <MainNav />
       <main className="main-content">
         <div className="ordertracking-main-layout">
-          {/* Columna izquierda: fases y seguimiento */}
+          {/* Columna izquierda */}
           <section className="ordertracking-tracking-col">
             <h2 className="ordertracking-title">Estado del Pedido</h2>
             {/* Navegación de fases */}
@@ -606,16 +606,6 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
               
-              {/* Mostrar botón de pagar en 'plan' o 'sketch', si no está pagado ni finalizado/cancelado/rechazado */}
-              {user.role === 'client'
-                && ['plan', 'sketch'].includes(order.current_stage)
-                && !order.is_paid
-                && !isFinal && (
-                <div className="ordertracking-section">
-                  <button className="ordertracking-pay-btn" onClick={handlePay}>Pagar</button>
-                </div>
-              )}
-              
               {/* Mostrar factura solo si el pedido está pagado */}
               {user.role === 'client' && order.is_paid && (
                 <div className="ordertracking-section">
@@ -638,63 +628,6 @@ const OrderTracking = ({ user }) => {
                     </div>
                   )}
                 </div>
-              )}
-              
-              {/* Cancelar por artista (solo en sketch, no pagado, no finalizado/cancelado/rechazado) */}
-              {user.role === 'artist'
-                && order.current_stage === 'sketch'
-                && !order.is_paid
-                && !isFinal && (
-                <button
-                  className="ordertracking-cancel-btn"
-                  onClick={async () => {
-                    if (window.confirm('¿Seguro que quieres cancelar este pedido por falta de pago?')) {
-                      try {
-                        await axios.put(
-                          `http://localhost:5000/api/orders/${order.id}/status`,
-                          { status: 'cancelled' },
-                          { withCredentials: true }
-                        );
-                        setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
-                        // Recarga el pedido
-                        const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-                        setOrder(res.data);
-                      } catch (err) {
-                        setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
-                      }
-                    }
-                  }}
-                >
-                  Cancelar pedido por falta de pago
-                </button>
-              )}
-              
-              {/* Cancelar por cliente (solo antes de sketch, no finalizado/cancelado/rechazado) */}
-              {user.role === 'client'
-                && ['plan'].includes(order.current_stage)
-                && !isFinal && (
-                <button
-                  className="ordertracking-cancel-btn"
-                  onClick={async () => {
-                    if (window.confirm('¿Seguro que quieres cancelar este pedido?')) {
-                      try {
-                        await axios.put(
-                          `http://localhost:5000/api/orders/${order.id}/status`,
-                          { status: 'cancelled' },
-                          { withCredentials: true }
-                        );
-                        setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
-                        // Recarga el pedido
-                        const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-                        setOrder(res.data);
-                      } catch (err) {
-                        setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
-                      }
-                    }
-                  }}
-                >
-                  Cancelar pedido
-                </button>
               )}
               
               {/* Descargar arte final (solo artista, solo si el pedido está completado y hay imagen final) */}
@@ -739,16 +672,12 @@ const OrderTracking = ({ user }) => {
             />
           </section>
 
-          {/* Columna derecha: información del pedido - CAMBIADO de aside a section */}
-          <section className="ordertracking-data-col">
-            {/* Layout con fondo naranja y header verde */}
+          {/* Columna derecha */}
+          <aside className="ordertracking-data-col">
+            <div className="ordertracking-data-green-header">
+              <h2>Datos del pedido</h2>
+            </div>
             <div className="ordertracking-data-section-bg">
-              {/* Header verde con título */}
-              <header className="ordertracking-data-green-header">
-                <h2>Datos del pedido</h2>
-              </header>
-              
-              {/* Contenido con fondo naranja */}
               <div className="ordertracking-data-content">
                 <OrderDataCard
                   order={order}
@@ -758,11 +687,77 @@ const OrderTracking = ({ user }) => {
                   selectedPackage={selectedPackage}
                   selectedExtras={selectedExtras}
                   onViewPackage={() => setShowPackageModal(true)}
-                  currentUserId={user.id} // <-- Asegúrate de pasar esto
+                  currentUserId={user.id}
                 />
               </div>
             </div>
-          </section>
+            <div className="ordertracking-actions-row">
+              {/* Botón de pagar */}
+              {user.role === 'client'
+                && ['plan', 'sketch'].includes(order.current_stage)
+                && !order.is_paid
+                && !isFinal && (
+                <button className="ordertracking-pay-btn" onClick={handlePay}>Realizar Pago</button>
+              )}
+
+              {/* Cancelar por artista (solo en sketch, no pagado, no finalizado/cancelado/rechazado) */}
+              {user.role === 'artist'
+                && order.current_stage === 'sketch'
+                && !order.is_paid
+                && !isFinal && (
+                <button
+                  className="ordertracking-cancel-btn"
+                  onClick={async () => {
+                    if (window.confirm('¿Seguro que quieres cancelar este pedido por falta de pago?')) {
+                      try {
+                        await axios.put(
+                          `http://localhost:5000/api/orders/${order.id}/status`,
+                          { status: 'cancelled' },
+                          { withCredentials: true }
+                        );
+                        setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
+                        // Recarga el pedido
+                        const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+                        setOrder(res.data);
+                      } catch (err) {
+                        setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
+                      }
+                    }
+                  }}
+                >
+                  Cancelar pedido por falta de pago
+                </button>
+              )}
+
+              {/* Cancelar por cliente (solo antes de sketch, no finalizado/cancelado/rechazado) */}
+              {user.role === 'client'
+                && ['plan'].includes(order.current_stage)
+                && !isFinal && (
+                <button
+                  className="ordertracking-cancel-btn"
+                  onClick={async () => {
+                    if (window.confirm('¿Seguro que quieres cancelar este pedido?')) {
+                      try {
+                        await axios.put(
+                          `http://localhost:5000/api/orders/${order.id}/status`,
+                          { status: 'cancelled' },
+                          { withCredentials: true }
+                        );
+                        setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
+                        // Recarga el pedido
+                        const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+                        setOrder(res.data);
+                      } catch (err) {
+                        setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
+                      }
+                    }
+                  }}
+                >
+                  Cancelar Pedido
+                </button>
+              )}
+            </div>
+          </aside>
         </div>
       </main>
       <Footer />

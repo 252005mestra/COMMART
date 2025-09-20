@@ -10,7 +10,6 @@
 .ordertracking-tracking-col {
   flex: 1 1 65%;
   min-width: 0;
-  padding: 2.5rem 2rem;
   background: transparent;
   display: flex;
   flex-direction: column;
@@ -87,6 +86,75 @@
   flex: 1; /* AÑADIDO: expandir en el contenedor */
 }
 
+/* Contenedor blanco para los botones */
+.ordertracking-actions-row {
+  background: #fff;
+  box-shadow: 0 8px 16px rgba(60, 48, 36, 0.13);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-radius: 0;
+  margin: 0;
+  padding: 1rem 2rem; /* Aumenta el padding aquí */
+  min-height: 60px;
+  box-sizing: border-box;
+  gap: 0;
+  position: relative;
+}
+
+/* Asegura que los botones estén pegados a los extremos */
+.ordertracking-pay-btn {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.ordertracking-cancel-btn {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* Botón Cancelar Pedido (más pequeño) */
+.ordertracking-cancel-btn {
+  background: #fff;
+  color: #b3541e;
+  border: 2px solid #b3541e;
+  border-radius: 20px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: none;
+}
+
+.ordertracking-cancel-btn:hover {
+  background: #fbeee6;
+  color: #a13e0b;
+}
+
+/* Botón Pagar (igual que .orderdata-preview-view-package-btn) */
+.ordertracking-pay-btn {
+  background: #8B6D47;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: none;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.ordertracking-pay-btn:hover {
+  background: #7A5D3F;
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 1200px) {
   .ordertracking-tracking-col {
@@ -158,5 +226,19 @@
   
   .ordertracking-data-content {
     padding: 0.8rem;
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .ordertracking-actions-row {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.2rem;
+  }
+  .ordertracking-pay-btn,
+  .ordertracking-cancel-btn {
+    width: 100%;
+    text-align: center;
   }
 }
