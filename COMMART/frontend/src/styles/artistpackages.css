@@ -590,8 +590,7 @@
   padding: 10px 24px; /* Mismo padding que los precios de paquetes */
   border-radius: 20px; /* Mismo border-radius que los precios de paquetes */
   letter-spacing: 0.04em;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Misma sombra que los precios de paquetes */
-  white-space: nowrap;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .extra-item-actions {

@@ -9,12 +9,16 @@ import ConfirmModal from '../components/ConfirmModal';
 import '../styles/ordertracking.css';
 
 const STAGES = [
-  { key: 'plan', label: 'Planeación' },
-  { key: 'sketch', label: 'Boceto' },
-  { key: 'details', label: 'Detalles' },
-  { key: 'final', label: 'Últimos Detalles' },
-  { key: 'completed', label: 'Finalizado' }
+  { key: 'plan', label: 'Planeación', description: 'En esta fase se revisa la solicitud del pedido, incluyendo referencias, descripción y detalles generales. El objetivo es establecer una base clara para el trabajo a realizar.' },
+  { key: 'sketch', label: 'Boceto', description: 'En esta fase se harán propuestas de boceto básicas para visualizar la idea inicial. El cliente podrá elegir el que más le guste.\n\nClientes estándar: 3 bocetos.\nClientes premium: 5 bocetos.' },
+  { key: 'details', label: 'Definición', description: 'El artista trabaja sobre el boceto elegido, añadiendo detalles, colores, estructura y estilo definidos según el pedido.\n\nPuede subirse hasta un máximo de 3 variantes.' },
+  { key: 'final', label: 'Últimos Detalles', description: 'Se realizan los ajustes finales: efectos, retoques, acabados o elementos adicionales incluidos en el paquete seleccionado.\n\nPuede subirse hasta un máximo de 3 variantes.' },
+  { key: 'completed', label: 'Finalizado', description: '¡La obra está completa! El archivo final ha sido entregado y puedes descargarlo o visualizarlo desde esta sección.' }
 ];
+
+function getStageIndex(key) {
+  return STAGES.findIndex(s => s.key === key);
+}
 
 const OrderTracking = ({ user }) => {
   const location = useLocation();
@@ -29,7 +33,8 @@ const OrderTracking = ({ user }) => {
   const [invoiceData, setInvoiceData] = useState(null);
   const [clientUser, setClientUser] = useState(null);
   const [artistUser, setArtistUser] = useState(null);
-  const [selectedStage, setSelectedStage] = useState('plan');
+  const [selectedStage, setSelectedStage] = useState(null);
+  const hasSyncedStage = useRef(false);
   const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
   const [showPackageModal, setShowPackageModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
@@ -351,6 +356,43 @@ const OrderTracking = ({ user }) => {
     // eslint-disable-next-line
   }, [location.key, location.search, messages, order?.current_stage]);
 
+  // Solo sincroniza selectedStage con la fase activa UNA VEZ al cargar el pedido
+  useEffect(() => {
+    if (order?.current_stage && !hasSyncedStage.current) {
+      setSelectedStage(order.current_stage);
+      hasSyncedStage.current = true;
+    }
+    // Si la notificación trae un messageId, haz scroll al mensaje
+    if (location.state?.messageId && messages.length > 0) {
+      const idx = messages.findIndex(m => String(m.id) === String(location.state.messageId));
+      if (idx !== -1 && messageListRef.current) {
+        const msgNode = messageListRef.current.children[idx];
+        if (msgNode) {
+          msgNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+    // eslint-disable-next-line
+  }, [location.key, location.search, messages, order?.current_stage]);
+
+  const handleDeleteSample = async (img, idx) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/orders/${order.id}/sample`,
+        {
+          data: { phase: selectedStage, image: img },
+          withCredentials: true,
+        }
+      );
+      // Recarga el pedido para actualizar las muestras
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      setAlert({ open: true, type: 'success', message: 'Muestra eliminada correctamente.' });
+    } catch (err) {
+      setAlert({ open: true, type: 'error', message: 'Error al eliminar la muestra.' });
+    }
+  };
+
   if (!user) return <div>Cargando usuario...</div>;
   if (loading) return <div>Cargando pedido...</div>;
   if (!order) return <div>No encontrado</div>;
@@ -483,23 +525,47 @@ const OrderTracking = ({ user }) => {
         <div className="ordertracking-main-layout">
           {/* Columna izquierda */}
           <section className="ordertracking-tracking-col">
-            <h2 className="ordertracking-title">Estado del Pedido</h2>
-            {/* Navegación de fases */}
-            <div className="ordertracking-stages-nav">
-              {STAGES.map((stage, idx) => (
-                <div
-                  key={stage.key}
-                  className={`ordertracking-stage-item${selectedStage === stage.key ? ' active' : ''}${idx <= currentStageIdx ? ' reached' : ''}`}
-                  onClick={() => idx <= currentStageIdx && setSelectedStage(stage.key)}
-                >
-                  <div className="ordertracking-stage-dot" />
-                  <span className="ordertracking-stage-label">{stage.label}</span>
+            <div className="ordertracking-title">Estado del Pedido</div>
+            <div className="ordertracking-phase-card compact">
+              <div className="ordertracking-phases-line">
+                <div className="ordertracking-phases-line-bg" />
+                {STAGES.map((stage, idx) => {
+                  const isActive = order?.current_stage === stage.key; // círculo verde
+                  const isSelected = selectedStage === stage.key; // borde negro
+                  return (
+                    <div
+                      key={stage.key}
+                      className={
+                        "ordertracking-phase-item" +
+                        (isActive ? " active" : "") +
+                        (isSelected ? " selected" : "")
+                      }
+                      onClick={() => setSelectedStage(stage.key)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className={
+                        "ordertracking-phase-circle" +
+                        (isActive ? " active" : "") +
+                        (isSelected ? " selected" : "")
+                      } />
+                      <span className="ordertracking-phase-label">{stage.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <hr className="ordertracking-phase-divider" />
+              <div className="ordertracking-phase-desc">
+                <div className="ordertracking-phase-desc-title">
+                  {STAGES[getStageIndex(selectedStage)]?.label}
                 </div>
-              ))}
+                {STAGES[getStageIndex(selectedStage)]?.description.split('\n').map((line, i) =>
+                  <p key={i}>{line}</p>
+                )}
+              </div>
             </div>
+            
             {/* Contenido de la fase seleccionada */}
             <div className="ordertracking-phase-content">
-              <h3 className="ordertracking-phase-title">{STAGES.find(s => s.key === selectedStage)?.label}</h3>
               
               {/* Muestras del artista */}
               <div className="ordertracking-section">
@@ -509,12 +575,40 @@ const OrderTracking = ({ user }) => {
                 {selectedPhaseImages.length > 0 ? (
                   <div className="ordertracking-samples-list">
                     {selectedPhaseImages.map((img, idx) => (
-                      <img
-                        key={idx}
-                        src={`http://localhost:5000/${img}`}
-                        alt={`Muestra ${idx + 1}`}
-                        className="ordertracking-sample-img"
-                      />
+                      <div key={idx} className="ordertracking-sample-img-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
+                        <img
+                          src={`http://localhost:5000/${img}`}
+                          alt={`Muestra ${idx + 1}`}
+                          className="ordertracking-sample-img"
+                        />
+                        {user.role === 'artist' && canUploadSamples && (
+                          <button
+                            className="ordertracking-delete-sample-btn"
+                            style={{
+                              position: 'absolute',
+                              top: 4,
+                              right: 4,
+                              background: '#fff',
+                              border: '1px solid #e74c3c',
+                              color: '#e74c3c',
+                              borderRadius: '50%',
+                              width: 28,
+                              height: 28,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 'bold',
+                              fontSize: 18,
+                              zIndex: 2,
+                            }}
+                            title="Eliminar muestra"
+                            onClick={() => handleDeleteSample(img, idx)}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
                     ))}
                   </div>
                 ) : (

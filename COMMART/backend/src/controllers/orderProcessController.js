@@ -3,6 +3,8 @@ import { updateOrderFields, getOrderById } from '../models/orderModel.js';
 import { updateOrderStatusModel } from '../models/orderModel.js';
 import { createNotification } from '../models/notificationModel.js';
 import dbConnection from '../config/db.js';
+import fs from 'fs';
+import path from 'path';
 
 // Avanzar de fase
 export const advanceOrderPhaseController = async (req, res) => {
@@ -159,5 +161,51 @@ export const uploadFinalArtController = async (req, res) => {
   } catch (error) {
     console.error('Error al subir arte final:', error);
     res.status(500).json({ message: 'Error al subir arte final.' });
+  }
+};
+
+export const deleteSampleController = async (req, res) => {
+  try {
+    const { id } = req.params; // order id
+    const { phase, image } = req.body; // image: ruta relativa
+    const userId = req.user.id;
+
+    if (!phase || !image) {
+      return res.status(400).json({ message: 'Faltan datos obligatorios.' });
+    }
+
+    // Verifica que el usuario sea el artista del pedido
+    const order = await getOrderById(id);
+    if (!order || order.artist_id !== userId) {
+      return res.status(403).json({ message: 'No autorizado.' });
+    }
+
+    // Elimina la referencia de la imagen en el campo correspondiente
+    const phaseField = `${phase}_image`;
+    let images = (order[phaseField] || '').split(',').filter(Boolean);
+    images = images.filter(img => img !== image);
+    const newImages = images.join(',');
+
+    await new Promise((resolve, reject) => {
+      dbConnection.query(
+        `UPDATE orders SET ${phaseField} = ? WHERE id = ?`,
+        [newImages, id],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
+    });
+
+    // Elimina el archivo físico si existe
+    const filePath = path.join(process.cwd(), 'src', image);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    res.json({ message: 'Muestra eliminada correctamente.' });
+  } catch (error) {
+    console.error('Error al eliminar muestra:', error);
+    res.status(500).json({ message: 'Error al eliminar muestra.' });
   }
 };

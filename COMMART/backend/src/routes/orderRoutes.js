@@ -16,7 +16,8 @@ import {
   getPhaseSamplesController,
   getPhaseMessagesController,
   payOrderController,
-  uploadFinalArtController
+  uploadFinalArtController,
+  deleteSampleController
 } from '../controllers/orderProcessController.js';
 
 const router = express.Router();
@@ -74,5 +75,8 @@ router.post('/:id/pay', verifyToken, payOrderController);
 
 // Subir arte final
 router.post('/:id/final', verifyToken, uploadFinalArt.single('final_image'), uploadFinalArtController);
+
+// Eliminar muestra
+router.delete('/:id/sample', verifyToken, deleteSampleController);
 
 export default router;
