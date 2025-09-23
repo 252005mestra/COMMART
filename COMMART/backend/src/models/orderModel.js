@@ -123,3 +123,16 @@ export const updateOrderStatusModel = (orderId, updateData) => {
     );
   });
 };
+
+// Función para actualizar estado de pago del pedido
+export const updateOrderPaymentStatus = (orderId, isPaid) => {
+  return new Promise((resolve, reject) => {
+    const query = 'UPDATE orders SET is_paid = ?, paid_at = ? WHERE id = ?';
+    const paidAt = isPaid ? new Date() : null;
+    
+    dbConnection.query(query, [isPaid ? 1 : 0, paidAt, orderId], (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    });
+  });
+};

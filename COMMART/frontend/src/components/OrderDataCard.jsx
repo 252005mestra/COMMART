@@ -14,6 +14,7 @@ export default function OrderDataCard({
   selectedExtras = [],
   onViewPackage,
   currentUserId,
+  currentUser, // ✅ MANTENER para fallback
 }) {
   const [showCarousel, setShowCarousel] = useState(false);
   const [showPackageDetail, setShowPackageDetail] = useState(false);
@@ -22,29 +23,43 @@ export default function OrderDataCard({
   // Siempre trabajar con array
   const extrasArray = Array.isArray(selectedExtras) ? selectedExtras : [];
 
-  // Suma total
+  // ✅ MOVER ESTA LÍNEA AQUÍ (antes era línea 38)
+  const isClientView = currentUserId === order?.client_id;
+
+  // ✅ USAR SOLO UNA VARIABLE PARA TODO
+  const profileUser = isClientView ? clientUser : artistUser;
+  const labelText = 'Pedido realizado por:';
+
+  const profileImageUrl = profileUser?.profile_image 
+    ? `http://localhost:5000/${profileUser.profile_image}`
+    : '/default-profile.jpg'; // Esta ruta SÍ existe en tu /public/
+
+  // ✅ CORREGIR: Suma total como en el código original
   const total =
     (Number(selectedPackage?.price) || 0) +
     extrasArray.reduce((sum, e) => sum + (Number(e.price) || 0), 0);
 
-  // Mostrar siempre el cliente que hizo el pedido
-  const displayUser = clientUser;
-  const labelText = 'Pedido realizado por:';
-
   // Navegación al perfil
   const handleUserClick = () => {
-    if (!displayUser) return;
-    // Forzar navegación a perfil de artista si tiene is_artist true
-    if (displayUser.is_artist === true || displayUser.is_artist === 1) {
-      navigate(`/artist/${displayUser.id}`);
+    if (!profileUser) return;
+    
+    // Si es el usuario actual, ir a su perfil privado
+    if (currentUserId && profileUser.id === currentUserId) {
+      if (profileUser.is_artist) {
+        navigate('/artist-profile');
+      } else {
+        navigate('/profile');
+      }
+      return;
+    }
+    
+    // Si no es el usuario actual, ir al perfil público
+    if (profileUser.is_artist === true || profileUser.is_artist === 1) {
+      navigate(`/artist/${profileUser.id}`);
     } else {
-      navigate(`/user/${displayUser.id}`);
+      navigate(`/user/${profileUser.id}`);
     }
   };
-
-  // Utilidad para obtener la URL de la foto de perfil
-  const getProfileImageUrl = (imgPath) =>
-    imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
 
   return (
     <>
@@ -55,19 +70,33 @@ export default function OrderDataCard({
             <div className="orderdata-row orderdata-row-top">
               <div className="orderdata-user-section">
                 <span className="orderdata-user-label">{labelText}</span>
-                <div
-                  className="orderdata-user"
-                  style={{ cursor: 'pointer' }}
-                  onClick={handleUserClick}
-                  title="Ver perfil"
-                >
-                  <img
-                    src={getProfileImageUrl(displayUser?.profile_image)}
-                    alt={displayUser?.username}
-                    className="orderdata-avatar"
-                  />
-                  <span className="orderdata-username">{displayUser?.username}</span>
-                </div>
+                {profileUser ? (
+                  <div
+                    className="orderdata-user"
+                    style={{ cursor: 'pointer' }}
+                    onClick={handleUserClick}
+                    title="Ver perfil"
+                  >
+                    <img
+                      src={profileImageUrl}
+                      alt={profileUser?.username || 'Usuario'}
+                      className="orderdata-avatar"
+                      onError={(e) => {
+                        e.target.src = '/default-profile.jpg';
+                      }}
+                    />
+                    <span className="orderdata-username">{profileUser?.username || 'Usuario'}</span>
+                  </div>
+                ) : (
+                  <div className="orderdata-user">
+                    <img
+                      src="/default-profile.jpg"
+                      alt="Usuario"
+                      className="orderdata-avatar"
+                    />
+                    <span className="orderdata-username">Usuario no disponible</span>
+                  </div>
+                )}
               </div>
               <div className="orderdata-date-section">
                 <span className="orderdata-date-label">Pedido realizado el</span>
@@ -215,17 +244,17 @@ export default function OrderDataCard({
         )}
       </div>
 
-      {/* Card de precios SEPARADA, fuera de la card principal */}
+      {/* ✅ CORREGIR: Card de precios como en el código original */}
       <div className="odc-summary-price-card">
         <div className="odc-summary-price-breakdown">
           <div className="odc-summary-price-item">
             <span>{selectedPackage?.name || selectedPackage?.title || 'Paquete'}</span>
-            <span className="odc-summary-price-badge">{formatColombianPrice(selectedPackage?.price)}</span>
+            <span className="odc-summary-price-badge">{formatColombianPrice(selectedPackage?.price || 0)}</span>
           </div>
           {extrasArray.map((extra) => (
             <div key={extra.id} className="odc-summary-price-item">
               <span>{extra.name}</span>
-              <span className="odc-summary-price-badge">{formatColombianPrice(extra.price)}</span>
+              <span className="odc-summary-price-badge">{formatColombianPrice(extra.price || 0)}</span>
             </div>
           ))}
         </div>

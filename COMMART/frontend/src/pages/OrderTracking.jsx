@@ -6,6 +6,8 @@ import Footer from '../components/Footer';
 import AlertModal from '../components/AlertModal';
 import OrderDataCard from '../components/OrderDataCard';
 import ConfirmModal from '../components/ConfirmModal';
+import { usePayment } from '../hooks/usePayment';
+import InvoiceModal from '../components/InvoiceModal';
 import '../styles/ordertracking.css';
 
 const STAGES = [
@@ -44,13 +46,22 @@ const OrderTracking = ({ user }) => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const messageListRef = useRef(null);
+  const { processPayment, loading: paymentLoading, error: paymentError } = usePayment();
 
+  // ✅ useEffect para cargar datos iniciales del pedido
   useEffect(() => {
     const fetchOrderAndUsers = async () => {
       setLoading(true);
       try {
         const res = await axios.get(`http://localhost:5000/api/orders/${id}`, { withCredentials: true });
         setOrder(res.data);
+
+        // ✅ CORRECCIÓN: Verificar que res.data existe antes de acceder a sus propiedades
+        if (!res.data || !res.data.client_id || !res.data.artist_id) {
+          console.error('Error: Datos de pedido incompletos', res.data);
+          setAlert({ open: true, type: 'error', message: 'Error al cargar los datos del pedido.' });
+          return;
+        }
 
         // Obtener datos de cliente y artista
         const [clientRes, artistRes] = await Promise.all([
@@ -61,18 +72,44 @@ const OrderTracking = ({ user }) => {
         setClientUser(clientRes.data);
         setArtistUser(artistRes.data);
 
-        // AGREGAR: Obtener datos del paquete
+        // Obtener datos del paquete
         if (res.data.package_id) {
           try {
             const packageRes = await axios.get(`http://localhost:5000/api/packages/artist/${res.data.artist_id}`, { withCredentials: true });
             const selectedPkg = packageRes.data.find(pkg => pkg.id === res.data.package_id);
-            setSelectedPackage(selectedPkg);
+            
+            if (selectedPkg) {
+              setSelectedPackage(selectedPkg);
+            } else {
+              // Crear paquete temporal si no se encuentra
+              setSelectedPackage({
+                id: res.data.package_id,
+                title: res.data.package_name || 'Paquete',
+                name: res.data.package_name || 'Paquete',
+                price: res.data.total_price || 100000
+              });
+            }
           } catch (err) {
             console.error('Error al obtener paquete:', err);
+            // Crear paquete temporal
+            setSelectedPackage({
+              id: res.data.package_id || 1,
+              title: 'Paquete',
+              name: 'Paquete',
+              price: 100000
+            });
           }
+        } else {
+          // Paquete por defecto
+          setSelectedPackage({
+            id: 1,
+            title: 'Paquete Estándar',
+            name: 'Paquete Estándar',
+            price: 100000
+          });
         }
 
-        // AGREGAR: Obtener datos de extras
+        // Obtener datos de extras
         if (res.data.extras) {
           try {
             const extrasRes = await axios.get(`http://localhost:5000/api/packages/all/extras`, { withCredentials: true });
@@ -84,25 +121,33 @@ const OrderTracking = ({ user }) => {
               extrasIds = res.data.extras;
             }
             
-            const selectedExtras = extrasRes.data.filter(extra => 
+            const selectedExtrasData = extrasRes.data.filter(extra => 
               extrasIds.includes(String(extra.id))
             );
-            setSelectedExtras(selectedExtras);
+            setSelectedExtras(selectedExtrasData);
           } catch (err) {
             console.error('Error al obtener extras:', err);
+            setSelectedExtras([]);
           }
+        } else {
+          setSelectedExtras([]);
         }
 
+        setSelectedStage(res.data.current_stage || 'plan');
       } catch (err) {
         console.error('Error:', err);
+        setAlert({ open: true, type: 'error', message: 'Error al cargar el pedido.' });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrderAndUsers();
+    if (id) {
+      fetchOrderAndUsers();
+    }
   }, [id]);
 
+  // ✅ useEffect para cargar mensajes cuando cambia la etapa
   useEffect(() => {
     if (order && selectedStage) {
       fetchMessages(selectedStage);
@@ -110,6 +155,7 @@ const OrderTracking = ({ user }) => {
     // eslint-disable-next-line
   }, [order, selectedStage]);
 
+  // ✅ useEffect para manejar preview de archivos
   useEffect(() => {
     if (!sampleFiles.length) {
       setPreviewUrls([]);
@@ -120,11 +166,114 @@ const OrderTracking = ({ user }) => {
     return () => urls.forEach(url => URL.revokeObjectURL(url));
   }, [sampleFiles]);
 
+  // ✅ useEffect para manejar el retorno de Wompi (INTEGRACIÓN DE PAGO)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const paymentStatus = urlParams.get('payment');
+    
+    if (paymentStatus === 'success') {
+      console.log('✅ Usuario regresó de pago exitoso');
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: '¡Pago completado! Tu pedido ha sido procesado exitosamente. El artista ha sido notificado.' 
+      });
+      
+      // Limpiar parámetros de la URL
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+      
+      // Función para recargar datos con reintentos
+      const reloadOrderDataWithRetries = async (maxRetries = 5) => {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          try {
+            console.log(`🔄 Intento ${attempt}/${maxRetries}: Recargando datos del pedido...`);
+            
+            const response = await axios.get(`http://localhost:5000/api/orders/${id}`, { 
+              withCredentials: true 
+            });
+            
+            if (response.data) {
+              console.log(`📋 Datos recargados (intento ${attempt}):`, {
+                is_paid: response.data.is_paid,
+                paid_at: response.data.paid_at,
+                status: response.data.status
+              });
+              
+              setOrder(response.data);
+              
+              // Si el pago fue procesado correctamente, detener reintentos
+              if (response.data.is_paid) {
+                console.log('✅ Pago confirmado en la base de datos');
+                return;
+              } else {
+                console.log(`⚠️ Intento ${attempt}: El pago aún no se refleja en la base de datos`);
+              }
+            }
+          } catch (error) {
+            console.error(`❌ Error en intento ${attempt}:`, error);
+          }
+          
+          // Esperar antes del siguiente intento (2, 4, 6, 8, 10 segundos)
+          if (attempt < maxRetries) {
+            const waitTime = attempt * 2000;
+            console.log(`⏳ Esperando ${waitTime/1000} segundos antes del siguiente intento...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          }
+        }
+        
+        console.log('⚠️ Se agotaron los reintentos. El estado del pago podría no estar actualizado.');
+      };
+      
+      // Iniciar proceso de recarga con delay inicial
+      setTimeout(() => {
+        reloadOrderDataWithRetries();
+      }, 1000);
+    }
+  }, [location.search, id]);
+
+  // ✅ useEffect para scroll a mensajes específicos (SIN FORZAR CAMBIO DE STAGE)
+  useEffect(() => {
+    // Solo seleccionar la fase si viene específicamente en el estado de navegación
+    if (location.state?.phase && location.state.phase !== selectedStage) {
+      setSelectedStage(location.state.phase);
+    }
+    
+    // Si la notificación trae un messageId, haz scroll al mensaje
+    if (location.state?.messageId && messages.length > 0) {
+      const idx = messages.findIndex(m => String(m.id) === String(location.state.messageId));
+      if (idx !== -1 && messageListRef.current) {
+        const msgNode = messageListRef.current.children[idx];
+        if (msgNode) {
+          msgNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+    // eslint-disable-next-line
+  }, [location.state?.messageId, location.state?.phase, messages]);
+
+  // Solo sincroniza selectedStage con la fase activa UNA VEZ al cargar el pedido
+  useEffect(() => {
+    if (order?.current_stage && !hasSyncedStage.current) {
+      setSelectedStage(order.current_stage);
+      hasSyncedStage.current = true;
+    }
+    // eslint-disable-next-line
+  }, [order?.current_stage]);
+
+  // ✅ FUNCIÓN para obtener mensajes
   const fetchMessages = async (stage) => {
-    const res = await axios.get(`http://localhost:5000/api/orders/${id}/messages/${stage}`, { withCredentials: true });
-    setMessages(res.data);
+    try {
+      const res = await axios.get(`http://localhost:5000/api/orders/${id}/messages/${stage}`, { withCredentials: true });
+      setMessages(res.data);
+    } catch (err) {
+      console.error('Error cargando mensajes:', err);
+      setMessages([]);
+    }
   };
 
+  // ✅ Función para enviar mensaje
   const handleSendMsg = async () => {
     if (!msg.trim()) return;
     const newMsg = {
@@ -146,6 +295,7 @@ const OrderTracking = ({ user }) => {
     }
   };
 
+  // ✅ Función para avanzar de fase
   const handleAdvancePhase = async () => {
     const currentIdx = STAGES.findIndex(s => s.key === order.current_stage);
     if (currentIdx === -1 || currentIdx >= STAGES.length - 1) return;
@@ -168,6 +318,36 @@ const OrderTracking = ({ user }) => {
     }
   };
 
+  // ✅ Función para finalizar pedido (cambiar status a completed)
+  const handleFinalizePedido = async () => {
+    if (order.current_stage !== 'final') return;
+    
+    try {
+      await axios.put(
+        `http://localhost:5000/api/orders/${order.id}/status`,
+        { status: 'completed' },
+        { withCredentials: true }
+      );
+      
+      // Recargar el pedido para actualizar el estado
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: 'Pedido finalizado exitosamente. El cliente ha sido notificado.' 
+      });
+    } catch (err) {
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Error al finalizar el pedido.' 
+      });
+    }
+  };
+
+  // ✅ Función para subir muestras
   const handleUploadSamples = async () => {
     if (!sampleFiles.length) return;
     try {
@@ -191,6 +371,7 @@ const OrderTracking = ({ user }) => {
     }
   };
 
+  // ✅ Función para mostrar/ocultar factura
   const handleToggleInvoice = () => {
     setShowInvoice(prev => !prev);
     if (!showInvoice && order && clientUser && artistUser) {
@@ -207,51 +388,103 @@ const OrderTracking = ({ user }) => {
     }
   };
 
+  // ✅ FUNCIÓN PARA PROCESAR PAGO CON WOMPI
   const handlePay = async () => {
     try {
-      await axios.post(
-        `http://localhost:5000/api/orders/${order.id}/pay`,
-        {},
-        { withCredentials: true }
-      );
-      // Recarga el pedido y usuarios para tener los datos actualizados
-      const [orderRes, clientRes, artistRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true }),
-        axios.get(`http://localhost:5000/api/auth/users/${order.client_id}`, { withCredentials: true }),
-        axios.get(`http://localhost:5000/api/auth/users/${order.artist_id}`, { withCredentials: true }),
-      ]);
-      setOrder(orderRes.data);
-      setClientUser(clientRes.data);
-      setArtistUser(artistRes.data);
+      console.log('💳 Iniciando proceso de pago...');
+      
+      // Validar que existe un pedido
+      if (!order || !order.id) {
+        setAlert({ 
+          open: true, 
+          type: 'error', 
+          message: 'No se pudo cargar la información del pedido' 
+        });
+        return;
+      }
 
-      setInvoiceData({
-        orderId: orderRes.data.id,
-        client: clientRes.data.username,
-        artist: artistRes.data.username,
-        amount: orderRes.data.price || orderRes.data.amount || 100,
-        date: orderRes.data.paid_at
-          ? new Date(orderRes.data.paid_at).toLocaleString()
-          : new Date().toLocaleString(),
-        stage: orderRes.data.current_stage
+      // Calcular el total
+      const packagePrice = selectedPackage?.price || 0;
+      const extrasPrice = selectedExtras.reduce((sum, extra) => sum + (extra.price || 0), 0);
+      const totalAmount = packagePrice + extrasPrice;
+      
+      if (totalAmount <= 0) {
+        setAlert({ 
+          open: true, 
+          type: 'error', 
+          message: 'Error: El monto del pedido debe ser mayor a 0. Verifica que el paquete tenga precio asignado.' 
+        });
+        return;
+      }
+
+      // Validar datos del cliente
+      const customerEmail = clientUser?.email || user?.email;
+      const customerName = clientUser?.username || user?.username;
+
+      if (!customerEmail || !customerName) {
+        setAlert({ 
+          open: true, 
+          type: 'error', 
+          message: 'Error: No se pudo obtener la información del cliente. Verifica que tu sesión esté activa.' 
+        });
+        return;
+      }
+
+      setAlert({ 
+        open: true, 
+        type: 'info', 
+        message: 'Preparando pago con Wompi... Serás redirigido en un momento.' 
       });
-      setShowInvoice(true);
+
+      // Datos de pago para enviar al backend
+      const paymentData = {
+        orderId: parseInt(order.id),
+        amount: parseFloat(totalAmount),
+        customerEmail: String(customerEmail),
+        customerName: String(customerName)
+      };
+
+      // Procesar pago usando el hook
+      const success = await processPayment(paymentData);
+
+      if (!success) {
+        if (paymentError) {
+          setAlert({ 
+            open: true, 
+            type: 'error', 
+            message: `Error de pago: ${paymentError}` 
+          });
+        } else {
+          setAlert({ 
+            open: true, 
+            type: 'error', 
+            message: 'Error procesando el pago. Por favor, intenta nuevamente.' 
+          });
+        }
+      }
+      
     } catch (err) {
-      setAlert({ open: true, type: 'error', message: err.response?.data?.message || 'Error al registrar el pago' });
+      console.error('❌ Error inesperado en handlePay:', err);
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: `Error inesperado: ${err.message}. Por favor, intenta nuevamente.` 
+      });
     }
   };
 
-  // Nueva función para recargar el pedido
+  // ✅ Función para recargar el pedido
   const reloadOrder = async () => {
     const res = await axios.get(`http://localhost:5000/api/orders/${id}`, { withCredentials: true });
     setOrder(res.data);
   };
 
-  // Función para aceptar pedido
+  // ✅ Función para aceptar pedido
   const handleAccept = async () => {
     try {
       await axios.put(
         `http://localhost:5000/api/orders/${order.id}/status`,
-        { status: 'in_progress' },
+        { status: 'accepted' },
         { withCredentials: true }
       );
       await reloadOrder();
@@ -261,7 +494,7 @@ const OrderTracking = ({ user }) => {
     }
   };
 
-  // Función para rechazar pedido
+  // ✅ Función para rechazar pedido
   const handleReject = async () => {
     if (!rejectReason.trim()) {
       setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo para el rechazo.' });
@@ -303,7 +536,7 @@ const OrderTracking = ({ user }) => {
     }
   };
 
-  // Función para marcar como completado (solo cliente, fase final)
+  // ✅ Función para marcar como completado (solo cliente, fase final)
   const handleMarkAsCompleted = async () => {
     if (order.current_stage !== 'final' || order.status === 'completed') return;
     try {
@@ -321,59 +554,49 @@ const OrderTracking = ({ user }) => {
     }
   };
 
-  // Solo permitir mensajes y muestras en la fase actual y si no está finalizado
-  const isFinal = ['cancelled', 'rejected', 'completed', 'finalized'].includes(order?.status);
-  const canSendMsg = !isFinal && selectedStage === order?.current_stage;
-  const canUploadSamples = user?.role === 'artist' && !isFinal && selectedStage === order?.current_stage;
-
-  // Fases por las que ha pasado el pedido (hasta la actual)
-  const currentStageIdx = order ? STAGES.findIndex(s => s.key === order.current_stage) : 0;
-  const availableStages = order ? STAGES.slice(0, currentStageIdx + 1) : [STAGES[0]];
-
-  // Imágenes de la fase seleccionada
-  const selectedPhaseImages = order && order[`${selectedStage}_image`]
-    ? order[`${selectedStage}_image`].split(',').filter(Boolean)
-    : [];
-
-  useEffect(() => {
-    // Selecciona la fase si viene en el estado de navegación
-    if (location.state?.phase && location.state.phase !== selectedStage) {
-      setSelectedStage(location.state.phase);
-    } else if (!location.state?.phase && order?.current_stage && selectedStage !== order.current_stage) {
-      // Si no viene fase, selecciona la actual
-      setSelectedStage(order.current_stage);
-    }
-    // Si la notificación trae un messageId, haz scroll al mensaje
-    if (location.state?.messageId && messages.length > 0) {
-      const idx = messages.findIndex(m => String(m.id) === String(location.state.messageId));
-      if (idx !== -1 && messageListRef.current) {
-        const msgNode = messageListRef.current.children[idx];
-        if (msgNode) {
-          msgNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // ✅ Función para forzar recarga completa de datos
+  const forceReloadOrderData = async () => {
+    try {
+      console.log('🔄 Forzando recarga completa de datos...');
+      setLoading(true);
+      
+      const res = await axios.get(`http://localhost:5000/api/orders/${id}`, { 
+        withCredentials: true 
+      });
+      
+      if (res.data) {
+        console.log('📋 Datos actualizados:', {
+          id: res.data.id,
+          is_paid: res.data.is_paid,
+          paid_at: res.data.paid_at,
+          status: res.data.status,
+          current_stage: res.data.current_stage
+        });
+        
+        setOrder(res.data);
+        
+        // Actualizar stage seleccionado si cambió
+        if (res.data.current_stage !== selectedStage) {
+          setSelectedStage(res.data.current_stage);
         }
+        
+        setAlert({ 
+          open: true, 
+          type: 'success', 
+          message: 'Datos del pedido actualizados correctamente.' 
+        });
       }
+    } catch (error) {
+      console.error('❌ Error forzando recarga:', error);
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Error al recargar los datos del pedido.' 
+      });
+    } finally {
+      setLoading(false);
     }
-    // eslint-disable-next-line
-  }, [location.key, location.search, messages, order?.current_stage]);
-
-  // Solo sincroniza selectedStage con la fase activa UNA VEZ al cargar el pedido
-  useEffect(() => {
-    if (order?.current_stage && !hasSyncedStage.current) {
-      setSelectedStage(order.current_stage);
-      hasSyncedStage.current = true;
-    }
-    // Si la notificación trae un messageId, haz scroll al mensaje
-    if (location.state?.messageId && messages.length > 0) {
-      const idx = messages.findIndex(m => String(m.id) === String(location.state.messageId));
-      if (idx !== -1 && messageListRef.current) {
-        const msgNode = messageListRef.current.children[idx];
-        if (msgNode) {
-          msgNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }
-    }
-    // eslint-disable-next-line
-  }, [location.key, location.search, messages, order?.current_stage]);
+  };
 
   const handleDeleteSample = async (img, idx) => {
     try {
@@ -393,6 +616,23 @@ const OrderTracking = ({ user }) => {
     }
   };
 
+  // ✅ LÓGICA DE PERMISOS MEJORADA
+  const isFinal = ['cancelled', 'rejected', 'completed', 'finalized'].includes(order?.status);
+  const currentStageIdx = order ? STAGES.findIndex(s => s.key === order.current_stage) : 0;
+  const selectedStageIdx = STAGES.findIndex(s => s.key === selectedStage);
+
+  // Permisos específicos
+  const canSendMsg = !isFinal && selectedStage === order?.current_stage;
+  const canUploadSamples = user?.role === 'artist' && !isFinal && selectedStage === order?.current_stage;
+  const isCurrentPhase = selectedStage === order?.current_stage;
+  const isPastPhase = selectedStageIdx < currentStageIdx;
+  const isFuturePhase = selectedStageIdx > currentStageIdx;
+
+  const selectedPhaseImages = order && order[`${selectedStage}_image`]
+    ? order[`${selectedStage}_image`].split(',').filter(Boolean)
+    : [];
+
+  // ✅ Renders de estados especiales
   if (!user) return <div>Cargando usuario...</div>;
   if (loading) return <div>Cargando pedido...</div>;
   if (!order) return <div>No encontrado</div>;
@@ -526,12 +766,14 @@ const OrderTracking = ({ user }) => {
           {/* Columna izquierda */}
           <section className="ordertracking-tracking-col">
             <div className="ordertracking-title">Estado del Pedido</div>
+            {/* ✅ MOSTRAR TODAS LAS FASES - permitir navegar a cualquiera */}
             <div className="ordertracking-phase-card compact">
               <div className="ordertracking-phases-line">
                 <div className="ordertracking-phases-line-bg" />
                 {STAGES.map((stage, idx) => {
-                  const isActive = order?.current_stage === stage.key; // círculo verde
-                  const isSelected = selectedStage === stage.key; // borde negro
+                  const isActive = order?.current_stage === stage.key; // círculo verde (fase actual)
+                  const isSelected = selectedStage === stage.key; // borde negro (fase seleccionada)
+                  
                   return (
                     <div
                       key={stage.key}
@@ -540,7 +782,7 @@ const OrderTracking = ({ user }) => {
                         (isActive ? " active" : "") +
                         (isSelected ? " selected" : "")
                       }
-                      onClick={() => setSelectedStage(stage.key)}
+                      onClick={() => setSelectedStage(stage.key)} // ✅ Permitir clic en CUALQUIER fase
                       style={{ cursor: 'pointer' }}
                     >
                       <div className={
@@ -557,6 +799,46 @@ const OrderTracking = ({ user }) => {
               <div className="ordertracking-phase-desc">
                 <div className="ordertracking-phase-desc-title">
                   {STAGES[getStageIndex(selectedStage)]?.label}
+                  {/* ✅ Indicadores de estado de la fase */}
+                  {selectedStage === order?.current_stage && (
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      color: '#27ae60', 
+                      fontWeight: 'normal',
+                      marginLeft: '8px',
+                      background: '#d4edda',
+                      padding: '2px 8px',
+                      borderRadius: '12px'
+                    }}>
+                      (Fase actual)
+                    </span>
+                  )}
+                  {getStageIndex(selectedStage) < currentStageIdx && (
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      color: '#6c757d', 
+                      fontWeight: 'normal',
+                      marginLeft: '8px',
+                      background: '#e2e3e5',
+                      padding: '2px 8px',
+                      borderRadius: '12px'
+                    }}>
+                      (Completada)
+                    </span>
+                  )}
+                  {getStageIndex(selectedStage) > currentStageIdx && (
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      color: '#f39c12', 
+                      fontWeight: 'normal',
+                      marginLeft: '8px',
+                      background: '#fff3cd',
+                      padding: '2px 8px',
+                      borderRadius: '12px'
+                    }}>
+                      (Pendiente)
+                    </span>
+                  )}
                 </div>
                 {STAGES[getStageIndex(selectedStage)]?.description.split('\n').map((line, i) =>
                   <p key={i}>{line}</p>
@@ -570,7 +852,10 @@ const OrderTracking = ({ user }) => {
               {/* Muestras del artista */}
               <div className="ordertracking-section">
                 <div className="ordertracking-section-title">
-                  Muestras del artista ({STAGES.find(s => s.key === selectedStage)?.label}):
+                  Muestras del artista:
+                  {isPastPhase && <small style={{ color: '#6c757d', fontWeight: 'normal' }}> (Fase completada)</small>}
+                  {isFuturePhase && <small style={{ color: '#f39c12', fontWeight: 'normal' }}> (Pendiente)</small>}
+                  {isCurrentPhase && <small style={{ color: '#27ae60', fontWeight: 'normal' }}> (Fase actual)</small>}
                 </div>
                 {selectedPhaseImages.length > 0 ? (
                   <div className="ordertracking-samples-list">
@@ -612,7 +897,12 @@ const OrderTracking = ({ user }) => {
                     ))}
                   </div>
                 ) : (
-                  <span className="ordertracking-no-samples">Sin muestras aún</span>
+                  <span className="ordertracking-no-samples">
+                    {isFuturePhase 
+                      ? 'Las muestras aparecerán cuando se alcance esta fase'
+                      : 'Sin muestras aún'
+                    }
+                  </span>
                 )}
               </div>
               
@@ -631,7 +921,9 @@ const OrderTracking = ({ user }) => {
                       <img key={idx} src={url} alt={`Preview ${idx + 1}`} className="ordertracking-preview-img" />
                     ))}
                   </div>
-                  <button className="ordertracking-upload-btn" onClick={handleUploadSamples} disabled={!sampleFiles.length}>Subir muestras</button>
+                  <button className="ordertracking-upload-btn" onClick={handleUploadSamples} disabled={!sampleFiles.length}>
+                    Subir muestras
+                  </button>
                 </div>
               )}
               
@@ -676,10 +968,129 @@ const OrderTracking = ({ user }) => {
                 </div>
                 {!canSendMsg && (
                   <div className="ordertracking-message-note">
-                    Solo puedes enviar mensajes en la fase actual y si el pedido no está finalizado.
+                    {isFinal ? (
+                      '🔒 El pedido ha finalizado. No se pueden enviar más mensajes.'
+                    ) : isPastPhase ? (
+                      `📝 Esta es una fase completada. Solo puedes ver los mensajes enviados anteriormente.`
+                    ) : isFuturePhase ? (
+                      `⏳ Esta fase aún no ha comenzado. Los mensajes aparecerán cuando se alcance esta etapa.`
+                    ) : isCurrentPhase ? (
+                      '✍️ Puedes enviar mensajes en esta fase actual.'
+                    ) : (
+                      'Solo puedes enviar mensajes en la fase actual del pedido.'
+                    )}
                   </div>
                 )}
               </div>
+
+              {/* ✅ BOTÓN DE PAGO CON WOMPI - MOSTRAR SOLO SI NO ESTÁ PAGADO */}
+              {user.id === order.client_id && 
+                (order.status === 'accepted' || ['plan', 'sketch'].includes(order.current_stage)) && 
+                !order.is_paid &&
+                !isFinal && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">Realizar pago</div>
+                  <button 
+                    className="ordertracking-pay-btn" 
+                    onClick={handlePay}
+                    disabled={paymentLoading}
+                    style={{
+                      background: paymentLoading ? '#ccc' : '#27ae60',
+                      color: 'white',
+                      padding: '12px 24px',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      cursor: paymentLoading ? 'not-allowed' : 'pointer',
+                      opacity: paymentLoading ? 0.7 : 1
+                    }}
+                  >
+                    {paymentLoading ? '⏳ Procesando...' : '💳 Pagar pedido'}
+                  </button>
+                  {paymentError && (
+                    <div style={{ 
+                      marginTop: 8, 
+                      padding: 8, 
+                      background: '#ffebee', 
+                      color: '#c62828', 
+                      borderRadius: 4,
+                      fontSize: 14
+                    }}>
+                      {paymentError}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ✅ MOSTRAR MENSAJE DE PAGO EXITOSO SI YA ESTÁ PAGADO */}
+              {user.id === order.client_id && order.is_paid && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">Estado del pago</div>
+                  <div style={{
+                    padding: '12px 16px',
+                    background: '#d4edda',
+                    color: '#155724',
+                    borderRadius: '6px',
+                    border: '1px solid #c3e6cb',
+                    marginBottom: '8px'
+                  }}>
+                    ✅ <strong>Pago completado exitosamente</strong>
+                    <br />
+                    <small>El artista ha sido notificado y puede continuar con tu pedido.</small>
+                  </div>
+                </div>
+              )}
+
+              {/* ✅ BOTÓN DE RECARGA MANUAL - Solo si acaba de hacer pago pero no se refleja */}
+              {user.id === order.client_id && !order.is_paid && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">¿Acabas de hacer un pago?</div>
+                  <button 
+                    onClick={forceReloadOrderData}
+                    disabled={loading}
+                    style={{
+                      background: '#17a2b8',
+                      color: 'white',
+                      padding: '8px 16px',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      opacity: loading ? 0.7 : 1
+                    }}
+                  >
+                    {loading ? '⏳ Verificando...' : '🔄 Verificar estado del pago'}
+                  </button>
+                  <small style={{ display: 'block', marginTop: '4px', color: '#666' }}>
+                    Si acabas de completar un pago, haz clic aquí para actualizar el estado.
+                  </small>
+                </div>
+              )}
+
+              {/* ✅ MOSTRAR FACTURA solo si el pedido está pagado */}
+              {user.id === order.client_id && order.is_paid && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">Factura de Pago</div>
+                  <button 
+                    className="ordertracking-invoice-btn" 
+                    onClick={handleToggleInvoice}
+                    style={{
+                      background: '#8B6D47',
+                      color: 'white',
+                      padding: '12px 24px',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontFamily: 'Goldman, sans-serif'
+                    }}
+                  >
+                    🧾 Ver Factura
+                  </button>
+                </div>
+              )}
               
               {/* Subir arte final (solo artista, solo en la última fase) */}
               {user.role === 'artist' && order.current_stage === 'final' && !isFinal && (
@@ -720,72 +1131,48 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
               
-              {/* Descargar arte final (solo cliente, solo si existe el archivo y el pedido está completado) */}
-              {user.role === 'client' && order.current_stage === 'completed' && order.status === 'completed' && order.completed_image && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">Descargar arte final</div>
-                  <a href={`http://localhost:5000/${order.completed_image}`} download>
-                    Descargar arte final
-                  </a>
-                </div>
-              )}
-              
-              {/* Mostrar factura solo si el pedido está pagado */}
-              {user.role === 'client' && order.is_paid && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">Factura</div>
-                  <button className="ordertracking-invoice-btn" onClick={handleToggleInvoice}>
-                    {showInvoice ? 'Ocultar' : 'Mostrar'} factura
-                  </button>
-                  {showInvoice && invoiceData && (
-                    <div className="ordertracking-invoice-modal">
-                      <div className="ordertracking-invoice-content">
-                        <h2>Factura de Pago</h2>
-                        <p><b>Pedido:</b> #{invoiceData.orderId}</p>
-                        <p><b>Cliente:</b> {invoiceData.client}</p>
-                        <p><b>Artista:</b> {invoiceData.artist}</p>
-                        <p><b>Monto:</b> ${invoiceData.amount}</p>
-                        <p><b>Fecha:</b> {invoiceData.date}</p>
-                        <p><b>Fase pagada:</b> {invoiceData.stage}</p>
-                        <button onClick={() => setShowInvoice(false)}>Cerrar</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Descargar arte final (solo artista, solo si el pedido está completado y hay imagen final) */}
-              {user.role === 'artist' && order.status === 'completed' && order.final_image && (
-                <a
-                  href={`http://localhost:5000/${order.final_image}`}
-                  download={`arte_final_pedido_${order.id}.jpg`}
-                  className="ordertracking-download-btn"
-                >
-                  Descargar arte final
-                </a>
-              )}
-              
               {/* Solo mostrar el botón si el usuario es cliente, el pedido está en fase final y no está completado */}
               {user.id === order.client_id && order.current_stage === 'final' && order.status !== 'completed' && (
-                <button className="ordertracking-completed-btn" onClick={handleMarkAsCompleted}>
+                <button 
+                  style={{
+                    background: '#27ae60',
+                    color: 'white',
+                    padding: '12px 24px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    marginTop: '16px'
+                  }}
+                  onClick={handleMarkAsCompleted}
+                >
                   Marcar como completado
                 </button>
               )}
               
-              {/* Botón para avanzar de fase */}
-              {user.role === 'artist'
-                && !isFinal
-                && selectedStage === order.current_stage
-                && selectedPhaseImages.length > 0
-                && (
+              {/* ✅ BOTÓN PARA ARTISTA: Avanzar fase o Finalizar */}
+              {user.role === 'artist' && 
+                order.is_paid && 
+                !isFinal && 
+                selectedStage === order.current_stage &&
+                selectedPhaseImages.length > 0 && (
+                <div className="ordertracking-section">
                   <button
-                    className="ordertracking-advance-btn"
-                    onClick={handleAdvancePhase}
+                    onClick={order.current_stage === 'final' ? handleFinalizePedido : handleAdvancePhase}
+                    style={{
+                      background: order.current_stage === 'final' ? '#e67e22' : '#3498db',
+                      color: 'white',
+                      padding: '12px 24px',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      cursor: 'pointer'
+                    }}
                   >
-                    Avanzar a la la siguiente fase
+                    {order.current_stage === 'final' ? '🎉 Finalizar pedido' : 'Avanzar a siguiente fase'}
                   </button>
-                )
-              }
+                </div>
+              )}
             </div>
             
             <AlertModal
@@ -805,52 +1192,16 @@ const OrderTracking = ({ user }) => {
               <div className="ordertracking-data-content">
                 <OrderDataCard
                   order={order}
-                  clientUser={order.clientUser}
+                  clientUser={clientUser}
                   artistUser={artistUser}
                   images={order.references_image ? order.references_image.split(',').map(img => `http://localhost:5000/${img}`) : []}
-                  selectedPackage={selectedPackage}
-                  selectedExtras={selectedExtras}
+                  selectedPackage={selectedPackage || { id: 1, title: 'Paquete', name: 'Paquete', price: 100000 }}
+                  selectedExtras={selectedExtras || []}
                   onViewPackage={() => setShowPackageModal(true)}
                   currentUserId={user.id}
+                  currentUser={user}
                 />
               </div>
-            </div>
-            <div className="ordertracking-actions-row">
-              {/* Botón de pagar: solo cliente, solo en sketch, solo si hay bocetos y favorito elegido y no pagado */}
-              {user.role === 'client'
-                && order.current_stage === 'sketch'
-                && !order.is_paid
-                && order.sketch_image // Asegúrate de tener este campo con los bocetos subidos
-                && order.selected_sketch // Asegúrate de tener este campo cuando el cliente elige el favorito
-                && !isFinal && (
-                <button className="ordertracking-pay-btn" onClick={handlePay}>Realizar Pago</button>
-              )}
-
-              {/* Cancelar por artista (plan o sketch, no pagado, no finalizado/cancelado/rechazado) */}
-              {user.role === 'artist'
-                && ['plan', 'sketch'].includes(order.current_stage)
-                && !order.is_paid
-                && !['completed', 'cancelled', 'rejected'].includes(order.status) && (
-                <button
-                  className="ordertracking-cancel-btn"
-                  onClick={() => setShowCancelModal(true)}
-                >
-                  Cancelar Pedido
-                </button>
-              )}
-
-              {/* Cancelar por cliente (plan o sketch, no pagado, no finalizado/cancelado/rechazado) */}
-              {user.role === 'client'
-                && ['plan', 'sketch'].includes(order.current_stage)
-                && !order.is_paid
-                && !isFinal && (
-                <button
-                  className="ordertracking-cancel-btn"
-                  onClick={() => setShowCancelModal(true)}
-                >
-                  Cancelar Pedido
-                </button>
-              )}
             </div>
           </aside>
         </div>
@@ -902,6 +1253,12 @@ const OrderTracking = ({ user }) => {
         onConfirm={handleCancelOrder}
         confirmText="Cancelar pedido"
         cancelText="Volver"
+      />
+
+      <InvoiceModal
+        open={showInvoice}
+        invoiceData={invoiceData}
+        onClose={() => setShowInvoice(false)}
       />
     </>
   );

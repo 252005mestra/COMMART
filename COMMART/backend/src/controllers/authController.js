@@ -222,7 +222,9 @@ export const getUserByIdController = async (req, res) => {
         res.status(200).json({
             id: user.id,
             username: sanitizeInput(user.username),
-            email: sanitizeInput(user.email)
+            email: sanitizeInput(user.email),
+            profile_image: user.profile_image,  // ✅ AGREGAR ESTA LÍNEA
+            is_artist: user.is_artist
         });
     } catch (error) {
         console.error('Error al obtener usuario:', error);
