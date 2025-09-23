@@ -99,7 +99,7 @@
   padding: 1rem 2rem; /* Aumenta el padding aquí */
   min-height: 60px;
   box-sizing: border-box;
-  gap: 0;
+  gap: 2rem;
   position: relative;
 }
 

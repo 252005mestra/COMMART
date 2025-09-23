@@ -983,45 +983,6 @@ const OrderTracking = ({ user }) => {
                 )}
               </div>
 
-              {/* ✅ BOTÓN DE PAGO CON WOMPI - MOSTRAR SOLO SI NO ESTÁ PAGADO */}
-              {user.id === order.client_id && 
-                (order.status === 'accepted' || ['plan', 'sketch'].includes(order.current_stage)) && 
-                !order.is_paid &&
-                !isFinal && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">Realizar pago</div>
-                  <button 
-                    className="ordertracking-pay-btn" 
-                    onClick={handlePay}
-                    disabled={paymentLoading}
-                    style={{
-                      background: paymentLoading ? '#ccc' : '#27ae60',
-                      color: 'white',
-                      padding: '12px 24px',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      cursor: paymentLoading ? 'not-allowed' : 'pointer',
-                      opacity: paymentLoading ? 0.7 : 1
-                    }}
-                  >
-                    {paymentLoading ? '⏳ Procesando...' : '💳 Pagar pedido'}
-                  </button>
-                  {paymentError && (
-                    <div style={{ 
-                      marginTop: 8, 
-                      padding: 8, 
-                      background: '#ffebee', 
-                      color: '#c62828', 
-                      borderRadius: 4,
-                      fontSize: 14
-                    }}>
-                      {paymentError}
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* ✅ MOSTRAR MENSAJE DE PAGO EXITOSO SI YA ESTÁ PAGADO */}
               {user.id === order.client_id && order.is_paid && (
                 <div className="ordertracking-section">
@@ -1041,30 +1002,6 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
 
-              {/* ✅ BOTÓN DE RECARGA MANUAL - Solo si acaba de hacer pago pero no se refleja */}
-              {user.id === order.client_id && !order.is_paid && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">¿Acabas de hacer un pago?</div>
-                  <button 
-                    onClick={forceReloadOrderData}
-                    disabled={loading}
-                    style={{
-                      background: '#17a2b8',
-                      color: 'white',
-                      padding: '8px 16px',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      opacity: loading ? 0.7 : 1
-                    }}
-                  >
-                    {loading ? '⏳ Verificando...' : '🔄 Verificar estado del pago'}
-                  </button>
-                  <small style={{ display: 'block', marginTop: '4px', color: '#666' }}>
-                    Si acabas de completar un pago, haz clic aquí para actualizar el estado.
-                  </small>
-                </div>
-              )}
 
               {/* ✅ MOSTRAR FACTURA solo si el pedido está pagado */}
               {user.id === order.client_id && order.is_paid && (
@@ -1087,7 +1024,7 @@ const OrderTracking = ({ user }) => {
                       fontFamily: 'Goldman, sans-serif'
                     }}
                   >
-                    🧾 Ver Factura
+                    Ver Factura
                   </button>
                 </div>
               )}
@@ -1202,6 +1139,23 @@ const OrderTracking = ({ user }) => {
                   currentUser={user}
                 />
               </div>
+              {/* BOTONES CON MEJOR ESPACIADO */}
+              {(order.status === 'accepted' || order.status === 'in_progress' || order.status === 'plan' || order.status === 'sketch') && !order.is_paid && user.id === order.client_id && (
+                <div className="ordertracking-actions-row">
+                  <button
+                    className="ordertracking-cancel-btn"
+                    onClick={() => setShowCancelModal(true)}
+                  >
+                    Cancelar pedido
+                  </button>
+                  <button
+                    className="ordertracking-pay-btn"
+                    onClick={handlePay}
+                  >
+                    Realizar Pago
+                  </button>
+                </div>
+              )}
             </div>
           </aside>
         </div>

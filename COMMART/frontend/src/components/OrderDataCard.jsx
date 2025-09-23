@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ReferenceCarousel from './ReferenceCarousel';
+import ConfirmModal from './ConfirmModal';
 import '../styles/orderdatacard.css';
 import { formatColombianPrice } from '../utils/priceFormatter';
 
@@ -14,36 +15,28 @@ export default function OrderDataCard({
   selectedExtras = [],
   onViewPackage,
   currentUserId,
-  currentUser, // ✅ MANTENER para fallback
+  currentUser,
 }) {
   const [showCarousel, setShowCarousel] = useState(false);
   const [showPackageDetail, setShowPackageDetail] = useState(false);
   const navigate = useNavigate();
 
-  // Siempre trabajar con array
   const extrasArray = Array.isArray(selectedExtras) ? selectedExtras : [];
-
-  // ✅ MOVER ESTA LÍNEA AQUÍ (antes era línea 38)
   const isClientView = currentUserId === order?.client_id;
-
-  // ✅ USAR SOLO UNA VARIABLE PARA TODO
   const profileUser = isClientView ? clientUser : artistUser;
   const labelText = 'Pedido realizado por:';
 
   const profileImageUrl = profileUser?.profile_image 
     ? `http://localhost:5000/${profileUser.profile_image}`
-    : '/default-profile.jpg'; // Esta ruta SÍ existe en tu /public/
+    : '/default-profile.jpg';
 
-  // ✅ CORREGIR: Suma total como en el código original
   const total =
     (Number(selectedPackage?.price) || 0) +
     extrasArray.reduce((sum, e) => sum + (Number(e.price) || 0), 0);
 
-  // Navegación al perfil
   const handleUserClick = () => {
     if (!profileUser) return;
     
-    // Si es el usuario actual, ir a su perfil privado
     if (currentUserId && profileUser.id === currentUserId) {
       if (profileUser.is_artist) {
         navigate('/artist-profile');
@@ -53,7 +46,6 @@ export default function OrderDataCard({
       return;
     }
     
-    // Si no es el usuario actual, ir al perfil público
     if (profileUser.is_artist === true || profileUser.is_artist === 1) {
       navigate(`/artist/${profileUser.id}`);
     } else {
@@ -173,7 +165,6 @@ export default function OrderDataCard({
               <div className="orderdata-description">{order?.description || 'Sin descripción'}</div>
             </div>
 
-            {/* Modal de referencias ampliadas */}
             <ReferenceCarousel
               open={showCarousel}
               images={images}
@@ -181,7 +172,6 @@ export default function OrderDataCard({
             />
           </>
         ) : (
-          // Vista de detalle del paquete (igual que en la vista previa)
           <div style={{ padding: '2rem 1.5rem 2rem 1.5rem' }}>
             <button
               className="order-preview-view-package-btn"
@@ -244,7 +234,6 @@ export default function OrderDataCard({
         )}
       </div>
 
-      {/* ✅ CORREGIR: Card de precios como en el código original */}
       <div className="odc-summary-price-card">
         <div className="odc-summary-price-breakdown">
           <div className="odc-summary-price-item">
