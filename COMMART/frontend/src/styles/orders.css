@@ -520,8 +520,8 @@
 
 .myorder-references-stack {
   position: relative;
-  height: 180px;
-  width: 240px;
+  height: 140px;
+  width: 220px;
   cursor: pointer;
   display: flex;
   gap: 0.5rem;
@@ -542,7 +542,7 @@
 }
 
 .myorder-reference-img.xlarge {
-  width: 180px;
+  width: 150px;
   height: 200px;
   border-radius: 16px;
   border: 2px solid #000;

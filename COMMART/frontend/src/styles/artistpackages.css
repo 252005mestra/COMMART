@@ -1157,3 +1157,14 @@
 .form-actions-artist {
   display: none;
 }
+
+@media (max-width: 1400px) {
+  .packages-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.7rem;
+  }
+  .artist-package-card {
+    width: clamp(340px, 35vw, 400px);
+    height: 630px;
+  }
+}

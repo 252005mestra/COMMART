@@ -11,7 +11,7 @@
 .create-order-header-section {
   text-align: left; 
   margin-bottom: 3rem;
-  padding-left: calc(5% + 1rem); 
+  padding-left: 4rem; 
 }
 
 .create-order-title {
@@ -52,6 +52,14 @@
   box-shadow: 0 8px 2px rgba(0, 0, 0, 0.321);
   border: 3px solid #000;
   overflow: hidden;
+}
+
+/* Vista de pedido: formulario más ancho en pantallas grandes */
+@media (min-width: 1200px) {
+  .create-order-main-card {
+    width: 1200px;
+    max-width: 100%;
+  }
 }
 
 /* ========== Header de la card con logo y título ========== */

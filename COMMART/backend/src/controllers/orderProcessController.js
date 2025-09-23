@@ -11,25 +11,30 @@ export const advanceOrderPhaseController = async (req, res) => {
   try {
     const { id } = req.params;
     const { next_phase } = req.body;
-    await updateOrderFields(id, { current_stage: next_phase });
-    // Notificar a ambos usuarios
-    // (Obtén order para saber client_id y artist_id)
-    // Suponiendo que tienes un modelo getOrderById
     const order = await getOrderById(id);
+
+    // Solo el artista puede avanzar de fase
+    if (req.user.id !== order.artist_id) {
+      return res.status(403).json({ message: 'Solo el artista puede avanzar de fase.' });
+    }
+
+    // Solo se puede avanzar si está en la fase actual "plan"
+    if (order.current_stage !== 'plan') {
+      return res.status(400).json({ message: 'Solo puedes avanzar desde la fase de planeación.' });
+    }
+
+    // Avanzar a la siguiente fase (boceto)
+    await updateOrderFields(id, { current_stage: next_phase });
+
+    // Notificar al cliente
     await createNotification({
       user_id: order.client_id,
-      type: 'order',
-      message: `Tu pedido avanzó a la fase: ${next_phase}`,
-      link: `/orders/${id}`,
-      is_read: false
-    });
-    await createNotification({
-      user_id: order.artist_id,
       type: 'order',
       message: `El pedido avanzó a la fase: ${next_phase}`,
       link: `/orders/${id}`,
       is_read: false
     });
+
     res.json({ message: 'Fase actualizada.' });
   } catch (error) {
     res.status(500).json({ message: 'Error al avanzar de fase.' });
@@ -41,6 +46,13 @@ export const uploadSampleController = async (req, res) => {
   try {
     const { id } = req.params;
     const { phase } = req.body;
+    const order = await getOrderById(id);
+
+    // No permitir subir muestras en la fase "plan"
+    if (phase === 'plan') {
+      return res.status(400).json({ message: 'No se pueden subir muestras en la fase de planeación.' });
+    }
+
     const file = req.file;
 
     if (!file) return res.status(400).json({ message: 'No se subió ninguna imagen.' });
