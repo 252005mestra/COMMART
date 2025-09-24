@@ -122,25 +122,66 @@ export const updateOrderStatusController = async (req, res) => {
     const { id } = req.params;
     const { status, reason } = req.body;
 
+    // PRIMERO obtener los datos del pedido
+    const order = await getOrderById(id);
+    if (!order) {
+      return res.status(404).json({ message: 'Pedido no encontrado.' });
+    }
+
     await updateOrderStatus(id, status, reason);
 
     // Notificar al cliente si es rechazado
     if (status === 'rejected') {
-      // Obtener el pedido para saber el client_id
-      const [orderRows] = await dbConnection.promise().query('SELECT client_id FROM orders WHERE id = ?', [id]);
-      if (orderRows && orderRows[0]) {
-        await createNotification({
-          user_id: orderRows[0].client_id,
-          type: 'order',
-          message: 'Tu pedido fue rechazado por el artista.',
-          link: '/orders',
-          order_id: id,
-          is_read: false
-        });
-      }
+      await createNotification({
+        user_id: order.client_id,
+        type: 'order_rejected',
+        message: `Tu pedido #${id} fue rechazado por el artista.`,
+        link: `/orders/${id}`,
+        order_id: id,
+        is_read: false
+      });
+      console.log(`📧 Cliente ${order.client_id} notificado de rechazo del pedido ${id}`);
     }
 
-    res.json({ message: 'Estado actualizado.' });
+    // Notificar al cliente y artista si el pedido es completado
+    if (status === 'completed') {
+      // Notificar al cliente
+      await createNotification({
+        user_id: order.client_id,
+        type: 'order_completed',
+        message: `🎉 ¡Tu pedido #${id} ha sido completado! Ya puedes descargar tu obra final.`,
+        link: `/orders/${id}`,
+        order_id: id,
+        is_read: false
+      });
+
+      // Notificar al artista
+      await createNotification({
+        user_id: order.artist_id,
+        type: 'order_completed',
+        message: `✅ Has completado exitosamente el pedido #${id}.`,
+        link: `/orders/${id}`,
+        order_id: id,
+        is_read: false
+      });
+
+      // Actualizar timestamp de completado
+      await new Promise((resolve, reject) => {
+        dbConnection.query(
+          'UPDATE orders SET completed_at = NOW() WHERE id = ?',
+          [id],
+          (err, result) => {
+            if (err) return reject(err);
+            resolve(result);
+          }
+        );
+      });
+
+      console.log(`✅ Pedido ${id} completado exitosamente`);
+      console.log(`📧 Notificaciones enviadas a cliente ${order.client_id} y artista ${order.artist_id}`);
+    }
+
+    res.json({ message: 'Estado actualizado correctamente.' });
   } catch (error) {
     console.error('Error al actualizar estado del pedido:', error);
     res.status(500).json({ message: 'Error al actualizar el estado del pedido.' });

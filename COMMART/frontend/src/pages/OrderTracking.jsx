@@ -8,6 +8,7 @@ import OrderDataCard from '../components/OrderDataCard';
 import ConfirmModal from '../components/ConfirmModal';
 import { usePayment } from '../hooks/usePayment';
 import InvoiceModal from '../components/InvoiceModal';
+import ReferenceCarousel from '../components/ReferenceCarousel';
 import '../styles/ordertracking.css';
 
 const STAGES = [
@@ -47,6 +48,7 @@ const OrderTracking = ({ user }) => {
   const [cancelReason, setCancelReason] = useState('');
   const messageListRef = useRef(null);
   const { processPayment, loading: paymentLoading, error: paymentError } = usePayment();
+  const [showFinalArtModal, setShowFinalArtModal] = useState(false);
 
   // ✅ useEffect para cargar datos iniciales del pedido
   useEffect(() => {
@@ -295,26 +297,78 @@ const OrderTracking = ({ user }) => {
     }
   };
 
-  // ✅ Función para avanzar de fase
+  // Función para avanzar de fase
   const handleAdvancePhase = async () => {
-    const currentIdx = STAGES.findIndex(s => s.key === order.current_stage);
-    if (currentIdx === -1 || currentIdx >= STAGES.length - 1) return;
+    // ✅ CORREGIR: Manejar las 5 fases correctas
+    const nextPhases = {
+      'plan': 'sketch',        // Planeación → Boceto
+      'sketch': 'details',     // Boceto → Definición
+      'details': 'final',      // Definición → Últimos Detalles  
+      'final': 'completed'     // Últimos Detalles → Finalizado
+      // 'completed' no tiene siguiente fase
+    };
 
-    const nextStage = STAGES[currentIdx + 1].key;
+    const nextPhase = nextPhases[selectedStage];
+    
+    if (!nextPhase) {
+      setAlert({
+        open: true,
+        type: 'error',
+        message: 'No se puede avanzar desde esta fase.'
+      });
+      return;
+    }
+
+    // ✅ NOMBRES LEGIBLES para mostrar al usuario
+    const phaseNames = {
+      'plan': 'Planeación',
+      'sketch': 'Boceto', 
+      'details': 'Definición',
+      'final': 'Últimos Detalles',
+      'completed': 'Finalizado'
+    };
+
     try {
-      await axios.put(
-        `http://localhost:5000/api/orders/${order.id}/phase`,
-        { next_phase: nextStage },
+      setAlert({
+        open: true,
+        type: 'info',
+        message: `Avanzando a ${phaseNames[nextPhase]}...`
+      });
+
+      console.log(`📡 Enviando petición de avance:`, {
+        orderId: order.id,
+        currentStage: selectedStage,
+        nextPhase: nextPhase
+      });
+
+      await axios.post(
+        `http://localhost:5000/api/orders/${order.id}/advance`,
+        { next_phase: nextPhase },
         { withCredentials: true }
       );
-      // Recarga el pedido para actualizar la fase
+
+      // Recargar el pedido para ver el cambio de fase
       const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
       setOrder(res.data);
-      setSelectedStage(res.data.current_stage);
-      setSampleFiles([]);
-      setPreviewUrls([]);
+      
+      // Cambiar automáticamente a la nueva fase en el frontend
+      setSelectedStage(nextPhase);
+
+      setAlert({
+        open: true,
+        type: 'success',
+        message: `✅ Pedido avanzado exitosamente a ${phaseNames[nextPhase]}. El cliente ha sido notificado.`
+      });
+
     } catch (err) {
-      setAlert({ open: true, type: 'error', message: 'Error al avanzar de fase.' });
+      console.error('❌ Error avanzando fase:', err);
+      console.error('❌ Error response:', err.response?.data);
+      
+      setAlert({
+        open: true,
+        type: 'error',
+        message: `Error al avanzar de fase: ${err.response?.data?.message || err.message}`
+      });
     }
   };
 
@@ -347,27 +401,101 @@ const OrderTracking = ({ user }) => {
     }
   };
 
-  // ✅ Función para subir muestras
+  // ✅ Función para subir muestras MEJORADA
   const handleUploadSamples = async () => {
-    if (!sampleFiles.length) return;
+    if (!sampleFiles.length) {
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Selecciona al menos una imagen para subir.' 
+      });
+      return;
+    }
+
+    // Verificar límite de 3 archivos
+    if (sampleFiles.length > 3) {
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Máximo 3 archivos por fase.' 
+      });
+      return;
+    }
+
+    // Verificar que ya no exceda el límite con las muestras existentes
+    const currentSamplesCount = selectedPhaseImages.length;
+    if (currentSamplesCount + sampleFiles.length > 3) {
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: `Solo puedes subir ${3 - currentSamplesCount} imagen(es) más en esta fase.` 
+      });
+      return;
+    }
+
     try {
-      for (const file of sampleFiles) {
+      setAlert({ 
+        open: true, 
+        type: 'info', 
+        message: `Subiendo ${sampleFiles.length} muestra(s)...` 
+      });
+
+      console.log('📤 Subiendo muestras:', {
+        phase: selectedStage,
+        fileCount: sampleFiles.length,
+        orderId: order.id
+      });
+
+      // Subir cada archivo individualmente
+      for (let i = 0; i < sampleFiles.length; i++) {
+        const file = sampleFiles[i];
         const formData = new FormData();
         formData.append('phase', selectedStage);
         formData.append('sample_image', file);
-        await axios.post(
+
+        console.log(`📁 Subiendo archivo ${i + 1}:`, {
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        });
+
+        const response = await axios.post(
           `http://localhost:5000/api/orders/${order.id}/sample`,
           formData,
-          { withCredentials: true }
+          { 
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
         );
+
+        console.log(`✅ Archivo ${i + 1} subido:`, response.data);
       }
+
+      // Limpiar archivos seleccionados
       setSampleFiles([]);
       setPreviewUrls([]);
-      // Recarga el pedido para ver las muestras subidas y habilitar el avance de fase
+      
+      // Recargar el pedido para ver las muestras subidas
       const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
       setOrder(res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: `✅ ${sampleFiles.length} muestra(s) subida(s) correctamente.` 
+      });
+
     } catch (err) {
-      setAlert({ open: true, type: 'error', message: 'Error al subir muestras.' });
+      console.error('❌ Error subiendo muestras:', err);
+      console.error('❌ Error response:', err.response?.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: `Error al subir muestras: ${err.response?.data?.message || err.message}` 
+      });
     }
   };
 
@@ -616,6 +744,130 @@ const OrderTracking = ({ user }) => {
     }
   };
 
+  // ✅ Función para subir obra final
+  const handleUploadFinalArt = async (e) => {
+    const file = e.target.files[0];
+    console.log('🎨 handleUploadFinalArt llamada:', { file: !!file, fileName: file?.name });
+    
+    if (!file) return;
+    
+    try {
+      console.log('📤 Iniciando subida de obra final...');
+      
+      setAlert({ 
+        open: true, 
+        type: 'info', 
+        message: 'Subiendo obra final...' 
+      });
+
+      const formData = new FormData();
+      formData.append('final_image', file);
+      
+      console.log('📡 Enviando petición al servidor...');
+      
+      const response = await axios.post(
+        `http://localhost:5000/api/orders/${order.id}/final`,
+        formData,
+        { withCredentials: true }
+      );
+      
+      console.log('✅ Respuesta del servidor:', response.data);
+      
+      // Recargar el pedido para mostrar la obra final y el estado actualizado
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      
+      console.log('📋 Pedido actualizado:', res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: '🎉 ¡Obra final subida correctamente! Ahora puedes completar el pedido.' 
+      });
+    } catch (err) {
+      console.error('❌ Error subiendo obra final:', err);
+      console.error('❌ Error details:', err.response?.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: `Error al subir la obra final: ${err.response?.data?.message || err.message}` 
+      });
+    }
+  };
+
+  // ✅ Función para completar pedido definitivamente
+  const handleCompletePedido = async () => {
+    try {
+      setAlert({ 
+        open: true, 
+        type: 'info', 
+        message: 'Completando pedido definitivamente...' 
+      });
+
+      await axios.put(
+        `http://localhost:5000/api/orders/${order.id}/status`,
+        { status: 'completed' },
+        { withCredentials: true }
+      );
+      
+      // Recargar datos y cambiar a fase completed
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      setSelectedStage('completed'); // Cambiar a la fase final automáticamente
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: '🎉 ¡Pedido completado exitosamente! El cliente ha sido notificado y puede descargar la obra final.' 
+      });
+    } catch (err) {
+      console.error('Error completando pedido:', err);
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Error al completar el pedido. Intenta nuevamente.' 
+      });
+    }
+  };
+
+  // Función para eliminar obra final
+  const handleDeleteFinalArt = async () => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar la obra final?')) {
+      return;
+    }
+
+    try {
+      setAlert({ 
+        open: true, 
+        type: 'info', 
+        message: 'Eliminando obra final...' 
+      });
+
+      await axios.delete(
+        `http://localhost:5000/api/orders/${order.id}/final`,
+        { withCredentials: true }
+      );
+      
+      // Recargar datos
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: 'Obra final eliminada correctamente.' 
+      });
+    } catch (err) {
+      console.error('Error eliminando obra final:', err);
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Error al eliminar la obra final. Intenta nuevamente.' 
+      });
+    }
+  };
+
   // ✅ LÓGICA DE PERMISOS MEJORADA
   const isFinal = ['cancelled', 'rejected', 'completed', 'finalized'].includes(order?.status);
   const currentStageIdx = order ? STAGES.findIndex(s => s.key === order.current_stage) : 0;
@@ -849,84 +1101,337 @@ const OrderTracking = ({ user }) => {
             {/* Contenido de la fase seleccionada */}
             <div className="ordertracking-phase-content">
               
-              {/* Muestras del artista */}
+              {/* Muestras del artista - LÓGICA CORREGIDA */}
               <div className="ordertracking-section">
                 <div className="ordertracking-section-title">
-                  Muestras del artista:
+                  {selectedStage === 'completed' ? '🎨 Obra Final:' : 'Muestras del artista:'}
                   {isPastPhase && <small style={{ color: '#6c757d', fontWeight: 'normal' }}> (Fase completada)</small>}
                   {isFuturePhase && <small style={{ color: '#f39c12', fontWeight: 'normal' }}> (Pendiente)</small>}
                   {isCurrentPhase && <small style={{ color: '#27ae60', fontWeight: 'normal' }}> (Fase actual)</small>}
                 </div>
-                {selectedPhaseImages.length > 0 ? (
-                  <div className="ordertracking-samples-list">
-                    {selectedPhaseImages.map((img, idx) => (
-                      <div key={idx} className="ordertracking-sample-img-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
-                        <img
-                          src={`http://localhost:5000/${img}`}
-                          alt={`Muestra ${idx + 1}`}
-                          className="ordertracking-sample-img"
-                        />
-                        {user.role === 'artist' && canUploadSamples && (
-                          <button
-                            className="ordertracking-delete-sample-btn"
-                            style={{
-                              position: 'absolute',
-                              top: 4,
-                              right: 4,
-                              background: '#fff',
-                              border: '1px solid #e74c3c',
-                              color: '#e74c3c',
-                              borderRadius: '50%',
-                              width: 28,
-                              height: 28,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 'bold',
-                              fontSize: 18,
-                              zIndex: 2,
-                            }}
-                            title="Eliminar muestra"
-                            onClick={() => handleDeleteSample(img, idx)}
-                          >
-                            ×
-                          </button>
-                        )}
+                
+                {/* FASE COMPLETED (FINALIZADO): Solo obra final */}
+                {selectedStage === 'completed' ? (
+                  order.completed_image ? (
+                    <div className="ordertracking-final-art">
+                      <div className="ordertracking-samples-list">
+                        <div className="ordertracking-sample-img-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
+                          <img
+                            src={`http://localhost:5000/${order.completed_image}`}
+                            alt="Obra Final"
+                            className="ordertracking-sample-img"
+                            onClick={() => setShowFinalArtModal(true)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          {/* Botón eliminar obra final - MISMO ESTILO QUE LAS MUESTRAS */}
+                          {user.role === 'artist' && isCurrentPhase && order.status !== 'completed' && (
+                            <button
+                              className="ordertracking-delete-sample-btn"
+                              style={{
+                                position: 'absolute',
+                                top: 4,
+                                right: 4,
+                                background: '#fff',
+                                border: '1px solid #e74c3c',
+                                color: '#e74c3c',
+                                borderRadius: '50%',
+                                width: 28,
+                                height: 28,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 'bold',
+                                fontSize: 18,
+                                zIndex: 2,
+                              }}
+                              title="Eliminar obra final"
+                              onClick={handleDeleteFinalArt}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                      
+                      {/* Mensaje para el cliente */}
+                      {user.id === order.client_id && (
+                        <div className="ordertracking-final-art-message">
+                          <p className="ordertracking-client-message">
+                            Tu obra está lista. Haz clic en la imagen para verla en tamaño completo y descargarla.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {/* Mensaje para el artista */}
+                      {user.id === order.artist_id && (
+                        <div className="ordertracking-final-art-message">
+                          <p className="ordertracking-artist-message">
+                            Obra final entregada exitosamente. El cliente puede descargarla cuando guste.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="ordertracking-no-final-art">
+                      {user.role === 'artist' && isCurrentPhase ? (
+                        <p className="ordertracking-message-artist">
+                          Sube la obra final para completar definitivamente el pedido
+                        </p>
+                      ) : isFuturePhase ? (
+                        <p className="ordertracking-message-future">
+                          La obra final aparecerá cuando el pedido sea finalizado
+                        </p>
+                      ) : (
+                        <p className="ordertracking-message-pending">
+                          El artista aún no ha subido la obra final
+                        </p>
+                      )}
+                    </div>
+                  )
                 ) : (
-                  <span className="ordertracking-no-samples">
-                    {isFuturePhase 
-                      ? 'Las muestras aparecerán cuando se alcance esta fase'
-                      : 'Sin muestras aún'
-                    }
-                  </span>
+                  /* TODAS LAS OTRAS FASES: Mostrar muestras */
+                  selectedPhaseImages.length > 0 ? (
+                    <div className="ordertracking-samples-list">
+                      {selectedPhaseImages.map((img, idx) => (
+                        <div key={idx} className="ordertracking-sample-img-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
+                          <img
+                            src={`http://localhost:5000/${img}`}
+                            alt={`Muestra ${idx + 1}`}
+                            className="ordertracking-sample-img"
+                          />
+                          {user.role === 'artist' && canUploadSamples && (
+                            <button
+                              className="ordertracking-delete-sample-btn"
+                              style={{
+                                position: 'absolute',
+                                top: 4,
+                                right: 4,
+                                background: '#fff',
+                                border: '1px solid #e74c3c',
+                                color: '#e74c3c',
+                                borderRadius: '50%',
+                                width: 28,
+                                height: 28,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 'bold',
+                                fontSize: 18,
+                                zIndex: 2,
+                              }}
+                              title="Eliminar muestra"
+                              onClick={() => handleDeleteSample(img, idx)}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="ordertracking-no-samples">
+                      {isFuturePhase 
+                        ? 'Las muestras aparecerán cuando se alcance esta fase'
+                        : 'Sin muestras aún'
+                      }
+                    </span>
+                  )
                 )}
               </div>
               
-              {/* Subir muestras solo si es artista, fase actual y no finalizado */}
-              {canUploadSamples && (
+              {/* Subir muestras - SOLO para fases que NO sean 'completed' */}
+              {canUploadSamples && selectedStage !== 'completed' && selectedStage !== 'plan' && (
                 <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">Subir muestras (máx 3 por fase)</div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={e => setSampleFiles(Array.from(e.target.files).slice(0, 3))}
-                  />
-                  <div className="ordertracking-preview-list">
-                    {previewUrls.map((url, idx) => (
-                      <img key={idx} src={url} alt={`Preview ${idx + 1}`} className="ordertracking-preview-img" />
-                    ))}
+                  <div className="ordertracking-section-title">
+                    Subir muestras (máx 3 por fase)
+                    <small style={{ 
+                      display: 'block', 
+                      fontSize: '12px', 
+                      color: '#6c757d', 
+                      fontWeight: 'normal' 
+                    }}>
+                      {selectedPhaseImages.length}/3 subidas en esta fase
+                    </small>
                   </div>
-                  <button className="ordertracking-upload-btn" onClick={handleUploadSamples} disabled={!sampleFiles.length}>
-                    Subir muestras
-                  </button>
+                  
+                  {/* Solo mostrar input si no ha llegado al límite */}
+                  {selectedPhaseImages.length < 3 && (
+                    <>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={e => {
+                          const files = Array.from(e.target.files);
+                          const remainingSlots = 3 - selectedPhaseImages.length;
+                          const filesToAdd = files.slice(0, remainingSlots);
+                          
+                          if (files.length > remainingSlots) {
+                            setAlert({
+                              open: true,
+                              type: 'warning',
+                              message: `Solo puedes subir ${remainingSlots} imagen(es) más. Se seleccionaron las primeras ${remainingSlots}.`
+                            });
+                          }
+                          
+                          setSampleFiles(filesToAdd);
+                        }}
+                        style={{ marginBottom: '12px' }}
+                      />
+                      
+                      {/* Vista previa de archivos seleccionados */}
+                      {previewUrls.length > 0 && (
+                        <div className="ordertracking-preview-list">
+                          {previewUrls.map((url, idx) => (
+                            <div key={idx} className="ordertracking-preview-item">
+                              <img 
+                                src={url} 
+                                alt={`Preview ${idx + 1}`} 
+                                className="ordertracking-preview-img" 
+                              />
+                              <button
+                                onClick={() => {
+                                  const newFiles = sampleFiles.filter((_, i) => i !== idx);
+                                  setSampleFiles(newFiles);
+                                }}
+                                className="ordertracking-preview-remove"
+                                title="Quitar imagen"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <button 
+                        className="ordertracking-upload-btn" 
+                        onClick={handleUploadSamples} 
+                        disabled={!sampleFiles.length}
+                        style={{
+                          background: sampleFiles.length ? '#8B6D47' : '#ccc',
+                          cursor: sampleFiles.length ? 'pointer' : 'not-allowed'
+                        }}
+                      >
+                        Subir {sampleFiles.length > 0 ? `${sampleFiles.length} ` : ''}muestra{sampleFiles.length !== 1 ? 's' : ''}
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Mensaje cuando ya se alcanzó el límite */}
+                  {selectedPhaseImages.length >= 3 && (
+                    <div style={{
+                      padding: '12px',
+                      background: '#fff3cd',
+                      border: '1px solid #ffeaa7',
+                      borderRadius: '6px',
+                      color: '#856404'
+                    }}>
+                      ✅ Ya has subido el máximo de 3 muestras en esta fase.
+                    </div>
+                  )}
                 </div>
               )}
               
+              {/* ✅ SUBIR OBRA FINAL - EN LA FASE 'completed' (FINALIZADO) */}
+              {user.role === 'artist' && 
+                selectedStage === 'completed' && 
+                isCurrentPhase && 
+                order.is_paid && 
+                !order.completed_image && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">
+                    🎨 Subir Obra Final
+                  </div>
+                  <div className="ordertracking-final-warning">
+                    ⚠️ <strong>Importante:</strong> Esta será la entrega final del pedido. Una vez subida, podrás completar el pedido.
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUploadFinalArt}
+                    className="ordertracking-final-input"
+                  />
+                </div>
+              )}
+
+              {/* ✅ BOTÓN COMPLETAR PEDIDO - SOLO aparece después de subir obra final EN 'completed' */}
+              {user.role === 'artist' && 
+                selectedStage === 'completed' && 
+                isCurrentPhase && 
+                order.is_paid && 
+                order.completed_image && 
+                order.status !== 'completed' && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">
+                    ✅ Confirmar Finalización
+                  </div>
+                  <div className="ordertracking-complete-warning">
+                    🎯 <strong>¿Estás listo para completar el pedido?</strong><br />
+                    Una vez confirmado, el pedido se marcará como completado y el cliente podrá descargar la obra final.
+                  </div>
+                  <button
+                    onClick={handleCompletePedido}
+                    className="ordertracking-complete-btn"
+                  >
+                    🏁 Completar Pedido Definitivamente
+                  </button>
+                </div>
+              )}
+
+              {/* BOTÓN AVANZAR FASE - Para todas las fases excepto 'completed' */}
+              {user.role === 'artist' && 
+                isCurrentPhase && 
+                order.is_paid && 
+                selectedStage !== 'completed' && 
+                (selectedStage === 'plan' || selectedPhaseImages.length > 0) && ( // ✅ Permitir avanzar desde 'plan' sin muestras
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">
+                    Avanzar de Fase
+                  </div>
+                  <div style={{
+                    background: '#e8f4fd',
+                    border: '1px solid #bee5eb',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '12px'
+                  }}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>
+                      ¿Listo para avanzar a la siguiente fase?
+                    </p>
+                    <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
+                      {selectedStage === 'plan' && 'Pasarás a la fase de Boceto donde crearás las propuestas iniciales.'}
+                      {selectedStage === 'sketch' && 'Pasarás a la fase de Definición para trabajar en los detalles.'}
+                      {selectedStage === 'details' && 'Pasarás a la fase de Últimos Detalles para los ajustes finales.'}
+                      {selectedStage === 'final' && 'Pasarás a la fase de Finalizado donde subirás la obra final.'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleAdvancePhase}
+                    className="ordertracking-advance-btn"
+                    style={{
+                      background: '#17a2b8',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    ➡️ Avanzar a {
+                      selectedStage === 'plan' ? 'Boceto' :
+                      selectedStage === 'sketch' ? 'Definición' :
+                      selectedStage === 'details' ? 'Últimos Detalles' :
+                      selectedStage === 'final' ? 'Finalizado' : 'Siguiente Fase'
+                    }
+                  </button>
+                </div>
+              )}
+
               {/* Comunicación */}
               <div className="ordertracking-section">
                 <div className="ordertracking-section-title">
@@ -1030,86 +1535,7 @@ const OrderTracking = ({ user }) => {
               )}
               
               {/* Subir arte final (solo artista, solo en la última fase) */}
-              {user.role === 'artist' && order.current_stage === 'final' && !isFinal && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">Subir arte final</div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files[0];
-                      if (!file) return;
-                      try {
-                        const formData = new FormData();
-                        formData.append('final_image', file);
-                        await axios.post(
-                          `http://localhost:5000/api/orders/${order.id}/final`,
-                          formData,
-                          { withCredentials: true }
-                        );
-                        // Recarga el pedido para mostrar el archivo final
-                        const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-                        setOrder(res.data);
-                        setAlert({ open: true, type: 'success', message: 'Arte final subido correctamente.' });
-                      } catch (err) {
-                        setAlert({ open: true, type: 'error', message: 'Error al subir el arte final.' });
-                      }
-                    }}
-                  />
-                  {order.completed_image && (
-                    <div style={{ marginTop: 8 }}>
-                      <b>Archivo final subido:</b>
-                      <img src={`http://localhost:5000/${order.completed_image}`} alt="Arte final" width={180} style={{ display: 'block', margin: '8px 0' }} />
-                      <a href={`http://localhost:5000/${order.completed_image}`} download>
-                        Descargar arte final
-                      </a>
-                    </div>
-                  )}
-                </div>
-              )}
               
-              {/* Solo mostrar el botón si el usuario es cliente, el pedido está en fase final y no está completado */}
-              {user.id === order.client_id && order.current_stage === 'final' && order.status !== 'completed' && (
-                <button 
-                  style={{
-                    background: '#27ae60',
-                    color: 'white',
-                    padding: '12px 24px',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    cursor: 'pointer',
-                    marginTop: '16px'
-                  }}
-                  onClick={handleMarkAsCompleted}
-                >
-                  Marcar como completado
-                </button>
-              )}
-              
-              {/* ✅ BOTÓN PARA ARTISTA: Avanzar fase o Finalizar */}
-              {user.role === 'artist' && 
-                order.is_paid && 
-                !isFinal && 
-                selectedStage === order.current_stage &&
-                selectedPhaseImages.length > 0 && (
-                <div className="ordertracking-section">
-                  <button
-                    onClick={order.current_stage === 'final' ? handleFinalizePedido : handleAdvancePhase}
-                    style={{
-                      background: order.current_stage === 'final' ? '#e67e22' : '#3498db',
-                      color: 'white',
-                      padding: '12px 24px',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {order.current_stage === 'final' ? '🎉 Finalizar pedido' : 'Avanzar a siguiente fase'}
-                  </button>
-                </div>
-              )}
             </div>
             
             <AlertModal
@@ -1213,6 +1639,13 @@ const OrderTracking = ({ user }) => {
         open={showInvoice}
         invoiceData={invoiceData}
         onClose={() => setShowInvoice(false)}
+      />
+
+      {/* Modal de obra final - IGUAL QUE LAS REFERENCIAS */}
+      <ReferenceCarousel
+        open={showFinalArtModal}
+        images={order.completed_image ? [`http://localhost:5000/${order.completed_image}`] : []}
+        onClose={() => setShowFinalArtModal(false)}
       />
     </>
   );

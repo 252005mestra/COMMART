@@ -13,30 +13,74 @@ export const advanceOrderPhaseController = async (req, res) => {
     const { next_phase } = req.body;
     const order = await getOrderById(id);
 
+    if (!order) {
+      return res.status(404).json({ message: 'Pedido no encontrado.' });
+    }
+
     // Solo el artista puede avanzar de fase
     if (req.user.id !== order.artist_id) {
       return res.status(403).json({ message: 'Solo el artista puede avanzar de fase.' });
     }
 
-    // Solo se puede avanzar si está en la fase actual "plan"
-    if (order.current_stage !== 'plan') {
-      return res.status(400).json({ message: 'Solo puedes avanzar desde la fase de planeación.' });
+    // ✅ CORREGIR: Definir las 5 fases y sus transiciones correctas
+    const validTransitions = {
+      'plan': 'sketch',        // Planeación → Boceto
+      'sketch': 'details',     // Boceto → Definición  
+      'details': 'final',      // Definición → Últimos Detalles
+      'final': 'completed'     // Últimos Detalles → Finalizado
+      // 'completed' no avanza a nada (es el final)
+    };
+
+    console.log(`🔄 Intentando avanzar pedido ${id}:`, {
+      current_stage: order.current_stage,
+      next_phase: next_phase,
+      valid_next: validTransitions[order.current_stage]
+    });
+
+    // Verificar que la transición sea válida
+    if (!validTransitions[order.current_stage]) {
+      return res.status(400).json({ 
+        message: `No se puede avanzar desde la fase '${order.current_stage}'.` 
+      });
     }
 
-    // Avanzar a la siguiente fase (boceto)
+    if (validTransitions[order.current_stage] !== next_phase) {
+      return res.status(400).json({ 
+        message: `Transición no válida. Desde '${order.current_stage}' solo se puede avanzar a '${validTransitions[order.current_stage]}'.` 
+      });
+    }
+
+    console.log(`📈 Avanzando pedido ${id} de ${order.current_stage} a ${next_phase}`);
+
+    // Avanzar a la siguiente fase
     await updateOrderFields(id, { current_stage: next_phase });
+
+    // ✅ MENSAJES CORREGIDOS para las 5 fases
+    const phaseMessages = {
+      'sketch': 'El pedido avanzó a la fase de Boceto. El artista comenzará con las propuestas iniciales.',
+      'details': 'El pedido avanzó a la fase de Definición. El artista trabajará en los detalles del boceto elegido.',
+      'final': 'El pedido avanzó a la fase de Últimos Detalles. El artista realizará los ajustes finales.',
+      'completed': 'El pedido avanzó a la fase de Finalizado. El artista subirá la obra final.'
+    };
 
     // Notificar al cliente
     await createNotification({
       user_id: order.client_id,
-      type: 'order',
-      message: `El pedido avanzó a la fase: ${next_phase}`,
+      type: 'phase_advanced',
+      message: phaseMessages[next_phase] || `El pedido avanzó a la fase: ${next_phase}`,
       link: `/orders/${id}`,
+      order_id: id,
       is_read: false
     });
 
-    res.json({ message: 'Fase actualizada.' });
+    console.log(`✅ Pedido ${id} avanzó a ${next_phase}, cliente ${order.client_id} notificado`);
+
+    res.json({ 
+      message: 'Fase actualizada correctamente.',
+      new_phase: next_phase 
+    });
   } catch (error) {
+    console.error('Error al avanzar de fase:', error);
     res.status(500).json({ message: 'Error al avanzar de fase.' });
   }
 };
@@ -46,31 +90,77 @@ export const uploadSampleController = async (req, res) => {
   try {
     const { id } = req.params;
     const { phase } = req.body;
-    const order = await getOrderById(id);
 
-    // No permitir subir muestras en la fase "plan"
-    if (phase === 'plan') {
-      return res.status(400).json({ message: 'No se pueden subir muestras en la fase de planeación.' });
+    console.log('📤 Recibiendo muestra:', {
+      orderId: id,
+      phase: phase,
+      hasFile: !!req.file,
+      fileName: req.file?.originalname
+    });
+
+    // Validaciones básicas
+    if (!phase) {
+      return res.status(400).json({ message: 'La fase es requerida.' });
     }
 
-    const file = req.file;
+    if (!req.file) {
+      return res.status(400).json({ message: 'No se subió ningún archivo.' });
+    }
 
-    if (!file) return res.status(400).json({ message: 'No se subió ninguna imagen.' });
+    // Verificar que el pedido existe
+    const order = await getOrderById(id);
+    if (!order) {
+      return res.status(404).json({ message: 'Pedido no encontrado.' });
+    }
 
-    // Determina el campo a actualizar según la fase
-    const phaseField = `${phase}_image`;
-    const imagePath = file.path.replace(/\\/g, '/');
+    // Solo el artista puede subir muestras
+    if (req.user.id !== order.artist_id) {
+      return res.status(403).json({ message: 'No autorizado.' });
+    }
 
-    // Actualiza el campo correspondiente en la base de datos
-    await dbConnection.promise().query(
-      `UPDATE orders SET ${phaseField} = IF(${phaseField} IS NULL OR ${phaseField} = '', ?, CONCAT(${phaseField}, ',', ?)) WHERE id = ?`,
-      [imagePath, imagePath, id]
-    );
+    // Verificar que la fase sea válida
+    const validPhases = ['plan', 'sketch', 'details', 'final'];
+    if (!validPhases.includes(phase)) {
+      return res.status(400).json({ message: 'Fase no válida.' });
+    }
 
-    res.status(200).json({ message: 'Muestra subida correctamente.' });
+    // Verificar límite de 3 muestras por fase
+    const currentImages = order[`${phase}_image`];
+    const currentCount = currentImages ? currentImages.split(',').filter(Boolean).length : 0;
+    
+    if (currentCount >= 3) {
+      return res.status(400).json({ message: `Ya has subido el máximo de 3 muestras en la fase ${phase}.` });
+    }
+
+    const imagePath = req.file.path.replace(/\\/g, '/');
+    console.log(`📁 Guardando imagen: ${imagePath}`);
+
+    // Agregar la nueva imagen al campo correspondiente
+    const newImages = currentImages 
+      ? `${currentImages},${imagePath}` 
+      : imagePath;
+
+    await new Promise((resolve, reject) => {
+      dbConnection.query(
+        `UPDATE orders SET ${phase}_image = ? WHERE id = ?`,
+        [newImages, id],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
+    });
+
+    console.log(`✅ Muestra subida correctamente para pedido ${id} en fase ${phase}`);
+
+    res.json({ 
+      message: 'Muestra subida correctamente.',
+      image_path: imagePath 
+    });
+
   } catch (error) {
-    console.error('Error al subir muestra:', error);
-    res.status(500).json({ message: 'Error al subir muestra.' });
+    console.error('❌ Error al subir muestra:', error);
+    res.status(500).json({ message: 'Error al subir la muestra.' });
   }
 };
 
@@ -155,24 +245,66 @@ export const uploadFinalArtController = async (req, res) => {
   try {
     const { id } = req.params;
     const order = await getOrderById(id);
-    if (!order) return res.status(404).json({ message: 'Pedido no encontrado.' });
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Pedido no encontrado.' });
+    }
 
     // Solo el artista puede subir el arte final
     if (req.user.id !== order.artist_id) {
       return res.status(403).json({ message: 'No autorizado.' });
     }
 
-    // Verifica que haya archivo
+    // ✅ CORRECCIÓN: Verificar que esté en fase 'completed' (Finalizado)
+    if (order.current_stage !== 'completed') {
+      return res.status(400).json({ message: 'Solo puedes subir arte final en la fase de Finalizado.' });
+    }
+
+    if (!order.is_paid) {
+      return res.status(400).json({ message: 'El pedido debe estar pagado para subir la obra final.' });
+    }
+
+    // Verificar que haya archivo
     if (!req.file) {
       return res.status(400).json({ message: 'No se subió ningún archivo.' });
     }
 
-    // Guarda la ruta en completed_image
-    await updateOrderStatusModel(id, { completed_image: `uploads/${req.file.filename}` });
-    res.json({ message: 'Arte final subido.' });
+    const imagePath = req.file.path.replace(/\\/g, '/');
+    console.log(`🎨 Subiendo obra final para pedido ${id}: ${imagePath}`);
+
+    // SOLO GUARDAR LA IMAGEN - NO completar automáticamente
+    await new Promise((resolve, reject) => {
+      dbConnection.query(
+        'UPDATE orders SET completed_image = ? WHERE id = ?',
+        [imagePath, id],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
+    });
+
+    // Notificar al cliente que la obra final está lista
+    await createNotification({
+      user_id: order.client_id,
+      type: 'final_art_uploaded',
+      message: `¡La obra final de tu pedido #${id} está lista! El artista procederá a completar el pedido.`,
+      link: `/orders/${id}`,
+      order_id: id,
+      is_read: false
+    });
+
+    console.log(`✅ Obra final subida para pedido ${id}`);
+    console.log(`📧 Cliente ${order.client_id} notificado`);
+
+    res.json({ 
+      message: 'Obra final subida correctamente. Ahora puedes completar el pedido.',
+      image_path: imagePath
+    });
+
   } catch (error) {
-    console.error('Error al subir arte final:', error);
-    res.status(500).json({ message: 'Error al subir arte final.' });
+    console.error('Error al subir obra final:', error);
+    res.status(500).json({ message: 'Error al subir obra final.' });
   }
 };
 
@@ -219,5 +351,62 @@ export const deleteSampleController = async (req, res) => {
   } catch (error) {
     console.error('Error al eliminar muestra:', error);
     res.status(500).json({ message: 'Error al eliminar muestra.' });
+  }
+};
+
+export const deleteFinalArtController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await getOrderById(id);
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Pedido no encontrado.' });
+    }
+
+    // Solo el artista puede eliminar la obra final
+    if (req.user.id !== order.artist_id) {
+      return res.status(403).json({ message: 'No autorizado.' });
+    }
+
+    // No permitir eliminar si el pedido ya está completado
+    if (order.status === 'completed') {
+      return res.status(400).json({ message: 'No puedes eliminar la obra final de un pedido completado.' });
+    }
+
+    // Verificar que tenga obra final
+    if (!order.completed_image) {
+      return res.status(400).json({ message: 'No hay obra final para eliminar.' });
+    }
+
+    console.log(`🗑️ Eliminando obra final para pedido ${id}: ${order.completed_image}`);
+
+    // Eliminar la referencia en la base de datos
+    await new Promise((resolve, reject) => {
+      dbConnection.query(
+        'UPDATE orders SET completed_image = NULL WHERE id = ?',
+        [id],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
+    });
+
+    // Eliminar el archivo físico si existe
+    const filePath = path.join(process.cwd(), order.completed_image);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      console.log(`📁 Archivo físico eliminado: ${filePath}`);
+    }
+
+    console.log(`✅ Obra final eliminada para pedido ${id}`);
+
+    res.json({ 
+      message: 'Obra final eliminada correctamente.'
+    });
+
+  } catch (error) {
+    console.error('Error al eliminar obra final:', error);
+    res.status(500).json({ message: 'Error al eliminar obra final.' });
   }
 };

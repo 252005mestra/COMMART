@@ -10,14 +10,15 @@ import {
   updateOrderStatusController,
 } from '../controllers/orderController.js';
 import {
-  advanceOrderPhaseController,
   uploadSampleController,
   sendPhaseMessageController,
   getPhaseSamplesController,
   getPhaseMessagesController,
-  payOrderController,
+  advanceOrderPhaseController,
   uploadFinalArtController,
-  deleteSampleController
+  deleteSampleController,
+  deleteFinalArtController,
+  payOrderController
 } from '../controllers/orderProcessController.js';
 
 const router = express.Router();
@@ -59,14 +60,13 @@ router.get('/:id', verifyToken, getOrderDetailsController);
 // Cambiar estado del pedido
 router.put('/:id/status', verifyToken, updateOrderStatusController);
 
-// Avanzar etapa del pedido
-router.put('/:id/phase', verifyToken, advanceOrderPhaseController);
+// Subir muestra
+router.post('/:id/sample', verifyToken, upload.single('sample_image'), uploadSampleController);
 
 // Enviar mensaje sobre el pedido
-router.post('/:id/sample', verifyToken, upload.single('sample_image'), uploadSampleController);
 router.post('/:id/message', verifyToken, sendPhaseMessageController);
 
-// Obtener mensajes de un pedido
+// Obtener datos de fases
 router.get('/:id/samples/:phase', verifyToken, getPhaseSamplesController);
 router.get('/:id/messages/:phase', verifyToken, getPhaseMessagesController);
 
@@ -78,5 +78,11 @@ router.post('/:id/final', verifyToken, uploadFinalArt.single('final_image'), upl
 
 // Eliminar muestra
 router.delete('/:id/sample', verifyToken, deleteSampleController);
+
+// Eliminar obra final
+router.delete('/:id/final', verifyToken, deleteFinalArtController);
+
+// Avanzar de fase
+router.post('/:id/advance', verifyToken, advanceOrderPhaseController);
 
 export default router;
