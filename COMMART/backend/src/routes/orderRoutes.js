@@ -17,8 +17,9 @@ import {
   advanceOrderPhaseController,
   uploadFinalArtController,
   deleteSampleController,
+  payOrderController,
   deleteFinalArtController,
-  payOrderController
+  updateOrderPlanningController
 } from '../controllers/orderProcessController.js';
 
 const router = express.Router();
@@ -84,5 +85,8 @@ router.delete('/:id/final', verifyToken, deleteFinalArtController);
 
 // Avanzar de fase
 router.post('/:id/advance', verifyToken, advanceOrderPhaseController);
+
+// Actualizar detalles de planeación
+router.put('/:id/planning', verifyToken, updateOrderPlanningController);
 
 export default router;

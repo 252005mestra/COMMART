@@ -9,6 +9,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { usePayment } from '../hooks/usePayment';
 import InvoiceModal from '../components/InvoiceModal';
 import ReferenceCarousel from '../components/ReferenceCarousel';
+import { formatColombianPrice } from '../utils/priceFormatter';
 import '../styles/ordertracking.css';
 
 const STAGES = [
@@ -49,6 +50,10 @@ const OrderTracking = ({ user }) => {
   const messageListRef = useRef(null);
   const { processPayment, loading: paymentLoading, error: paymentError } = usePayment();
   const [showFinalArtModal, setShowFinalArtModal] = useState(false);
+  const [showPackageChangeModal, setShowPackageChangeModal] = useState(false);
+  const [showExtrasModal, setShowExtrasModal] = useState(false);
+  const [availablePackages, setAvailablePackages] = useState([]);
+  const [availableExtras, setAvailableExtras] = useState([]);
 
   // ✅ useEffect para cargar datos iniciales del pedido
   useEffect(() => {
@@ -154,7 +159,6 @@ const OrderTracking = ({ user }) => {
     if (order && selectedStage) {
       fetchMessages(selectedStage);
     }
-    // eslint-disable-next-line
   }, [order, selectedStage]);
 
   // ✅ useEffect para manejar preview de archivos
@@ -167,6 +171,13 @@ const OrderTracking = ({ user }) => {
     setPreviewUrls(urls);
     return () => urls.forEach(url => URL.revokeObjectURL(url));
   }, [sampleFiles]);
+
+  // ✅ AGREGAR AQUÍ: Cargar paquetes y extras cuando se necesiten
+  useEffect(() => {
+    if ((showPackageChangeModal || showExtrasModal) && order?.artist_id) {
+      loadArtistPackagesAndExtras();
+    }
+  }, [showPackageChangeModal, showExtrasModal, order?.artist_id]);
 
   // ✅ useEffect para manejar el retorno de Wompi (INTEGRACIÓN DE PAGO)
   useEffect(() => {
@@ -235,7 +246,7 @@ const OrderTracking = ({ user }) => {
     }
   }, [location.search, id]);
 
-  // ✅ useEffect para scroll a mensajes específicos (SIN FORZAR CAMBIO DE STAGE)
+  // ✅ useEffect para scroll a mensajes específicos
   useEffect(() => {
     // Solo seleccionar la fase si viene específicamente en el estado de navegación
     if (location.state?.phase && location.state.phase !== selectedStage) {
@@ -252,17 +263,17 @@ const OrderTracking = ({ user }) => {
         }
       }
     }
-    // eslint-disable-next-line
   }, [location.state?.messageId, location.state?.phase, messages]);
 
-  // Solo sincroniza selectedStage con la fase activa UNA VEZ al cargar el pedido
+  // ✅ Solo sincroniza selectedStage con la fase activa UNA VEZ
   useEffect(() => {
     if (order?.current_stage && !hasSyncedStage.current) {
       setSelectedStage(order.current_stage);
       hasSyncedStage.current = true;
     }
-    // eslint-disable-next-line
   }, [order?.current_stage]);
+
+  // ✅ TODAS LAS FUNCIONES van después de los useEffect...
 
   // ✅ FUNCIÓN para obtener mensajes
   const fetchMessages = async (stage) => {
@@ -566,37 +577,29 @@ const OrderTracking = ({ user }) => {
 
       // Datos de pago para enviar al backend
       const paymentData = {
-        orderId: parseInt(order.id),
-        amount: parseFloat(totalAmount),
-        customerEmail: String(customerEmail),
-        customerName: String(customerName)
+        orderId: order.id,
+        amount: totalAmount,
+        currency: 'COP',
+        customerEmail: customerEmail,
+        customerName: customerName,
+        description: `Pago del pedido #${order.id} - ${selectedPackage?.title || 'Paquete personalizado'}`,
+        // URL de retorno después del pago
+        redirectUrl: `${window.location.origin}/orders/${order.id}?payment=success`
       };
 
-      // Procesar pago usando el hook
-      const success = await processPayment(paymentData);
+      console.log('📡 Enviando datos de pago:', paymentData);
 
-      if (!success) {
-        if (paymentError) {
-          setAlert({ 
-            open: true, 
-            type: 'error', 
-            message: `Error de pago: ${paymentError}` 
-          });
-        } else {
-          setAlert({ 
-            open: true, 
-            type: 'error', 
-            message: 'Error procesando el pago. Por favor, intenta nuevamente.' 
-          });
-        }
-      }
+      // Procesar pago usando el hook
+      await processPayment(paymentData);
       
-    } catch (err) {
-      console.error('❌ Error inesperado en handlePay:', err);
+      console.log('✅ Proceso de pago iniciado correctamente');
+
+    } catch (error) {
+      console.error('❌ Error en el proceso de pago:', error);
       setAlert({ 
         open: true, 
         type: 'error', 
-        message: `Error inesperado: ${err.message}. Por favor, intenta nuevamente.` 
+        message: `Error al procesar el pago: ${error.message || 'Intenta nuevamente.'}` 
       });
     }
   };
@@ -615,52 +618,93 @@ const OrderTracking = ({ user }) => {
         { status: 'accepted' },
         { withCredentials: true }
       );
-      await reloadOrder();
-      setAlert({ open: true, type: 'success', message: 'Pedido aceptado.' });
+      
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: 'Pedido aceptado exitosamente. El cliente ha sido notificado.' 
+      });
     } catch (err) {
-      setAlert({ open: true, type: 'error', message: 'Error al aceptar el pedido.' });
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Error al aceptar el pedido.' 
+      });
     }
   };
 
   // ✅ Función para rechazar pedido
   const handleReject = async () => {
     if (!rejectReason.trim()) {
-      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo para el rechazo.' });
+      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo.' });
       return;
     }
+
     try {
       await axios.put(
         `http://localhost:5000/api/orders/${order.id}/status`,
-        { status: 'rejected', reason: rejectReason },
+        { status: 'rejected', rejection_reason: rejectReason },
         { withCredentials: true }
       );
+      
       setShowRejectModal(false);
       setRejectReason('');
-      await reloadOrder();
-      setAlert({ open: true, type: 'success', message: 'Pedido rechazado.' });
+      
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: 'Pedido rechazado. El cliente ha sido notificado.' 
+      });
     } catch (err) {
-      setAlert({ open: true, type: 'error', message: 'Error al rechazar el pedido.' });
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Error al rechazar el pedido.' 
+      });
     }
   };
 
   // Función para cancelar pedido
   const handleCancelOrder = async () => {
     if (!cancelReason.trim()) {
-      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo para la cancelación.' });
+      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo.' });
       return;
     }
+
     try {
       await axios.put(
         `http://localhost:5000/api/orders/${order.id}/status`,
-        { status: 'cancelled', reason: cancelReason },
+        { 
+          status: 'cancelled', 
+          reason: cancelReason  // ✅ CAMBIAR DE 'cancellation_reason' A 'reason'
+        },
         { withCredentials: true }
       );
+      
       setShowCancelModal(false);
       setCancelReason('');
-      await reloadOrder();
-      setAlert({ open: true, type: 'success', message: 'Pedido cancelado.' });
+      
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: 'Pedido cancelado exitosamente.' 
+      });
     } catch (err) {
-      setAlert({ open: true, type: 'error', message: 'Error al cancelar el pedido.' });
+      console.error('Error cancelando pedido:', err);
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: `Error al cancelar el pedido: ${err.response?.data?.message || err.message}` 
+      });
     }
   };
 
@@ -864,6 +908,218 @@ const OrderTracking = ({ user }) => {
         open: true, 
         type: 'error', 
         message: 'Error al eliminar la obra final. Intenta nuevamente.' 
+      });
+    }
+  };
+
+  // ✅ Función para cargar paquetes y extras disponibles del artista
+  const loadArtistPackagesAndExtras = async () => {
+    try {
+      console.log('🔍 Cargando paquetes y extras para artista:', order.artist_id);
+      
+      const [packagesRes, extrasRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/packages/artist/${order.artist_id}`, { withCredentials: true }),
+        axios.get(`http://localhost:5000/api/packages/artist/${order.artist_id}/extras`, { withCredentials: true })
+      ]);
+      
+      console.log('📦 Paquetes cargados:', packagesRes.data);
+      console.log('✨ Extras cargados:', extrasRes.data);
+      
+      setAvailablePackages(packagesRes.data || []);
+      setAvailableExtras(extrasRes.data || []);
+    } catch (err) {
+      console.error('❌ Error cargando paquetes y extras:', err);
+      setAlert({ open: true, type: 'error', message: 'Error al cargar opciones disponibles.' });
+    }
+  };
+
+  // ✅ Función para cambiar paquete - CORREGIDA
+  const handleChangePackage = async (newPackageId) => {
+    try {
+      const newPackage = availablePackages.find(p => p.id === parseInt(newPackageId));
+      if (!newPackage) {
+        setAlert({ open: true, type: 'error', message: 'Paquete no encontrado.' });
+        return;
+      }
+
+      console.log('📦 Cambiando paquete a:', newPackage);
+
+      setSelectedPackage(newPackage);
+      setShowPackageChangeModal(false);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: `Paquete cambiado a: ${newPackage.title}. Recuerda guardar los cambios.` 
+      });
+    } catch (err) {
+      console.error('Error cambiando paquete:', err);
+      setAlert({ open: true, type: 'error', message: 'Error al cambiar el paquete.' });
+    }
+  };
+
+  // ✅ Función para agregar extra - CORREGIDA
+  const handleAddExtra = async (extraId) => {
+    try {
+      const extraToAdd = availableExtras.find(e => e.id === parseInt(extraId));
+      if (!extraToAdd) {
+        setAlert({ open: true, type: 'error', message: 'Extra no encontrado.' });
+        return;
+      }
+
+      // Verificar que no esté ya agregado
+      if (selectedExtras.some(e => e.id === extraToAdd.id)) {
+        setAlert({ open: true, type: 'warning', message: 'Este extra ya está incluido.' });
+        setShowExtrasModal(false);
+        return;
+      }
+
+      console.log('✨ Agregando extra:', extraToAdd);
+
+      setSelectedExtras(prev => [...prev, extraToAdd]);
+      setShowExtrasModal(false);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: `Extra agregado: ${extraToAdd.name}. Recuerda guardar los cambios.` 
+      });
+    } catch (err) {
+      console.error('Error agregando extra:', err);
+      setAlert({ open: true, type: 'error', message: 'Error al agregar el extra.' });
+    }
+  };
+
+  // ✅ Función para quitar extra - AGREGADA
+  const handleRemoveExtra = async (extraId) => {
+    try {
+      const extraToRemove = selectedExtras.find(e => e.id === extraId);
+      if (!extraToRemove) return;
+
+      setSelectedExtras(prev => prev.filter(e => e.id !== extraId));
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: `Extra removido: ${extraToRemove.name}. Recuerda guardar los cambios.` 
+      });
+    } catch (err) {
+      console.error('Error removiendo extra:', err);
+      setAlert({ open: true, type: 'error', message: 'Error al remover el extra.' });
+    }
+  };
+
+  // ✅ Función para cancelar pedido por falta de pago (solo artista) - CORREGIDA
+  const handleCancelForNonPayment = async () => {
+    try {
+      console.log('❌ Cancelando pedido...', { stage: selectedStage, isPaid: order.is_paid });
+      
+      setAlert({ 
+        open: true, 
+        type: 'info', 
+        message: 'Cancelando pedido...' 
+      });
+
+      // Mensaje personalizado según la fase
+      const cancellationReason = selectedStage === 'plan'
+        ? 'Pedido cancelado por el artista durante la fase de planeación debido a problemas de comunicación o acuerdo en los detalles.'
+        : 'Pedido cancelado por el artista debido a falta de pago en la fase de boceto.';
+
+      await axios.put(
+        `http://localhost:5000/api/orders/${order.id}/status`,
+        { 
+          status: 'cancelled',
+          reason: cancellationReason  // ✅ CAMBIAR DE 'cancellation_reason' A 'reason'
+        },
+        { withCredentials: true }
+      );
+      
+      // Recargar datos
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: selectedStage === 'plan' 
+          ? 'Pedido cancelado. El cliente ha sido notificado.' 
+          : 'Pedido cancelado por falta de pago. El cliente ha sido notificado.'
+      });
+    } catch (err) {
+      console.error('Error cancelando pedido:', err);
+      console.error('Error response:', err.response?.data);
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: `Error al cancelar el pedido: ${err.response?.data?.message || err.message}` 
+      });
+    }
+  };
+
+  // ✅ Función para guardar cambios de planeación
+  const handleSavePlanningChanges = async () => {
+    try {
+      console.log('🔍 Iniciando guardado de cambios...');
+      
+      setAlert({ 
+        open: true, 
+        type: 'info', 
+        message: 'Guardando cambios del pedido...' 
+      });
+
+      // Preparar datos para enviar
+      const extrasIds = selectedExtras.map(e => e.id).join(',');
+      const packagePrice = Number(selectedPackage?.price) || 0;
+      const extrasPrice = selectedExtras.reduce((sum, e) => sum + (Number(e.price) || 0), 0);
+      const totalPrice = packagePrice + extrasPrice;
+
+      const payload = {
+        package_id: selectedPackage?.id,
+        package_name: selectedPackage?.title || selectedPackage?.name,
+        extras: extrasIds,
+        total_price: totalPrice
+      };
+
+      console.log('📡 Enviando payload:', payload);
+      console.log('🔗 URL:', `http://localhost:5000/api/orders/${order.id}/planning`);
+
+      // Verificar cookies
+      console.log('🍪 Cookies disponibles:', document.cookie);
+
+      // Enviar cambios al backend
+      const response = await axios.put(
+        `http://localhost:5000/api/orders/${order.id}/planning`,
+        payload,
+        { 
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('✅ Respuesta del servidor:', response.data);
+
+      // Recargar pedido con datos actualizados
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: '✅ Cambios guardados exitosamente. El cliente ha sido notificado y verá el nuevo precio actualizado.' 
+      });
+
+    } catch (err) {
+      console.error('❌ Error completo:', err);
+      console.error('❌ Response data:', err.response?.data);
+      console.error('❌ Response status:', err.response?.status);
+      console.error('❌ Response headers:', err.response?.headers);
+      
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: `Error al guardar cambios: ${err.response?.data?.message || err.message}` 
       });
     }
   };
@@ -1335,49 +1591,168 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
               
-              {/* ✅ SUBIR OBRA FINAL - EN LA FASE 'completed' (FINALIZADO) */}
-              {user.role === 'artist' && 
-                selectedStage === 'completed' && 
-                isCurrentPhase && 
-                order.is_paid && 
-                !order.completed_image && (
-                <div className="ordertracking-section">
+              {/* ✅ FASE DE PLANEACIÓN - Negociación de detalles (MOVIDA AL LUGAR CORRECTO) */}
+              {selectedStage === 'plan' && isCurrentPhase && user.role === 'artist' && order.is_paid === 0 && (
+                <div className="ordertracking-section ordertracking-planning-section">
                   <div className="ordertracking-section-title">
-                    🎨 Subir Obra Final
+                    📋 Ajustar Detalles del Pedido
                   </div>
-                  <div className="ordertracking-final-warning">
-                    ⚠️ <strong>Importante:</strong> Esta será la entrega final del pedido. Una vez subida, podrás completar el pedido.
+                  <div className="ordertracking-planning-info">
+                    <p style={{ 
+                      background: '#e8f4fd', 
+                      padding: '12px', 
+                      borderRadius: '6px',
+                      margin: '0 0 16px 0',
+                      fontSize: '14px',
+                      color: '#0c5460'
+                    }}>
+                      💡 <strong>En esta fase puedes:</strong> Agregar extras necesarios, cambiar el paquete si el cliente lo requiere, y negociar todos los detalles antes de que realice el pago.
+                    </p>
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleUploadFinalArt}
-                    className="ordertracking-final-input"
-                  />
+
+                  {/* Cambiar paquete */}
+                  <div className="ordertracking-planning-package">
+                    <div className="ordertracking-planning-subtitle">
+                      🎨 Paquete Actual: <strong>{selectedPackage?.title || 'Sin paquete'}</strong>
+                    </div>
+                    <button
+                      onClick={() => setShowPackageChangeModal(true)}
+                      className="ordertracking-planning-btn"
+                      style={{
+                        background: '#17a2b8',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        marginTop: '8px'
+                      }}
+                    >
+                      Cambiar Paquete
+                    </button>
+                  </div>
+
+                  {/* Agregar extras */}
+                  <div className="ordertracking-planning-extras">
+                    <div className="ordertracking-planning-subtitle">
+                      ✨ Extras Incluidos ({selectedExtras.length})
+                    </div>
+                    {selectedExtras.length > 0 && (
+                      <div className="ordertracking-current-extras">
+                        {selectedExtras.map(extra => (
+                          <div key={extra.id} className="ordertracking-extra-item" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '8px',
+                            background: '#f8f9fa',
+                            borderRadius: '4px',
+                            margin: '4px 0'
+                          }}>
+                            <span>{extra.name} - ${extra.price?.toLocaleString()}</span>
+                            <button
+                              onClick={() => handleRemoveExtra(extra.id)}
+                              style={{
+                                background: '#e74c3c',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                marginLeft: '8px'
+                              }}
+                              title="Quitar extra"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <button
+                      onClick={() => setShowExtrasModal(true)}
+                      className="ordertracking-planning-btn"
+                      style={{
+                        background: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        marginTop: '8px'
+                      }}
+                    >
+                      + Agregar Extras
+                    </button>
+                  </div>
+
+                  {/* Total actualizado */}
+                  <div className="ordertracking-planning-total">
+                    <div style={{
+                      background: '#f8f9fa',
+                      border: '2px solid #8B6D47',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      textAlign: 'center',
+                      marginTop: '16px'
+                    }}>
+                      <strong style={{ fontSize: '18px', color: '#8B6D47' }}>
+                        Total Actualizado: {formatColombianPrice(
+                          (Number(selectedPackage?.price) || 0) + 
+                          selectedExtras.reduce((sum, e) => sum + (Number(e.price) || 0), 0)
+                        )}
+                      </strong>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#6c757d' }}>
+                        Los cambios se aplicarán cuando el cliente realice el pago
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Botón para guardar cambios */}
+                  <div className="ordertracking-planning-actions">
+                    <button
+                      onClick={handleSavePlanningChanges}
+                      className="ordertracking-planning-save-btn"
+                      style={{
+                        background: '#8B6D47',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 24px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        marginTop: '16px',
+                        width: '100%'
+                      }}
+                    >
+                      💾 Guardar Cambios del Pedido
+                    </button>
+                  </div>
                 </div>
               )}
 
-              {/* ✅ BOTÓN COMPLETAR PEDIDO - SOLO aparece después de subir obra final EN 'completed' */}
-              {user.role === 'artist' && 
-                selectedStage === 'completed' && 
-                isCurrentPhase && 
-                order.is_paid && 
-                order.completed_image && 
-                order.status !== 'completed' && (
+              {/* Mensaje especial para la fase de planeación - PARA CLIENTES */}
+              {selectedStage === 'plan' && user.role === 'client' && (
                 <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">
-                    ✅ Confirmar Finalización
+                  <div style={{
+                    padding: '16px',
+                    background: '#fff3cd',
+                    border: '1px solid #ffeaa7', 
+                    borderRadius: '8px',
+                    textAlign: 'center'
+                  }}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#856404' }}>
+                      📋 Fase de Planeación
+                    </p>
+                    <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
+                      El artista está revisando tu pedido y puede sugerir cambios de paquete o extras adicionales. 
+                      Mantén comunicación para acordar todos los detalles antes del pago.
+                    </p>
                   </div>
-                  <div className="ordertracking-complete-warning">
-                    🎯 <strong>¿Estás listo para completar el pedido?</strong><br />
-                    Una vez confirmado, el pedido se marcará como completado y el cliente podrá descargar la obra final.
-                  </div>
-                  <button
-                    onClick={handleCompletePedido}
-                    className="ordertracking-complete-btn"
-                  >
-                    🏁 Completar Pedido Definitivamente
-                  </button>
                 </div>
               )}
 
@@ -1386,10 +1761,14 @@ const OrderTracking = ({ user }) => {
                 isCurrentPhase && 
                 order.is_paid && 
                 selectedStage !== 'completed' && 
-                (selectedStage === 'plan' || selectedPhaseImages.length > 0) && ( // ✅ Permitir avanzar desde 'plan' sin muestras
+                (
+                  // ✅ CONDICIONES CORREGIDAS:
+                  selectedStage === 'plan' ||                    // En planeación siempre se puede avanzar
+                  selectedPhaseImages.length > 0                // En otras fases necesita muestras
+                ) && (
                 <div className="ordertracking-section">
                   <div className="ordertracking-section-title">
-                    Avanzar de Fase
+                    ➡️ Avanzar de Fase
                   </div>
                   <div style={{
                     background: '#e8f4fd',
@@ -1402,8 +1781,8 @@ const OrderTracking = ({ user }) => {
                       ¿Listo para avanzar a la siguiente fase?
                     </p>
                     <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
-                      {selectedStage === 'plan' && 'Pasarás a la fase de Boceto donde crearás las propuestas iniciales.'}
-                      {selectedStage === 'sketch' && 'Pasarás a la fase de Definición para trabajar en los detalles.'}
+                      {selectedStage === 'plan' && 'Pasarás a la fase de Boceto donde crearás las propuestas iniciales para el cliente.'}
+                      {selectedStage === 'sketch' && 'Pasarás a la fase de Definición para trabajar en los detalles del boceto elegido.'}
                       {selectedStage === 'details' && 'Pasarás a la fase de Últimos Detalles para los ajustes finales.'}
                       {selectedStage === 'final' && 'Pasarás a la fase de Finalizado donde subirás la obra final.'}
                     </p>
@@ -1419,7 +1798,8 @@ const OrderTracking = ({ user }) => {
                       borderRadius: '6px',
                       cursor: 'pointer',
                       fontSize: '16px',
-                      fontWeight: 'bold'
+                      fontWeight: 'bold',
+                      width: '100%'
                     }}
                   >
                     ➡️ Avanzar a {
@@ -1432,118 +1812,160 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
 
-              {/* Comunicación */}
-              <div className="ordertracking-section">
-                <div className="ordertracking-section-title">
-                  Comunicación ({STAGES.find(s => s.key === selectedStage)?.label})
-                </div>
-                <div
-                  ref={messageListRef}
-                  className="ordertracking-messages-list"
-                >
-                  {messages.map((m, idx) => (
-                    <div
-                      key={m.id || idx}
-                      className={`ordertracking-message${location.state?.messageId && String(m.id) === String(location.state.messageId) ? ' highlighted' : ''}`}
-                    >
-                      <b>
-                        {m.sender_id === user.id
-                          ? 'Tú'
-                          : m.sender_username || 'Usuario'}
-                        :
-                      </b> {m.message}
-                    </div>
-                  ))}
-                </div>
-                <div className="ordertracking-message-input-row">
-                  <input
-                    value={msg}
-                    onChange={e => setMsg(e.target.value)}
-                    placeholder="Escribe un mensaje..."
-                    disabled={!canSendMsg}
-                    className="ordertracking-message-input"
-                  />
+              {/* BOTÓN CANCELAR POR FALTA DE PAGO - En fase planeación Y boceto sin pago */}
+              {user.role === 'artist' && 
+                (selectedStage === 'plan' || selectedStage === 'sketch') && 
+                isCurrentPhase && 
+                !order.is_paid && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">
+                    ⚠️ Gestión de Pago
+                  </div>
+                  <div style={{
+                    background: '#fff3cd',
+                    border: '1px solid #ffeaa7',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '12px'
+                  }}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#856404' }}>
+                      {selectedStage === 'plan' 
+                        ? 'El cliente aún no ha realizado el pago'
+                        : 'El cliente aún no ha realizado el pago'
+                      }
+                    </p>
+                    <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
+                      {selectedStage === 'plan' 
+                        ? 'Si no puedes llegar a un acuerdo con el cliente sobre los detalles del pedido o el cliente no responde, puedes cancelar el pedido.'
+                        : 'En la fase de boceto, si el cliente no ha pagado después de ver las propuestas, puedes cancelar el pedido.'
+                      } El cliente recibirá una notificación explicando el motivo.
+                    </p>
+                  </div>
                   <button
-                    className="ordertracking-send-btn"
-                    onClick={handleSendMsg}
-                    disabled={!msg.trim() || !canSendMsg}
+                    onClick={() => {
+                      const confirmMessage = selectedStage === 'plan' 
+                        ? '¿Estás seguro de que quieres cancelar este pedido?\n\nMotivos comunes:\n- No se llegó a un acuerdo en los detalles\n- El cliente no responde\n- Problemas de comunicación\n\nEsta acción no se puede deshacer y el cliente será notificado.'
+                        : '¿Estás seguro de que quieres cancelar este pedido por falta de pago?\n\nEsta acción no se puede deshacer y el cliente será notificado.';
+                        
+                      if (window.confirm(confirmMessage)) {
+                        handleCancelForNonPayment();
+                      }
+                    }}
+                    style={{
+                      background: '#e74c3c',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      width: '100%'
+                    }}
                   >
-                    Enviar
+                    ❌ {selectedStage === 'plan' ? 'Cancelar Pedido' : 'Cancelar por Falta de Pago'}
                   </button>
                 </div>
+              )}
+
+              {/* ✅ CHAT - FUNDAMENTAL EN TODAS LAS FASES */}
+              <div className="ordertracking-section">
+                <div className="ordertracking-section-title">
+                  💬 Comunicación
+                  {!canSendMsg && <small style={{ color: '#6c757d', fontWeight: 'normal' }}> (Solo lectura)</small>}
+                </div>
+                
+                {/* Lista de mensajes */}
+                <div className="ordertracking-messages" ref={messageListRef}>
+                  {messages.length > 0 ? (
+                    messages.map((message, idx) => (
+                      <div
+                        key={idx}
+                        className={`ordertracking-message ${message.sender_id === user.id ? 'own' : 'other'}`}
+                      >
+                        <div className="ordertracking-message-header">
+                          <strong>{message.sender_username}</strong>
+                          <span className="ordertracking-message-time">
+                            {new Date(message.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="ordertracking-message-text">{message.message}</div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="ordertracking-no-messages">
+                      {selectedStage === 'plan' 
+                        ? 'Inicia la conversación para coordinar los detalles del pedido'
+                        : 'Sin mensajes en esta fase'
+                      }
+                    </p>
+                  )}
+                </div>
+                
+                {/* Input para enviar mensajes */}
+                {canSendMsg && (
+                  <div className="ordertracking-message-input">
+                    <textarea
+                      value={msg}
+                      onChange={e => setMsg(e.target.value)}
+                      placeholder={selectedStage === 'plan' 
+                        ? 'Escribe aquí para coordinar los detalles del pedido...'
+                        : 'Escribe tu mensaje aquí...'
+                      }
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMsg();
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        minHeight: '80px',
+                        padding: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '6px',
+                        resize: 'vertical',
+                        fontFamily: 'inherit'
+                      }}
+                    />
+                    <button
+                      onClick={handleSendMsg}
+                      disabled={!msg.trim()}
+                      style={{
+                        marginTop: '8px',
+                        padding: '10px 20px',
+                        background: msg.trim() ? '#8B6D47' : '#ccc',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: msg.trim() ? 'pointer' : 'not-allowed',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      Enviar mensaje
+                    </button>
+                  </div>
+                )}
+                
                 {!canSendMsg && (
-                  <div className="ordertracking-message-note">
-                    {isFinal ? (
-                      '🔒 El pedido ha finalizado. No se pueden enviar más mensajes.'
-                    ) : isPastPhase ? (
-                      `📝 Esta es una fase completada. Solo puedes ver los mensajes enviados anteriormente.`
-                    ) : isFuturePhase ? (
-                      `⏳ Esta fase aún no ha comenzado. Los mensajes aparecerán cuando se alcance esta etapa.`
-                    ) : isCurrentPhase ? (
-                      '✍️ Puedes enviar mensajes en esta fase actual.'
-                    ) : (
-                      'Solo puedes enviar mensajes en la fase actual del pedido.'
-                    )}
+                  <div style={{
+                    padding: '12px',
+                    background: '#f8f9fa',
+                    border: '1px solid #dee2e6',
+                    borderRadius: '6px',
+                    color: '#6c757d',
+                    fontSize: '14px',
+                    textAlign: 'center'
+                  }}>
+                    {isFinal 
+                      ? 'La comunicación está cerrada en pedidos finalizados'
+                      : 'Solo puedes enviar mensajes en la fase actual'
+                    }
                   </div>
                 )}
               </div>
-
-              {/* ✅ MOSTRAR MENSAJE DE PAGO EXITOSO SI YA ESTÁ PAGADO */}
-              {user.id === order.client_id && order.is_paid && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">Estado del pago</div>
-                  <div style={{
-                    padding: '12px 16px',
-                    background: '#d4edda',
-                    color: '#155724',
-                    borderRadius: '6px',
-                    border: '1px solid #c3e6cb',
-                    marginBottom: '8px'
-                  }}>
-                    ✅ <strong>Pago completado exitosamente</strong>
-                    <br />
-                    <small>El artista ha sido notificado y puede continuar con tu pedido.</small>
-                  </div>
-                </div>
-              )}
-
-
-              {/* ✅ MOSTRAR FACTURA solo si el pedido está pagado */}
-              {user.id === order.client_id && order.is_paid && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">Factura de Pago</div>
-                  <button 
-                    className="ordertracking-invoice-btn" 
-                    onClick={handleToggleInvoice}
-                    style={{
-                      background: '#8B6D47',
-                      color: 'white',
-                      padding: '12px 24px',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      fontFamily: 'Goldman, sans-serif'
-                    }}
-                  >
-                    Ver Factura
-                  </button>
-                </div>
-              )}
-              
-              {/* Subir arte final (solo artista, solo en la última fase) */}
-              
             </div>
-            
-            <AlertModal
-              open={alert.open}
-              type={alert.type}
-              message={alert.message}
-              onClose={() => setAlert(a => ({ ...a, open: false }))}
-            />
           </section>
 
           {/* Columna derecha */}
@@ -1588,64 +2010,106 @@ const OrderTracking = ({ user }) => {
       </main>
       <Footer />
 
-      {/* Modales de confirmación */}
-      <ConfirmModal
-        open={showRejectModal}
-        message={
-          <div>
-            <div style={{ marginBottom: 16, fontWeight: 700, fontFamily: "'Nunito Sans', sans-serif" }}>
-              Motivo de la cancelación
-            </div>
-            <textarea
-              className="confirm-modal-textarea"
-              value={rejectReason}
-              onChange={e => setRejectReason(e.target.value)}
-              placeholder="Explica el motivo de la cancelación"
-            />
-          </div>
-        }
-        onCancel={() => {
-          setShowRejectModal(false);
-          setRejectReason('');
-        }}
-        onConfirm={handleReject}
-        confirmText="Rechazar"
-        cancelText="Cancelar"
-      />
-
-      <ConfirmModal
-        open={showCancelModal}
-        message={
-          <div>
-            <div style={{ marginBottom: 16 }}>Motivo de la cancelación</div>
-            <textarea
-              className="confirm-modal-textarea"
-              value={cancelReason}
-              onChange={e => setCancelReason(e.target.value)}
-              placeholder="Explica el motivo de la cancelación"
-            />
-          </div>
-        }
-        onCancel={() => {
-          setShowCancelModal(false);
-          setCancelReason('');
-        }}
-        onConfirm={handleCancelOrder}
-        confirmText="Cancelar pedido"
-        cancelText="Volver"
-      />
-
-      <InvoiceModal
-        open={showInvoice}
-        invoiceData={invoiceData}
-        onClose={() => setShowInvoice(false)}
-      />
-
       {/* Modal de obra final - IGUAL QUE LAS REFERENCIAS */}
       <ReferenceCarousel
         open={showFinalArtModal}
         images={order.completed_image ? [`http://localhost:5000/${order.completed_image}`] : []}
         onClose={() => setShowFinalArtModal(false)}
+      />
+
+      {/* Modal para cambiar paquete */}
+      <ConfirmModal
+        open={showPackageChangeModal}
+        message={
+          <div>
+            <div style={{ marginBottom: 16, fontWeight: 700 }}>
+              Cambiar Paquete del Pedido
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                Seleccionar nuevo paquete:
+              </label>
+              <select
+                id="package-select"
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+                defaultValue=""
+              >
+                <option value="" disabled>Selecciona un paquete</option>
+                {availablePackages.map(pkg => (
+                  <option key={pkg.id} value={pkg.id}>
+                    {pkg.title || pkg.name} - ${pkg.price?.toLocaleString()}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        }
+        onCancel={() => setShowPackageChangeModal(false)}
+        onConfirm={() => {
+          const select = document.getElementById('package-select');
+          if (select.value) {
+            handleChangePackage(select.value);
+          } else {
+            setAlert({ open: true, type: 'warning', message: 'Selecciona un paquete.' });
+          }
+        }}
+        confirmText="Cambiar Paquete"
+        cancelText="Cancelar"
+      />
+
+      {/* Modal para agregar extras */}
+      <ConfirmModal
+        open={showExtrasModal}
+        message={
+          <div>
+            <div style={{ marginBottom: 16, fontWeight: 700 }}>
+              Agregar Extras al Pedido
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                Seleccionar extra:
+              </label>
+              <select
+                id="extras-select"
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+                defaultValue=""
+              >
+                <option value="" disabled>Selecciona un extra</option>
+                {availableExtras
+                  .filter(extra => !selectedExtras.some(se => se.id === extra.id))
+                  .map(extra => (
+                    <option key={extra.id} value={extra.id}>
+                      {extra.name} - ${extra.price?.toLocaleString()}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+        }
+        onCancel={() => setShowExtrasModal(false)}
+        onConfirm={() => {
+          const select = document.getElementById('extras-select');
+          if (select.value) {
+            handleAddExtra(select.value);
+            setShowExtrasModal(false);
+          } else {
+            setAlert({ open: true, type: 'warning', message: 'Selecciona un extra.' });
+          }
+        }}
+        confirmText="Agregar Extra"
+        cancelText="Cancelar"
       />
     </>
   );

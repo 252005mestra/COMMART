@@ -410,3 +410,113 @@ export const deleteFinalArtController = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar obra final.' });
   }
 };
+
+// ✅ AGREGAR AL FINAL DEL ARCHIVO - Controlador para actualizar planeación
+
+export const updateOrderPlanningController = async (req, res) => {
+  console.log('🚀 === INICIO updateOrderPlanningController ===');
+  
+  try {
+    const { id } = req.params;
+    const { package_id, package_name, extras, total_price } = req.body;
+    
+    console.log('✅ 1. Datos recibidos:', {
+      orderId: id,
+      userId: req.user?.id,
+      userRole: req.user?.role,
+      body: req.body
+    });
+    
+    console.log('✅ 2. Verificando funciones disponibles:', {
+      getOrderById: typeof getOrderById,
+      createNotification: typeof createNotification,
+      dbConnection: !!dbConnection
+    });
+    
+    console.log('✅ 3. Obteniendo pedido...');
+    const order = await getOrderById(id);
+    console.log('✅ 4. Pedido obtenido:', order ? 'OK' : 'NULL');
+    
+    if (!order) {
+      console.log('❌ Pedido no encontrado:', id);
+      return res.status(404).json({ message: 'Pedido no encontrado.' });
+    }
+
+    console.log('✅ 5. Validando permisos...');
+    if (req.user.id !== order.artist_id) {
+      console.log('❌ Usuario no autorizado:', {
+        userId: req.user.id,
+        artistId: order.artist_id
+      });
+      return res.status(403).json({ message: 'Solo el artista del pedido puede hacer cambios de planeación.' });
+    }
+
+    console.log('✅ 6. Validando fase...');
+    if (order.current_stage !== 'plan') {
+      console.log('❌ Fase incorrecta:', order.current_stage);
+      return res.status(400).json({ 
+        message: 'Solo se pueden hacer cambios en la fase de planeación.' 
+      });
+    }
+
+    console.log('✅ 7. Validando pago...');
+    if (order.is_paid) {
+      console.log('❌ Pedido ya pagado');
+      return res.status(400).json({ 
+        message: 'No se pueden hacer cambios después del pago.' 
+      });
+    }
+
+    console.log('✅ 8. Ejecutando UPDATE en BD...');
+    await new Promise((resolve, reject) => {
+      dbConnection.query(
+        'UPDATE orders SET package_id = ?, extras = ?, total_price = ? WHERE id = ?',
+        [package_id, extras, total_price, id], // ✅ QUITAR package_name
+        (err, result) => {
+          if (err) {
+            console.error('❌ Error en query UPDATE:', err);
+            return reject(err);
+          }
+          console.log('✅ Query UPDATE exitosa:', result);
+          resolve(result);
+        }
+      );
+    });
+
+    console.log('✅ 9. Enviando notificación...');
+    try {
+      await createNotification({
+        user_id: order.client_id,
+        type: 'planning_updated',
+        message: `El artista ha actualizado los detalles de tu pedido #${id}.`,
+        link: `/orders/${id}`,
+        order_id: id,
+        is_read: false
+      });
+      console.log('✅ 10. Notificación enviada');
+    } catch (notifError) {
+      console.error('⚠️ Error en notificación (no crítico):', notifError);
+    }
+
+    console.log('✅ 11. Enviando respuesta exitosa...');
+    res.json({ 
+      success: true,
+      message: 'Detalles de planeación actualizados correctamente.',
+      updated_fields: { package_id, extras, total_price } // ✅ QUITAR package_name
+    });
+
+    console.log('🎉 === FIN updateOrderPlanningController EXITOSO ===');
+
+  } catch (error) {
+    console.error('💥 === ERROR CRÍTICO en updateOrderPlanningController ===');
+    console.error('❌ Error:', error);
+    console.error('❌ Stack:', error.stack);
+    console.error('❌ Mensaje:', error.message);
+    
+    res.status(500).json({ 
+      success: false,
+      message: 'Error interno del servidor al actualizar la planeación.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
