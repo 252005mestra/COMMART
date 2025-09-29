@@ -19,7 +19,8 @@ import {
   deleteSampleController,
   payOrderController,
   deleteFinalArtController,
-  updateOrderPlanningController
+  updateOrderPlanningController,
+  selectSampleController // ✅ NUEVO IMPORT
 } from '../controllers/orderProcessController.js';
 
 const router = express.Router();
@@ -88,5 +89,8 @@ router.post('/:id/advance', verifyToken, advanceOrderPhaseController);
 
 // Actualizar detalles de planeación
 router.put('/:id/planning', verifyToken, updateOrderPlanningController);
+
+// ✅ NUEVA RUTA: Seleccionar muestra (cliente)
+router.post('/:id/select-sample', verifyToken, selectSampleController);
 
 export default router;

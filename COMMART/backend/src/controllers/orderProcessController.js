@@ -520,3 +520,76 @@ export const updateOrderPlanningController = async (req, res) => {
     });
   }
 };
+
+// ✅ NUEVO: Controlador para que el cliente elija una muestra
+export const selectSampleController = async (req, res) => {
+  try {
+    const { id } = req.params; // order id
+    const { phase, selectedImage } = req.body;
+    
+    console.log('🎯 Cliente seleccionando muestra:', {
+      orderId: id,
+      phase,
+      selectedImage
+    });
+
+    // Verificar que el pedido existe
+    const order = await getOrderById(id);
+    if (!order) {
+      return res.status(404).json({ message: 'Pedido no encontrado.' });
+    }
+
+    // Solo el cliente puede seleccionar muestras
+    if (req.user.id !== order.client_id) {
+      return res.status(403).json({ message: 'Solo el cliente puede seleccionar muestras.' });
+    }
+
+    // Verificar que la fase sea válida para selección
+    const validPhasesForSelection = ['sketch', 'details', 'final'];
+    if (!validPhasesForSelection.includes(phase)) {
+      return res.status(400).json({ message: 'No se pueden seleccionar muestras en esta fase.' });
+    }
+
+    // Verificar que la imagen existe en esa fase
+    const phaseImages = order[`${phase}_image`];
+    if (!phaseImages || !phaseImages.includes(selectedImage)) {
+      return res.status(400).json({ message: 'La imagen seleccionada no existe en esta fase.' });
+    }
+
+    // Guardar la selección en el campo correspondiente
+    const selectionField = `${phase}_selected`;
+    
+    await new Promise((resolve, reject) => {
+      dbConnection.query(
+        `UPDATE orders SET ${selectionField} = ? WHERE id = ?`,
+        [selectedImage, id],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
+    });
+
+    // Notificar al artista sobre la selección
+    await createNotification({
+      user_id: order.artist_id,
+      type: 'sample_selected',
+      message: `El cliente ha seleccionado una muestra en la fase de ${phase === 'sketch' ? 'Boceto' : phase === 'details' ? 'Definición' : 'Últimos Detalles'}.`,
+      link: `/orders/${id}`,
+      order_id: id,
+      phase: phase,
+      is_read: false
+    });
+
+    console.log(`✅ Muestra seleccionada para pedido ${id} en fase ${phase}`);
+
+    res.json({ 
+      message: 'Muestra seleccionada correctamente.',
+      selectedImage: selectedImage 
+    });
+
+  } catch (error) {
+    console.error('Error al seleccionar muestra:', error);
+    res.status(500).json({ message: 'Error al seleccionar muestra.' });
+  }
+};

@@ -385,3 +385,37 @@
     height: 26px;
   }
 }
+
+
+/* Estilos para selección de muestras */
+.ordertracking-samples-selection {
+  width: 100%;
+}
+
+.ordertracking-sample-img-wrapper.selectable {
+  transition: all 0.2s ease;
+}
+
+.ordertracking-sample-img-wrapper.selectable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.ordertracking-sample-img-wrapper.selected {
+  box-shadow: 0 0 0 3px #28a745, 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.ordertracking-selection-overlay {
+  pointer-events: none;
+}
+
+.ordertracking-sample-img-wrapper.selectable .ordertracking-selection-overlay {
+  pointer-events: auto;
+}
+
+/* Mejorar la visibilidad del botón de eliminar cuando hay selección */
+.ordertracking-sample-img-wrapper.selected .ordertracking-delete-sample-btn {
+  background: #fff !important;
+  border: 2px solid #e74c3c !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}

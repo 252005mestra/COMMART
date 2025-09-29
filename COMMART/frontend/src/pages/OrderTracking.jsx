@@ -1124,6 +1124,46 @@ const OrderTracking = ({ user }) => {
     }
   };
 
+  // ✅ NUEVO: Función para seleccionar muestra (cliente)
+  const handleSelectSample = async (imageUrl, phase) => {
+    try {
+      console.log('🎯 Seleccionando muestra:', { imageUrl, phase });
+      
+      setAlert({ 
+        open: true, 
+        type: 'info', 
+        message: 'Seleccionando muestra...' 
+      });
+
+      await axios.post(
+        `http://localhost:5000/api/orders/${order.id}/select-sample`,
+        { 
+          phase: phase,
+          selectedImage: imageUrl.replace(`http://localhost:5000/`, '') // Solo enviar la ruta relativa
+        },
+        { withCredentials: true }
+      );
+
+      // Recargar el pedido para ver la selección
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: '✅ ¡Muestra seleccionada! El artista ha sido notificado.' 
+      });
+
+    } catch (err) {
+      console.error('❌ Error seleccionando muestra:', err);
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: `Error al seleccionar muestra: ${err.response?.data?.message || err.message}` 
+      });
+    }
+  };
+
   // ✅ LÓGICA DE PERMISOS MEJORADA
   const isFinal = ['cancelled', 'rejected', 'completed', 'finalized'].includes(order?.status);
   const currentStageIdx = order ? STAGES.findIndex(s => s.key === order.current_stage) : 0;
@@ -1357,7 +1397,7 @@ const OrderTracking = ({ user }) => {
             {/* Contenido de la fase seleccionada */}
             <div className="ordertracking-phase-content">
               
-              {/* Muestras del artista - LÓGICA CORREGIDA */}
+              {/* Muestras del artista - LÓGICA ACTUALIZADA */}
               <div className="ordertracking-section">
                 <div className="ordertracking-section-title">
                   {selectedStage === 'completed' ? '🎨 Obra Final:' : 'Muestras del artista:'}
@@ -1366,7 +1406,7 @@ const OrderTracking = ({ user }) => {
                   {isCurrentPhase && <small style={{ color: '#27ae60', fontWeight: 'normal' }}> (Fase actual)</small>}
                 </div>
                 
-                {/* FASE COMPLETED (FINALIZADO): Solo obra final */}
+                {/* FASE COMPLETED: Solo obra final */}
                 {selectedStage === 'completed' ? (
                   order.completed_image ? (
                     <div className="ordertracking-final-art">
@@ -1447,51 +1487,174 @@ const OrderTracking = ({ user }) => {
                   )
                 ) : (
                   /* TODAS LAS OTRAS FASES: Mostrar muestras */
-                  selectedPhaseImages.length > 0 ? (
-                    <div className="ordertracking-samples-list">
-                      {selectedPhaseImages.map((img, idx) => (
-                        <div key={idx} className="ordertracking-sample-img-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
-                          <img
-                            src={`http://localhost:5000/${img}`}
-                            alt={`Muestra ${idx + 1}`}
-                            className="ordertracking-sample-img"
-                          />
-                          {user.role === 'artist' && canUploadSamples && (
-                            <button
-                              className="ordertracking-delete-sample-btn"
-                              style={{
-                                position: 'absolute',
-                                top: 4,
-                                right: 4,
-                                background: '#fff',
-                                border: '1px solid #e74c3c',
-                                color: '#e74c3c',
-                                borderRadius: '50%',
-                                width: 28,
-                                height: 28,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontWeight: 'bold',
-                                fontSize: 18,
-                                zIndex: 2,
-                              }}
-                              title="Eliminar muestra"
-                              onClick={() => handleDeleteSample(img, idx)}
-                            >
-                              ×
-                            </button>
-                          )}
+                  ['sketch', 'details', 'final'].includes(selectedStage) ? (
+                    selectedPhaseImages.length > 0 ? (
+                      <div className="ordertracking-samples-selection">
+                        {/* ✅ MENSAJE DE SELECCIÓN PARA EL CLIENTE */}
+                        {user.id === order.client_id && isCurrentPhase && !order[`${selectedStage}_selected`] && (
+                          <div style={{
+                            background: '#e8f4fd',
+                            border: '1px solid #bee5eb',
+                            borderRadius: '8px',
+                            padding: '12px',
+                            marginBottom: '16px'
+                          }}>
+                            <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#0c5460' }}>
+                              🎯 Selecciona tu muestra favorita
+                            </p>
+                            <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
+                              Haz clic en la muestra que más te guste. El artista será notificado de tu elección.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* ✅ MENSAJE DE CONFIRMACIÓN CUANDO YA SELECCIONÓ */}
+                        {order[`${selectedStage}_selected`] && (
+                          <div style={{
+                            background: '#d4edda',
+                            border: '1px solid #c3e6cb',
+                            borderRadius: '8px',
+                            padding: '12px',
+                            marginBottom: '16px'
+                          }}>
+                            <p style={{ margin: '0', fontWeight: 'bold', color: '#155724' }}>
+                              ✅ {user.id === order.client_id ? 'Has seleccionado tu muestra favorita' : 'El cliente ha seleccionado una muestra'}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="ordertracking-samples-list">
+                          {selectedPhaseImages.map((img, idx) => {
+                            const fullImageUrl = `http://localhost:5000/${img}`;
+                            const isSelected = order[`${selectedStage}_selected`] === img;
+                            const canSelect = user.id === order.client_id && isCurrentPhase && !order[`${selectedStage}_selected`];
+                            
+                            return (
+                              <div 
+                                key={idx} 
+                                className={`ordertracking-sample-img-wrapper ${isSelected ? 'selected' : ''} ${canSelect ? 'selectable' : ''}`}
+                                style={{ 
+                                  position: 'relative', 
+                                  display: 'inline-block',
+                                  cursor: canSelect ? 'pointer' : 'default',
+                                  border: isSelected ? '3px solid #28a745' : '2px solid transparent',
+                                  borderRadius: '8px',
+                                  margin: '4px'
+                                }}
+                                onClick={() => canSelect && handleSelectSample(fullImageUrl, selectedStage)}
+                                title={canSelect ? 'Clic para seleccionar esta muestra' : ''}
+                              >
+                                <img
+                                  src={fullImageUrl}
+                                  alt={`Muestra ${idx + 1}`}
+                                  className="ordertracking-sample-img"
+                                />
+                                
+                                {/* ✅ INDICADOR DE SELECCIÓN */}
+                                {isSelected && (
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '8px',
+                                    right: '8px',
+                                    background: '#28a745',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    width: 32,
+                                    height: 32,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: 18,
+                                    fontWeight: 'bold',
+                                    zIndex: 3
+                                  }}>
+                                    ✓
+                                  </div>
+                                )}
+
+                                {/* ✅ OVERLAY DE HOVER PARA SELECCIÓN */}
+                                {canSelect && (
+                                  <div 
+                                    className="ordertracking-selection-overlay"
+                                    style={{
+                                      position: 'absolute',
+                                      top: 0,
+                                      left: 0,
+                                      right: 0,
+                                      bottom: 0,
+                                      background: 'rgba(40, 167, 69, 0.1)',
+                                      borderRadius: '8px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      opacity: 0,
+                                      transition: 'opacity 0.2s',
+                                      zIndex: 2
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.opacity = 1}
+                                    onMouseLeave={(e) => e.target.style.opacity = 0}
+                                  >
+                                    <span style={{
+                                      background: 'rgba(40, 167, 69, 0.9)',
+                                      color: 'white',
+                                      padding: '8px 16px',
+                                      borderRadius: '20px',
+                                      fontSize: '14px',
+                                      fontWeight: 'bold'
+                                    }}>
+                                      Seleccionar
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Botón eliminar (solo para artista) */}
+                                {user.role === 'artist' && canUploadSamples && (
+                                  <button
+                                    className="ordertracking-delete-sample-btn"
+                                    style={{
+                                      position: 'absolute',
+                                      top: 4,
+                                      right: 4,
+                                      background: '#fff',
+                                      border: '1px solid #e74c3c',
+                                      color: '#e74c3c',
+                                      borderRadius: '50%',
+                                      width: 28,
+                                      height: 28,
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      fontWeight: 'bold',
+                                      fontSize: 18,
+                                      zIndex: 4,
+                                    }}
+                                    title="Eliminar muestra"
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Evitar que se active la selección
+                                      handleDeleteSample(img, idx);
+                                    }}
+                                  >
+                                    ×
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ) : (
+                      <span className="ordertracking-no-samples">
+                        {isFuturePhase 
+                          ? 'Las muestras aparecerán cuando se alcance esta fase'
+                          : 'Sin muestras aún'
+                        }
+                      </span>
+                    )
                   ) : (
+                    /* FASE PLAN: Sin selección de muestras */
                     <span className="ordertracking-no-samples">
-                      {isFuturePhase 
-                        ? 'Las muestras aparecerán cuando se alcance esta fase'
-                        : 'Sin muestras aún'
-                      }
+                      En la fase de planeación se coordinan los detalles del pedido
                     </span>
                   )
                 )}
@@ -1591,7 +1754,77 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
               
-              {/* ✅ FASE DE PLANEACIÓN - Negociación de detalles (MOVIDA AL LUGAR CORRECTO) */}
+              {/* ✅ SUBIR OBRA FINAL - Solo en fase 'completed' si eres artista */}
+              {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && !order.completed_image && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">
+                    🎨 Subir Obra Final
+                  </div>
+                  <div style={{
+                    background: '#e8f4fd',
+                    border: '1px solid #bee5eb',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '12px'
+                  }}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#0c5460' }}>
+                      ¡Es hora de entregar la obra final!
+                    </p>
+                    <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
+                      Sube el archivo final del pedido. Una vez subido, podrás completar el pedido definitivamente.
+                    </p>
+                  </div>
+                  
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUploadFinalArt}
+                    style={{ marginBottom: '12px' }}
+                  />
+                </div>
+              )}
+
+              {/* ✅ COMPLETAR PEDIDO - Solo si ya hay obra final */}
+              {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && order.completed_image && order.status !== 'completed' && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">
+                    ✅ Completar Pedido
+                  </div>
+                  <div style={{
+                    background: '#d4edda',
+                    border: '1px solid #c3e6cb',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '12px'
+                  }}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#155724' }}>
+                      ¡Obra final subida correctamente!
+                    </p>
+                    <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
+                      Ahora puedes completar el pedido definitivamente. El cliente será notificado y podrá descargar su obra.
+                    </p>
+                  </div>
+                  
+                  <button
+                    onClick={handleCompletePedido}
+                    style={{
+                      background: '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      width: '100%'
+                    }}
+                  >
+                    🎉 Completar Pedido Definitivamente
+                  </button>
+                </div>
+              )}
+
+              {/* ✅ FASE DE PLANEACIÓN - Negociación de detalles */}
               {selectedStage === 'plan' && isCurrentPhase && user.role === 'artist' && order.is_paid === 0 && (
                 <div className="ordertracking-section ordertracking-planning-section">
                   <div className="ordertracking-section-title">
@@ -1764,7 +1997,12 @@ const OrderTracking = ({ user }) => {
                 (
                   // ✅ CONDICIONES CORREGIDAS:
                   selectedStage === 'plan' ||                    // En planeación siempre se puede avanzar
-                  selectedPhaseImages.length > 0                // En otras fases necesita muestras
+                  (selectedPhaseImages.length > 0 && (          // En otras fases necesita muestras Y selección del cliente
+                    selectedStage === 'sketch' ? order.sketch_selected :
+                    selectedStage === 'details' ? order.details_selected :
+                    selectedStage === 'final' ? order.final_selected :
+                    true
+                  ))
                 ) && (
                 <div className="ordertracking-section">
                   <div className="ordertracking-section-title">
@@ -1782,33 +2020,46 @@ const OrderTracking = ({ user }) => {
                     </p>
                     <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
                       {selectedStage === 'plan' && 'Pasarás a la fase de Boceto donde crearás las propuestas iniciales para el cliente.'}
-                      {selectedStage === 'sketch' && 'Pasarás a la fase de Definición para trabajar en los detalles del boceto elegido.'}
-                      {selectedStage === 'details' && 'Pasarás a la fase de Últimos Detalles para los ajustes finales.'}
-                      {selectedStage === 'final' && 'Pasarás a la fase de Finalizado donde subirás la obra final.'}
+                      {selectedStage === 'sketch' && order.sketch_selected && 'El cliente ya seleccionó su boceto favorito. Pasarás a trabajar en los detalles.'}
+                      {selectedStage === 'details' && order.details_selected && 'El cliente seleccionó la variante que más le gustó. Pasarás a los últimos detalles.'}
+                      {selectedStage === 'final' && order.final_selected && 'El cliente aprobó los últimos detalles. Pasarás a crear la obra final.'}
+                      
+                      {/* Mensajes cuando falta la selección */}
+                      {selectedStage === 'sketch' && !order.sketch_selected && '⏳ Esperando a que el cliente seleccione su boceto favorito.'}
+                      {selectedStage === 'details' && !order.details_selected && '⏳ Esperando a que el cliente seleccione la variante que más le guste.'}
+                      {selectedStage === 'final' && !order.final_selected && '⏳ Esperando a que el cliente apruebe los últimos detalles.'}
                     </p>
                   </div>
-                  <button
-                    onClick={handleAdvancePhase}
-                    className="ordertracking-advance-btn"
-                    style={{
-                      background: '#17a2b8',
-                      color: 'white',
-                      border: 'none',
-                      padding: '12px 24px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '16px',
-                      fontWeight: 'bold',
-                      width: '100%'
-                    }}
-                  >
-                    ➡️ Avanzar a {
-                      selectedStage === 'plan' ? 'Boceto' :
-                      selectedStage === 'sketch' ? 'Definición' :
-                      selectedStage === 'details' ? 'Últimos Detalles' :
-                      selectedStage === 'final' ? 'Finalizado' : 'Siguiente Fase'
-                    }
-                  </button>
+                  
+                  {/* Solo mostrar el botón si se puede avanzar */}
+                  {(selectedStage === 'plan' || 
+                    (selectedStage === 'sketch' && order.sketch_selected) ||
+                    (selectedStage === 'details' && order.details_selected) ||
+                    (selectedStage === 'final' && order.final_selected)
+                  ) && (
+                    <button
+                      onClick={handleAdvancePhase}
+                      className="ordertracking-advance-btn"
+                      style={{
+                        background: '#17a2b8',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 24px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        width: '100%'
+                      }}
+                    >
+                      ➡️ Avanzar a {
+                        selectedStage === 'plan' ? 'Boceto' :
+                        selectedStage === 'sketch' ? 'Definición' :
+                        selectedStage === 'details' ? 'Últimos Detalles' :
+                        selectedStage === 'final' ? 'Finalizado' : 'Siguiente Fase'
+                      }
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -1955,7 +2206,7 @@ const OrderTracking = ({ user }) => {
                     border: '1px solid #dee2e6',
                     borderRadius: '6px',
                     color: '#6c757d',
-                    fontSize: '14px',
+                                       fontSize: '14px',
                     textAlign: 'center'
                   }}>
                     {isFinal 
@@ -2008,8 +2259,7 @@ const OrderTracking = ({ user }) => {
           </aside>
         </div>
       </main>
-      <Footer />
-
+      
       {/* Modal de obra final - IGUAL QUE LAS REFERENCIAS */}
       <ReferenceCarousel
         open={showFinalArtModal}
