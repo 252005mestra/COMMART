@@ -90,9 +90,27 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
   const getProfileImageUrl = (imgPath) =>
     imgPath ? `http://localhost:5000/${imgPath}` : '/default-profile.jpg';
 
-  // Determinar el icono según el tipo
+  // Icono según tipo y estilos
   const getModalIcon = () => {
-    return type === 'followers' ? <Users size={24} /> : <Star size={24} />;
+    if (type === 'followers' || type === 'my-following') {
+      return (
+        <span className="artistlist-modal-icon users-green-bg">
+          <Users size={20} />
+        </span>
+      );
+    }
+    if (type === 'my-favorites') {
+      return (
+        <Star
+          className="artistlist-modal-icon star-filled"
+          size={24}
+          fill="#FFD700"
+          stroke="#000"
+          strokeWidth={2}
+        />
+      );
+    }
+    return null;
   };
 
   // Actualizar el texto vacío
@@ -119,23 +137,21 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
         {/* Header */}
         <div className="artistlist-modal-header">
           <div className="artistlist-modal-title-section">
-            <div className="artistlist-modal-icon">
-              {getModalIcon()}
-            </div>
+            {getModalIcon()}
             <h2 className="artistlist-modal-title">{title}</h2>
-            <div className="artistlist-modal-count">
-              ({loading ? '...' : filteredUsers.length})
+            <div className="artistlist-modal-count-badge">
+              {loading ? '...' : filteredUsers.length}
             </div>
           </div>
           <button className="artistlist-modal-close-btn" onClick={onClose}>
-            <X size={20} />
+            <X size={25} />
           </button>
         </div>
 
         {/* Search bar */}
         <div className="artistlist-modal-search-section">
           <div className="artistlist-modal-search-container">
-            <Search size={18} className="artistlist-modal-search-icon" />
+            <Search size={25} className="artistlist-modal-search-icon" />
             <input
               type="text"
               placeholder={`Buscar entre ${users.length} usuario${users.length !== 1 ? 's' : ''}...`}
@@ -149,7 +165,7 @@ const UserListModal = ({ isOpen, onClose, artistId, type, title }) => {
                 onClick={() => setSearchTerm('')}
                 tabIndex={-1}
               >
-                <X size={16} />
+                <X size={23} className="artistlist-modal-clear-search-btn" />
               </button>
             )}
           </div>
