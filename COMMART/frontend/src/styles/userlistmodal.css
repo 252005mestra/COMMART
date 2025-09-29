@@ -45,28 +45,85 @@
 }
 
 .artistlist-modal-icon {
-  color: #7d5938;
-  background: #f8f8f5;
+  /* Quitar fondo y borde redondeado */
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #222; /* Negro para todos los iconos */
+  font-size: 1.7rem;
+}
+
+.artistlist-modal-icon.star-filled {
+  color: #FFD700; /* Amarillo para estrella rellena */
+}
+
+.artistlist-modal-icon.users-green-bg {
+  background: #8a9e7c;
   border-radius: 50%;
   padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #fff; /* Icono blanco */
+}
+
+.artistlist-modal-icon.users-green-bg svg {
+  color: #fff !important;
+  stroke: #fff !important;
 }
 
 .artistlist-modal-title {
   font-family: 'Goldman';
-  font-size: 1.25rem;
+  font-size: 1.45rem; /* Antes: 1.25rem */
   color: #7d5938;
   margin: 0;
   letter-spacing: 0.04em;
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .artistlist-modal-count {
-  font-family: 'Nunito Sans';
-  font-size: 1rem;
+  font-family: 'Goldman';
+  font-size: 1.3rem;
+  color: #222;
+  margin-left: 0.6rem;
+  font-weight: normal; /* Peso normal */
+  background: #f8f8f5;
+  border-radius: 10px;
+  padding: 2px 12px;
+  min-width: 36px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(60,48,36,0.06);
+  display: inline-block;
+}
+
+/* Contador café, redondo y pequeño */
+.artistlist-modal-count-badge {
+  background: transparent;
   color: #7d5938;
-  margin-left: 0.3rem;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 50%;
+  border: 2px solid #7d5938;
+  min-width: 28px;
+  min-height: 28px;
+  height: 28px;
+  width: 28px;
+  text-align: center;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  letter-spacing: 0.01em;
+  transition: border 0.2s;
+  margin-left: 0.5rem;
 }
 
 .artistlist-modal-close-btn {
@@ -90,21 +147,26 @@
   display: flex;
   align-items: center;
   background: #f8f8f5;
-  border-radius: 12px;
-  border: 2px solid #e9ecef;
-  padding: 0.3rem 0.7rem;
+  border: 2px solid #7d5938;
+  border-radius: 15px;
+  padding: 0 1rem;
   gap: 0.5rem;
+  height: 38px;
+  box-shadow: none;
+  margin-bottom: 0.5rem;
 }
 .artistlist-modal-search-icon {
+  font-size: 1.5rem;
   color: #7d5938;
+  margin-right: 0.7rem;
 }
 .artistlist-modal-search-input {
   border: none;
   background: transparent;
   font-size: 1rem;
-  flex: 1;
+  width: 100%;
   outline: none;
-  color: #333;
+  color: #7d5938;
   font-family: 'Nunito Sans';
 }
 .artistlist-modal-clear-search-btn {
@@ -279,7 +341,7 @@
     max-width: 98vw;
   }
   .artistlist-modal-title {
-    font-size: 1.05rem;
+    font-size: 1.18rem; /* Antes: 1.05rem */
   }
   .artistlist-modal-users-list {
     max-height: 220px;
