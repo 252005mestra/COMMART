@@ -2255,6 +2255,17 @@ const OrderTracking = ({ user }) => {
                   </button>
                 </div>
               )}
+              {/* ✅ BOTÓN VER FACTURA */}
+              {!!order.is_paid && (
+                <div className="ordertracking-actions-row">
+                  <button
+                    className="ordertracking-invoice-btn"
+                    onClick={handleToggleInvoice}
+                  >
+                    📄 Ver Factura
+                  </button>
+                </div>
+              )}
             </div>
           </aside>
         </div>
@@ -2265,6 +2276,12 @@ const OrderTracking = ({ user }) => {
         open={showFinalArtModal}
         images={order.completed_image ? [`http://localhost:5000/${order.completed_image}`] : []}
         onClose={() => setShowFinalArtModal(false)}
+      />
+      {/* ✅ MODAL DE FACTURA */}
+      <InvoiceModal
+        open={showInvoice}
+        invoiceData={invoiceData}
+        onClose={() => setShowInvoice(false)}
       />
 
       {/* Modal para cambiar paquete */}
@@ -2360,6 +2377,99 @@ const OrderTracking = ({ user }) => {
         }}
         confirmText="Agregar Extra"
         cancelText="Cancelar"
+      />
+      {/* ✅ MODAL DE CANCELACIÓN DEL CLIENTE - MISMO DISEÑO QUE EL RECHAZO */}
+      <ConfirmModal
+        open={showCancelModal}
+        message={
+          <div>
+            <div style={{ marginBottom: 16, fontWeight: 700 }}>
+              ¿Estás seguro de que quieres cancelar este pedido?
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                Motivo de cancelación:
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Explica por qué quieres cancelar el pedido..."
+                style={{
+                  width: '100%',
+                  minHeight: '80px',
+                  padding: '8px',
+                  border: '2px solid #b3b792',
+                  borderRadius: '8px',
+                  fontFamily: "'Nunito Sans', sans-serif",
+                  fontSize: '14px',
+                  resize: 'vertical'
+                }}
+                maxLength={500}
+                required
+              />
+              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                {cancelReason.length}/500 caracteres
+              </div>
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>
+              Esta acción no se puede deshacer. El artista será notificado del motivo.
+            </div>
+          </div>
+        }
+        onCancel={() => {
+          setShowCancelModal(false);
+          setCancelReason('');
+        }}
+        onConfirm={handleCancelOrder}
+        confirmText="Cancelar Pedido"
+        cancelText="No cancelar"
+      />
+
+      {/* ✅ MODAL DE RECHAZO DEL ARTISTA - SI NO LA TIENES */}
+      <ConfirmModal
+        open={showRejectModal}
+        message={
+          <div>
+            <div style={{ marginBottom: 16, fontWeight: 700 }}>
+              ¿Estás seguro de que quieres rechazar este pedido?
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                Motivo del rechazo:
+              </label>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Explica por qué rechazas el pedido..."
+                style={{
+                  width: '100%',
+                  minHeight: '80px',
+                  padding: '8px',
+                  border: '2px solid #b3b792',
+                  borderRadius: '8px',
+                  fontFamily: "'Nunito Sans', sans-serif",
+                  fontSize: '14px',
+                  resize: 'vertical'
+                }}
+                maxLength={500}
+                required
+              />
+              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                {rejectReason.length}/500 caracteres
+              </div>
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>
+              Esta acción no se puede deshacer. El cliente será notificado del motivo.
+            </div>
+          </div>
+        }
+        onCancel={() => {
+          setShowRejectModal(false);
+          setRejectReason('');
+        }}
+        onConfirm={handleReject}
+        confirmText="Rechazar Pedido"
+        cancelText="No rechazar"
       />
     </>
   );

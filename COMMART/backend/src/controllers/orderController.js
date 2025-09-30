@@ -3,12 +3,11 @@ import {
   getOrdersByArtist,
   getOrdersByClient,
   getOrderById,
-  updateOrderStatus,
-  updateOrderFields
+  updateOrderStatus // ✅ AGREGAR ESTE IMPORT
 } from '../models/orderModel.js';
 import { findUserByIdModel } from '../models/userModel.js';
 import { createNotification } from '../models/notificationModel.js';
-import dbConnection from '../config/db.js'; // <-- AÑADIR ESTA LÍNEA
+import dbConnection from '../config/db.js';
 
 // Crear pedido
 export const createOrderController = async (req, res) => {
@@ -128,19 +127,31 @@ export const updateOrderStatusController = async (req, res) => {
       return res.status(404).json({ message: 'Pedido no encontrado.' });
     }
 
+    // ✅ PASAR EL MOTIVO CORRECTAMENTE
     await updateOrderStatus(id, status, reason);
 
-    // Notificar al cliente si es rechazado
+    // ✅ NOTIFICAR SEGÚN EL TIPO DE CANCELACIÓN/RECHAZO
     if (status === 'rejected') {
       await createNotification({
         user_id: order.client_id,
         type: 'order_rejected',
-        message: `Tu pedido #${id} fue rechazado por el artista.`,
+        message: `Tu pedido #${id} ha sido rechazado por el artista. Motivo: ${reason || 'Sin motivo especificado'}`,
         link: `/orders/${id}`,
         order_id: id,
         is_read: false
       });
       console.log(`📧 Cliente ${order.client_id} notificado de rechazo del pedido ${id}`);
+    } else if (status === 'cancelled') {
+      // ✅ AGREGAR: Notificar cuando el cliente cancela
+      await createNotification({
+        user_id: order.artist_id,
+        type: 'order_cancelled',
+        message: `El pedido #${id} ha sido cancelado por el cliente. Motivo: ${reason || 'Sin motivo especificado'}`,
+        link: `/orders/${id}`,
+        order_id: id,
+        is_read: false
+      });
+      console.log(`📧 Artista ${order.artist_id} notificado de cancelación del pedido ${id}`);
     }
 
     // Notificar al cliente y artista si el pedido es completado
