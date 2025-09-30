@@ -264,6 +264,94 @@
   text-align: center;
 }
 
+/* ========== Card especial para fase de planeación ========== */
+.ordertracking-planning-card {
+  background: white;
+  border: 3px solid #8B6D47; /* Border café como las otras cards */
+  border-radius: 22px; /* Mismo border-radius que las phase cards */
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10); /* Misma sombra que las phase cards */
+  padding: 2.5rem 2rem 0 2rem; /* CAMBIADO: eliminado padding inferior para que las imágenes lleguen al borde */
+  margin-bottom: 2.5rem; /* Mismo margen que las phase cards */
+  width: 90%; /* Mismo ancho que las phase cards */
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-height: 250px; /* REDUCIDO: de 320px a 250px */
+  max-height: 300px; /* AÑADIDO: altura máxima para controlar el espacio */
+}
+
+/* Título principal */
+.ordertracking-planning-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 2rem;
+  color: #8B6D47; /* Color café */
+  font-weight: normal; /* Peso normal */
+  letter-spacing: 0.04em;
+  margin: 0 0 1rem 0; /* REDUCIDO: margen inferior de 1.5rem a 1rem */
+  text-align: center;
+}
+
+/* Contenedor del mensaje principal - CENTRADO PERFECTAMENTE */
+.ordertracking-planning-message {
+  text-align: center;
+  max-width: 500px;
+  margin: 0; /* CAMBIADO: quitar margen para centrado perfecto */
+  position: relative;
+  z-index: 2; /* Asegurar que el texto esté por encima de las imágenes */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Texto del mensaje */
+.ordertracking-planning-text {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1.1rem;
+  color: #333;
+  line-height: 1.5; /* REDUCIDO: de 1.6 a 1.5 para menos espacio entre líneas */
+  font-weight: normal; /* Peso normal */
+  text-align: center;
+}
+
+/* Texto "¡Gracias por tu paciencia!" en negrita */
+.ordertracking-planning-thanks {
+  font-weight: bold; /* En negrita */
+  margin-top: 0.8rem; /* REDUCIDO: de 1rem a 0.8rem */
+  display: block;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* Contenedor de los personajes - PEGADOS AL PIE DE LA CARD */
+.ordertracking-planning-characters {
+  position: absolute;
+  bottom: 0; /* CAMBIADO: pegado al fondo de la card */
+  left: 0;
+  right: 0;
+  height: 160px; /* REDUCIDO: de 180px a 160px */
+  pointer-events: none; /* No interfiere con clicks */
+}
+
+.ordertracking-planning-character {
+  position: absolute;
+  bottom: 0; /* CAMBIADO: pegado al fondo del contenedor */
+  height: 160px; /* REDUCIDO: de 180px a 160px */
+  width: auto;
+  object-fit: contain;
+}
+
+.ordertracking-planning-character.left {
+  left: 0.5rem;
+}
+
+.ordertracking-planning-character.right {
+  right: 0.5rem;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .ordertracking-tracking-col {
@@ -274,11 +362,11 @@
     flex: 0 0 40%;
     max-width: 40%;
     margin-right: 1rem;
-    min-width: 280px; /* REDUCIDO */
+    min-width: 280px;
   }
   
   .ordertracking-data-green-header h2 {
-    font-size: 1.6rem; /* MÁS PEQUEÑO en tablets */
+    font-size: 1.6rem;
   }
 }
 
@@ -286,7 +374,7 @@
   .ordertracking-main-layout {
     flex-direction: column;
     min-height: auto;
-    gap: 1rem; /* AÑADIDO: separación en móvil */
+    gap: 1rem;
   }
   
   .ordertracking-tracking-col {
@@ -315,12 +403,49 @@
   }
   
   .ordertracking-data-green-header h2 {
-    font-size: 1.5rem; /* MÁS PEQUEÑO en móvil */
+    font-size: 1.5rem;
   }
   
   .ordertracking-data-content {
     padding: 1rem;
     border-radius: 0 0 20px 20px;
+  }
+  
+  .ordertracking-planning-card {
+    padding: 2rem 1.5rem 0 1.5rem; /* CAMBIADO: eliminado padding inferior */
+    width: 95%;
+    min-height: 220px; /* REDUCIDO: de 280px a 220px */
+    max-height: 250px; /* AÑADIDO: altura máxima para tablets */
+  }
+  
+  .ordertracking-planning-title {
+    font-size: 1.7rem;
+  }
+  
+  .ordertracking-planning-text {
+    font-size: 1rem;
+    line-height: 1.4; /* REDUCIDO: para más compacto en móviles */
+  }
+  
+  .ordertracking-planning-thanks {
+    font-size: 1.1rem;
+    margin-top: 0.6rem; /* REDUCIDO */
+  }
+  
+  .ordertracking-planning-characters {
+    height: 130px; /* REDUCIDO: de 140px a 130px */
+  }
+  
+  .ordertracking-planning-character {
+    height: 130px; /* REDUCIDO: de 140px a 130px */
+  }
+  
+  .ordertracking-planning-character.left {
+    left: 0.3rem;
+  }
+  
+  .ordertracking-planning-character.right {
+    right: 0.3rem;
   }
 }
 
@@ -330,11 +455,47 @@
   }
   
   .ordertracking-data-green-header h2 {
-    font-size: 1.3rem; /* AÚN MÁS PEQUEÑO en móviles pequeños */
+    font-size: 1.3rem;
   }
   
   .ordertracking-data-content {
     padding: 0.8rem;
+  }
+  
+  .ordertracking-planning-card {
+    padding: 1.5rem 1rem 0 1rem; /* CAMBIADO: eliminado padding inferior */
+    min-height: 200px; /* REDUCIDO: de 240px a 200px */
+    max-height: 220px; /* AÑADIDO: altura máxima para móviles */
+  }
+  
+  .ordertracking-planning-title {
+    font-size: 1.5rem;
+  }
+  
+  .ordertracking-planning-text {
+    font-size: 0.95rem;
+    line-height: 1.3; /* REDUCIDO: líneas más compactas */
+  }
+  
+  .ordertracking-planning-thanks {
+    font-size: 1rem;
+    margin-top: 0.5rem; /* REDUCIDO */
+  }
+  
+  .ordertracking-planning-characters {
+    height: 110px; /* REDUCIDO: de 120px a 110px */
+  }
+  
+  .ordertracking-planning-character {
+    height: 110px; /* REDUCIDO: de 120px a 110px */
+  }
+  
+  .ordertracking-planning-character.left {
+    left: 0.2rem;
+  }
+  
+  .ordertracking-planning-character.right {
+    right: 0.2rem;
   }
 }
 
