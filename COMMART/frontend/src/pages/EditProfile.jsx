@@ -421,6 +421,10 @@ const EditProfile = () => {
       setIsArtist(true);
       setShowArtistConfirm(false);
       setAlert({ open: true, type: 'success', message: '¡Cuenta de artista activada exitosamente!' });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200); 
     } catch (error) {
       const msg = error.response?.data?.message || 'Error al activar cuenta de artista';
       setArtistActivationError(msg);

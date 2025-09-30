@@ -1,12 +1,12 @@
 /* Reset y variables básicas */
-.admindash *,
-.admindash *::before,
-.admindash *::after {
+.adminpanel *,
+.adminpanel *::before,
+.adminpanel *::after {
   box-sizing: border-box;
 }
 
 /* Layout principal */
-.admindash-root {
+.adminpanel-root {
   display: flex;
   height: 100vh;
   background: #f8f9fa;
@@ -15,7 +15,7 @@
 }
 
 /* SIDEBAR - ESTÁTICO EN DESKTOP */
-.admindash-sidebar {
+.adminpanel-sidebar {
   width: 280px;
   background: white;
   border-right: 1px solid #e5e5e5;
@@ -30,40 +30,40 @@
   transform: translateX(0); /* Siempre visible en desktop */
 }
 
-.admindash-sidebar-header {
+.adminpanel-sidebar-header {
   padding: 2rem 1.5rem 1.5rem;
   border-bottom: 1px solid #f0f0f0;
   flex-shrink: 0;
 }
-.admindash-sidebar-logo {
+.adminpanel-sidebar-logo {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
-.admindash-logo-circle {
+.adminpanel-logo-circle {
   width: 45px;
   height: 45px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #7d5938 0%, #593f28 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
 }
-.admindash-sidebar-logo span {
+.adminpanel-sidebar-logo span {
   font-family: 'Goldman', sans-serif;
   font-size: 1.3rem;
-  color: #1f2937;
-  font-weight: 600;
+  color: #7d5938;
+  font-weight: normal;
 }
-.admindash-sidebar-nav {
+.adminpanel-sidebar-nav {
   flex: 1;
   padding: 1rem 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-.admindash-nav-item {
+.adminpanel-nav-item {
   background: none;
   border: none;
   color: #1f2937;
@@ -77,14 +77,14 @@
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
-.admindash-nav-item.active,
-.admindash-nav-item:hover {
+.adminpanel-nav-item.active,
+.adminpanel-nav-item:hover {
   background: #f3f4f6;
-  color: #8b5cf6;
+  color: #7d5938;
 }
 
 /* Overlay para móvil - OCULTO EN DESKTOP */
-.admindash-sidebar-overlay {
+.adminpanel-sidebar-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.2);
@@ -93,7 +93,7 @@
 }
 
 /* Main Content - CON MARGEN FIJO EN DESKTOP */
-.admindash-main-content {
+.adminpanel-main-content {
   flex: 1;
   margin-left: 0; /* No necesario en desktop ya que está en flex */
   display: flex;
@@ -102,7 +102,7 @@
 }
 
 /* Header */
-.admindash-main-header {
+.adminpanel-main-header {
   background: white;
   border-bottom: 1px solid #e5e5e5;
   padding: 1.5rem 2rem;
@@ -110,30 +110,30 @@
   align-items: center;
   justify-content: space-between;
 }
-.admindash-header-content {
+.adminpanel-header-content {
   display: flex;
   align-items: center;
   width: 100%;
   justify-content: space-between;
 }
-.admindash-header-left {
+.adminpanel-header-left {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
-.admindash-header-text h1 {
+.adminpanel-header-text h1 {
   font-family: 'Goldman', sans-serif;
   font-size: 2rem;
   color: #1f2937;
   margin: 0 0 0.25rem 0;
   font-weight: 600;
 }
-.admindash-header-text p {
+.adminpanel-header-text p {
   color: #6b7280;
   margin: 0;
   font-size: 1rem;
 }
-.admindash-header-right {
+.adminpanel-header-right {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -143,7 +143,7 @@
 }
 
 /* Botón móvil - OCULTO EN DESKTOP */
-.admindash-mobile-menu-btn {
+.adminpanel-mobile-menu-btn {
   background: none;
   border: none;
   display: none; /* OCULTO EN DESKTOP */
@@ -153,7 +153,7 @@
 }
 
 /* Dashboard content */
-.admindash-dashboard-main {
+.adminpanel-dashboard-main {
   flex: 1;
   padding: 1.5rem;
   overflow-y: auto;
@@ -161,7 +161,7 @@
 }
 
 /* Overview section */
-.admindash-overview-section {
+.adminpanel-overview-section {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -169,13 +169,13 @@
 }
 
 /* Cards */
-.admindash-indicators-grid {
+.adminpanel-indicators-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
-.admindash-indicator-card {
+.adminpanel-indicator-card {
   background: white;
   border-radius: 16px;
   padding: 1.5rem;
@@ -185,31 +185,31 @@
   flex-direction: column;
   gap: 1rem;
 }
-.admindash-indicator-card.small {
+.adminpanel-indicator-card.small {
   min-width: 180px;
 }
-.admindash-indicator-content {
+.adminpanel-indicator-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.admindash-indicator-info h3 {
+.adminpanel-indicator-info h3 {
   font-family: 'Goldman', sans-serif;
   font-size: 1.1rem;
   color: #1f2937;
   margin: 0 0 0.5rem 0;
   font-weight: 600;
 }
-.admindash-indicator-value {
+.adminpanel-indicator-value {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #8b5cf6;
+  color: #7d5938;
 }
-.admindash-indicator-change {
+.adminpanel-indicator-change {
   font-size: 0.9rem;
   color: #10b981;
 }
-.admindash-indicator-icon {
+.adminpanel-indicator-icon {
   background: #f3f4f6;
   border-radius: 50%;
   padding: 0.7rem;
@@ -219,13 +219,13 @@
 }
 
 /* Charts */
-.admindash-overview-charts-grid {
+.adminpanel-overview-charts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   margin-bottom: 2rem;
 }
-.admindash-chart-card {
+.adminpanel-chart-card {
   background: white;
   border-radius: 16px;
   padding: 1.5rem;
@@ -235,20 +235,20 @@
   flex-direction: column;
   gap: 1rem;
 }
-.admindash-chart-header {
+.adminpanel-chart-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
 }
-.admindash-chart-title {
+.adminpanel-chart-title {
   font-family: 'Goldman', sans-serif;
   font-size: 1.1rem;
-  color: #1f2937;
+  color: #7d5938;
   margin: 0;
-  font-weight: 600;
+  font-weight: normal;
 }
-.admindash-time-selector {
+.adminpanel-time-selector {
   border-radius: 8px;
   border: 1px solid #e5e7eb;
   padding: 0.3rem 0.7rem;
@@ -256,26 +256,26 @@
   background: #f3f4f6;
   color: #1f2937;
 }
-.admindash-chart-wrapper {
+.adminpanel-chart-wrapper {
   width: 100%;
   height: 250px;
 }
-.admindash-chart-wrapper.small {
+.adminpanel-chart-wrapper.small {
   height: 200px;
 }
-.admindash-chart-wrapper.large {
+.adminpanel-chart-wrapper.large {
   height: 400px;
 }
 
 /* Bottom Section Grid */
-.admindash-overview-bottom-grid {
+.adminpanel-overview-bottom-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   margin-bottom: 2rem;
 }
 
-.admindash-info-card {
+.adminpanel-info-card {
   background: white;
   border-radius: 16px;
   padding: 1.5rem;
@@ -283,16 +283,16 @@
   border: 1px solid #e5e7eb;
 }
 
-.admindash-info-card-title {
+.adminpanel-info-card-title {
   font-family: 'Goldman', sans-serif;
   font-size: 1.1rem;
-  color: #1f2937;
+  color: #7d5938;
   margin: 0 0 1rem 0;
-  font-weight: 600;
+  font-weight: normal;
 }
 
 /* Artists List */
-.admindash-artists-list {
+.adminpanel-artists-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -301,86 +301,86 @@
   gap: 0.8rem;
 }
 
-.admindash-artist-item {
+.adminpanel-artist-item {
   display: flex;
   align-items: center;
   gap: 0.8rem;
 }
 
-.admindash-artist-avatar {
+.adminpanel-artist-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-.admindash-artist-info {
+.adminpanel-artist-info {
   flex: 1;
 }
 
-.admindash-artist-name {
+.adminpanel-artist-name {
   font-size: 0.9rem;
   font-weight: 500;
   margin: 0;
   color: #333;
 }
 
-.admindash-artist-views {
+.adminpanel-artist-views {
   font-size: 0.8rem;
   color: #666;
   margin: 0;
 }
 
 /* Samples Grid */
-.admindash-samples-grid {
+.adminpanel-samples-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
-.admindash-sample-card {
+.adminpanel-sample-card {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.admindash-sample-image {
+.adminpanel-sample-image {
   width: 100%;
   height: 80px;
   border-radius: 8px;
   object-fit: cover;
 }
 
-.admindash-sample-info {
+.adminpanel-sample-info {
   flex: 1;
 }
 
-.admindash-sample-title {
+.adminpanel-sample-title {
   font-size: 0.85rem;
   font-weight: 500;
   margin: 0;
   color: #333;
 }
 
-.admindash-sample-artist {
+.adminpanel-sample-artist {
   font-size: 0.75rem;
   color: #666;
   margin: 0;
 }
 
-.admindash-artist-highlight {
-  color: #8b5cf6;
-  font-weight: 500;
+.adminpanel-artist-highlight {
+  color: #7d5938;
+  font-weight: normal;
 }
 
-.admindash-sample-date {
+.adminpanel-sample-date {
   font-size: 0.7rem;
   color: #999;
   margin: 0;
 }
 
 /* Orders Table */
-.admindash-orders-card {
+.adminpanel-orders-card {
   background: white;
   border-radius: 16px;
   padding: 1.5rem;
@@ -388,34 +388,34 @@
   border: 1px solid #e5e7eb;
   margin-top: 2rem;
 }
-.admindash-orders-title {
+.adminpanel-orders-title {
   font-family: 'Goldman', sans-serif;
   font-size: 1.1rem;
-  color: #1f2937;
+  color: #7d5938;
   margin: 0 0 1rem 0;
-  font-weight: 600;
+  font-weight: normal;
 }
-.admindash-orders-table-container {
+.adminpanel-orders-table-container {
   overflow-x: auto;
 }
-.admindash-orders-table {
+.adminpanel-orders-table {
   width: 100%;
   border-collapse: collapse;
 }
-.admindash-orders-th,
-.admindash-orders-td {
+.adminpanel-orders-th,
+.adminpanel-orders-td {
   padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
 }
-.admindash-orders-th {
+.adminpanel-orders-th {
   background: #f3f4f6;
   font-weight: 600;
 }
-.admindash-orders-tr:last-child .admindash-orders-td {
+.adminpanel-orders-tr:last-child .adminpanel-orders-td {
   border-bottom: none;
 }
-.admindash-order-status {
+.adminpanel-order-status {
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -426,43 +426,43 @@
 }
 
 /* Estado completado - Verde */
-.admindash-order-status.completed {
+.adminpanel-order-status.completed {
   background: #d4edda;
   color: #155724;
   border: 1px solid #28a745;
 }
 
 /* Estado en proceso - Naranja */
-.admindash-order-status.in_progress,
-.admindash-order-status.pending {
+.adminpanel-order-status.in_progress,
+.adminpanel-order-status.pending {
   background: #fff3cd;
   color: #856404;
   border: 1px solid #ffc107;
 }
 
 /* Estado rechazado y cancelado - Rojo */
-.admindash-order-status.rejected,
-.admindash-order-status.cancelled {
+.adminpanel-order-status.rejected,
+.adminpanel-order-status.cancelled {
   background: #f8d7da;
   color: #721c24;
   border: 1px solid #dc3545;
 }
 
 /* Estado por defecto */
-.admindash-order-status:not(.completed):not(.in_progress):not(.pending):not(.rejected):not(.cancelled) {
+.adminpanel-order-status:not(.completed):not(.in_progress):not(.pending):not(.rejected):not(.cancelled) {
   background: #e2e3e5;
   color: #383d41;
   border: 1px solid #6c757d;
 }
 
 /* Section styles for other views */
-.admindash-section-content {
+.adminpanel-section-content {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.admindash-section-title {
+.adminpanel-section-title {
   font-family: 'Goldman', sans-serif;
   font-size: 1.5rem;
   color: #1f2937;
@@ -470,17 +470,17 @@
   font-weight: 600;
 }
 
-.admindash-charts-full-grid {
+.adminpanel-charts-full-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
 }
 
-.admindash-chart-card.large {
+.adminpanel-chart-card.large {
   padding: 2rem;
 }
 
-.admindash-section-card {
+.adminpanel-section-card {
   background: white;
   border-radius: 16px;
   padding: 2rem;
@@ -489,7 +489,7 @@
   text-align: center;
 }
 
-.admindash-section-subtitle {
+.adminpanel-section-subtitle {
   font-family: 'Goldman', sans-serif;
   font-size: 1.2rem;
   color: #1f2937;
@@ -497,13 +497,13 @@
   font-weight: 600;
 }
 
-.admindash-section-description {
+.adminpanel-section-description {
   color: #666;
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }
 
-.admindash-development-notice {
+.adminpanel-development-notice {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -514,11 +514,11 @@
   border-radius: 8px;
 }
 
-.admindash-notice-icon {
+.adminpanel-notice-icon {
   flex-shrink: 0;
 }
 
-.admindash-notice-text {
+.adminpanel-notice-text {
   margin: 0;
   font-weight: 500;
 }
@@ -526,7 +526,7 @@
 /* ==================== RESPONSIVE MÓVIL ==================== */
 @media (max-width: 900px) {
   /* En móviles, el sidebar se comporta como antes (desplegable) */
-  .admindash-sidebar {
+  .adminpanel-sidebar {
     position: fixed;
     left: 0;
     top: 0;
@@ -534,59 +534,59 @@
     transition: transform 0.3s ease; /* Con animación */
   }
   
-  .admindash-sidebar.open {
+  .adminpanel-sidebar.open {
     transform: translateX(0); /* Visible cuando está abierto */
   }
   
-  .admindash-main-content {
+  .adminpanel-main-content {
     margin-left: 0; /* Sin margen en móvil */
     width: 100%;
   }
   
-  .admindash-mobile-menu-btn {
+  .adminpanel-mobile-menu-btn {
     display: flex; /* MOSTRAR en móvil */
   }
   
-  .admindash-sidebar-overlay.open {
+  .adminpanel-sidebar-overlay.open {
     display: block; /* MOSTRAR overlay en móvil */
   }
 }
 
 /* Responsive tablets */
 @media (max-width: 1200px) {
-  .admindash-indicators-grid {
+  .adminpanel-indicators-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .admindash-overview-charts-grid {
+  .adminpanel-overview-charts-grid {
     grid-template-columns: 1fr;
   }
-  .admindash-overview-bottom-grid {
+  .adminpanel-overview-bottom-grid {
     grid-template-columns: 1fr;
   }
 }
 
 /* Responsive móviles pequeños */
 @media (max-width: 767px) {
-  .admindash-dashboard-main {
+  .adminpanel-dashboard-main {
     padding: 1rem;
   }
-  .admindash-indicators-grid {
+  .adminpanel-indicators-grid {
     grid-template-columns: 1fr;
   }
-  .admindash-overview-charts-grid {
+  .adminpanel-overview-charts-grid {
     grid-template-columns: 1fr;
   }
-  .admindash-overview-bottom-grid {
+  .adminpanel-overview-bottom-grid {
     grid-template-columns: 1fr;
   }
-  .admindash-orders-card {
+  .adminpanel-orders-card {
     padding: 1rem;
   }
 }
 
 /* Estilos adicionales para las nuevas secciones */
 .ranking-number {
-  background: #8b5cf6;
+  background: #7d5938;
   color: white;
   border-radius: 50%;
   width: 24px;
@@ -614,7 +614,7 @@
 .activity-dot {
   width: 8px;
   height: 8px;
-  background: #8b5cf6;
+  background: #7d5938;
   border-radius: 50%;
   margin-top: 0.5rem;
   flex-shrink: 0;
@@ -634,13 +634,13 @@
 }
 
 /* Management Grid */
-.admindash-management-grid {
+.adminpanel-management-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
 }
 
-.admindash-management-card {
+.adminpanel-management-card {
   background: white;
   border-radius: 16px;
   padding: 2rem;
@@ -650,17 +650,17 @@
   transition: transform 0.2s ease;
 }
 
-.admindash-management-card:hover {
+.adminpanel-management-card:hover {
   transform: translateY(-2px);
 }
 
 .management-card-icon {
-  color: #8b5cf6;
+  color: #7d5938;
   margin-bottom: 1rem;
 }
 
 .management-btn {
-  background: #8b5cf6;
+  background: #7d5938;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -671,11 +671,11 @@
 }
 
 .management-btn:hover {
-  background: #7c3aed;
+  background: #593f28;
 }
 
 /* Premium Plan Styles */
-.admindash-premium-container {
+.adminpanel-premium-container {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
@@ -696,26 +696,26 @@
   gap: 1.5rem;
 }
 
-.form-group {
+.adminpanel-form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-group label {
+.adminpanel-form-group label {
   font-weight: 600;
   color: #1f2937;
 }
 
-.form-group input,
-.form-group textarea {
+.adminpanel-form-group input,
+.adminpanel-form-group textarea {
   padding: 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 1rem;
 }
 
-.benefits-list {
+.adminpanel-benefits-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -727,14 +727,14 @@
   gap: 0.5rem;
 }
 
-.form-actions {
+.adminpanel-form-actions {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
 }
 
-.btn-primary,
-.btn-secondary {
+.adminpanel-btn-primary,
+.adminpanel-btn-secondary {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
@@ -742,18 +742,18 @@
   border: none;
 }
 
-.btn-primary {
-  background: #8b5cf6;
+.adminpanel-btn-primary {
+  background: #7d5938;
   color: white;
 }
 
-.btn-secondary {
+.adminpanel-btn-secondary {
   background: #e5e7eb;
   color: #1f2937;
 }
 
-.plan-preview {
-  border: 2px solid #8b5cf6;
+.adminpanel-plan-preview {
+  border: 2px solid #7d5938;
   border-radius: 12px;
   padding: 1.5rem;
 }
@@ -766,7 +766,7 @@
 .plan-price {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #8b5cf6;
+  color: #7d5938;
 }
 
 .plan-benefits ul {
@@ -776,15 +776,18 @@
 
 .plan-benefits li {
   padding: 0.5rem 0;
-  color: #10b981;
+  color: #7d5938;
 }
 
-@media (max-width: 768px) {
-  .admindash-premium-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .admindash-management-grid {
-    grid-template-columns: 1fr;
-  }
+/* Fuentes Goldman a peso normal */
+.adminpanel-header-text h1,
+.adminpanel-indicator-info h3,
+.adminpanel-orders-title,
+.adminpanel-section-title,
+.adminpanel-section-subtitle,
+.adminpanel-info-card-title,
+.adminpanel-artist-name,
+.adminpanel-sample-title {
+  font-family: 'Goldman', sans-serif;
+  font-weight: normal;
 }
