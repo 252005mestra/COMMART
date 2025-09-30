@@ -387,35 +387,355 @@
 }
 
 
-/* Estilos para selección de muestras */
-.ordertracking-samples-selection {
+/* ========== DISEÑO MEJORADO PARA MUESTRAS - ESTILO COMMART ========== */
+
+/* Contenedor principal de muestras */
+.ordertracking-samples-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 20px;
+  border: 3px solid #000;
+  margin: 1rem 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Wrapper individual de cada muestra */
+.ordertracking-sample-img-wrapper {
+  position: relative;
   width: 100%;
+  height: 280px; /* Altura fija para consistencia */
+  border-radius: 16px;
+  overflow: hidden;
+  border: 3px solid #000;
+  background: #f8f8f5;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
+.ordertracking-sample-img-wrapper:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-color: #7d5938;
+}
+
+/* Imagen de la muestra */
+.ordertracking-sample-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.ordertracking-sample-img:hover {
+  transform: scale(1.05);
+}
+
+/* Overlay con información */
+.ordertracking-sample-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  color: white;
+  padding: 1rem;
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ordertracking-sample-img-wrapper:hover .ordertracking-sample-overlay {
+  opacity: 1;
+}
+
+/* Botón eliminar muestra - Mejorado */
+.ordertracking-delete-sample-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #fff;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 18px;
+  z-index: 10;
+  opacity: 0;
+}
+
+.ordertracking-sample-img-wrapper:hover .ordertracking-delete-sample-btn {
+  opacity: 1;
+}
+
+.ordertracking-delete-sample-btn:hover {
+  background: #e74c3c;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* Indicador de selección para cliente */
 .ordertracking-sample-img-wrapper.selectable {
-  transition: all 0.2s ease;
-}
-
-.ordertracking-sample-img-wrapper.selectable:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  cursor: pointer;
+  border: 3px solid #ddd;
 }
 
 .ordertracking-sample-img-wrapper.selected {
-  box-shadow: 0 0 0 3px #28a745, 0 4px 12px rgba(40, 167, 69, 0.4);
+  border-color: #28a745;
+  box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.3);
 }
 
-.ordertracking-selection-overlay {
-  pointer-events: none;
+.ordertracking-sample-img-wrapper.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #28a745;
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
 }
 
-.ordertracking-sample-img-wrapper.selectable .ordertracking-selection-overlay {
-  pointer-events: auto;
+/* Mensaje cuando no hay muestras */
+.ordertracking-no-samples {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #f8f8f5;
+  border: 2px dashed #ccc;
+  border-radius: 16px;
+  color: #666;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1.1rem;
 }
 
-/* Mejorar la visibilidad del botón de eliminar cuando hay selección */
-.ordertracking-sample-img-wrapper.selected .ordertracking-delete-sample-btn {
-  background: #fff !important;
-  border: 2px solid #e74c3c !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+/* Sección de subir muestras mejorada */
+.ordertracking-section {
+  background: #fff;
+  border-radius: 20px;
+  border: 3px solid #000;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ordertracking-section-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.2rem;
+  color: #7d5938;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Vista previa de archivos seleccionados */
+.ordertracking-preview-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.ordertracking-preview-item {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #7d5938;
+}
+
+.ordertracking-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ordertracking-preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #fff;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.ordertracking-preview-remove:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* Botón de subir muestras mejorado */
+.ordertracking-upload-btn {
+  background: #7d5938;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(125, 89, 56, 0.3);
+}
+
+.ordertracking-upload-btn:hover:not(:disabled) {
+  background: #593f28;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(125, 89, 56, 0.4);
+}
+
+.ordertracking-upload-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ========== RESPONSIVE PARA MUESTRAS ========== */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .ordertracking-samples-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+    padding: 1.2rem;
+  }
+  
+  .ordertracking-sample-img-wrapper {
+    height: 250px;
+  }
+}
+
+/* Móviles */
+@media (max-width: 768px) {
+  .ordertracking-samples-list {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .ordertracking-sample-img-wrapper {
+    height: 220px;
+  }
+  
+  .ordertracking-section {
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+  
+  .ordertracking-preview-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .ordertracking-sample-img-wrapper {
+    height: 200px;
+  }
+  
+  .ordertracking-section {
+    padding: 1rem;
+  }
+  
+  .ordertracking-section-title {
+    font-size: 1rem;
+  }
+  
+  .ordertracking-preview-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .ordertracking-preview-item {
+    height: 120px;
+  }
+}
+
+/* ========== OBRA FINAL - DISEÑO ESPECIAL ========== */
+
+.ordertracking-final-art-container {
+  background: linear-gradient(135deg, #7d5938 0%, #593f28 100%);
+  border-radius: 24px;
+  padding: 2rem;
+  margin: 2rem 0;
+  border: 4px solid #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.ordertracking-final-art-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.ordertracking-final-art-wrapper {
+  position: relative;
+  z-index: 2;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 4px solid #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.ordertracking-final-art-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.ordertracking-final-art-img:hover {
+  transform: scale(1.02);
+}
+
+.ordertracking-final-art-title {
+  color: #fff;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
