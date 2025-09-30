@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import MyOrderCard from './MyOrderCard';
 
 const TABS = [
@@ -10,6 +10,38 @@ const TABS = [
 const OrdersTabsSection = ({ orders, allExtras = [], allArtists = [] }) => {
   const [activeTab, setActiveTab] = useState('realizados');
   const cardsRef = useRef({});
+  const [showMotivoModal, setShowMotivoModal] = useState(false);
+  const [motivoText, setMotivoText] = useState('');
+
+  // Detectar si hay highlightOrderId en el state de navegación
+  useEffect(() => {
+    const state = window.history.state && window.history.state.usr;
+    const highlightOrderId = state && state.highlightOrderId;
+    const highlightType = state && state.highlightType;
+
+    if (highlightOrderId && orders.length > 0) {
+      const order = orders.find(o => String(o.id) === String(highlightOrderId));
+      if (!order) return;
+
+      // Si es aceptado, ir a proceso y hacer scroll
+      if (highlightType === 'accepted' && (order.status === 'accepted' || order.status === 'in_progress')) {
+        setActiveTab('proceso');
+        setTimeout(() => {
+          if (cardsRef.current[highlightOrderId]) {
+            cardsRef.current[highlightOrderId].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+      // Si es rechazado, ir a realizados y mostrar modal de motivo
+      if (highlightType === 'rejected' && order.status === 'rejected') {
+        setActiveTab('realizados');
+        setTimeout(() => {
+          setMotivoText(order.rejection_reason || 'Sin motivo especificado.');
+          setShowMotivoModal(true);
+        }, 300);
+      }
+    }
+  }, [orders]);
 
   // Filtra los pedidos según el tab activo
   const getFilteredOrders = () => {
@@ -86,7 +118,7 @@ const OrdersTabsSection = ({ orders, allExtras = [], allArtists = [] }) => {
     };
   };
 
-  // Scroll al pedido en proceso
+  // Scroll al pedido en proceso (usado por botón IR)
   const handleGoToOrder = (orderId) => {
     setActiveTab('proceso');
     setTimeout(() => {
@@ -97,6 +129,24 @@ const OrdersTabsSection = ({ orders, allExtras = [], allArtists = [] }) => {
   };
 
   const filteredOrders = getFilteredOrders();
+
+  // Modal para mostrar motivo de rechazo
+  const MotivoModal = ({ open, motivo, onClose }) => {
+    if (!open) return null;
+    return (
+      <div className="motivo-modal-overlay" onClick={onClose}>
+        <div className="motivo-modal-content" onClick={e => e.stopPropagation()}>
+          <h2 className="motivo-modal-title">Motivo de cancelación</h2>
+          <div className="motivo-modal-content-section">
+            <p className="motivo-modal-text">{motivo || 'Sin motivo especificado'}</p>
+          </div>
+          <button className="motivo-modal-button" onClick={onClose}>
+            Aceptar
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="profile-tabs-section-bg">
@@ -146,6 +196,7 @@ const OrdersTabsSection = ({ orders, allExtras = [], allArtists = [] }) => {
           </div>
         )}
       </div>
+      <MotivoModal open={showMotivoModal} motivo={motivoText} onClose={() => setShowMotivoModal(false)} />
     </div>
   );
 };

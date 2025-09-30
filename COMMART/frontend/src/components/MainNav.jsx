@@ -296,21 +296,48 @@ const MainNav = ({
       markNotificationAsRead(notification.id);
     }
 
-    // Redirigir según tipo y existencia de order_id
+    // Pedido aceptado: ir al pedido específico
+    if (notification.type === 'order_accepted' && notification.order_id) {
+      navigate(`/orders/${notification.order_id}`);
+      return;
+    }
+
+    // Pedido rechazado: ir a la lista y mostrar modal
+    if (notification.type === 'order_rejected' && notification.order_id) {
+      navigate('/orders', {
+        state: {
+          highlightOrderId: notification.order_id,
+          highlightType: 'rejected'
+        }
+      });
+      return;
+    }
+
+    // Nueva solicitud de pedido para artista: ir a pedidos y hacer scroll
+    if (
+      (notification.type === 'order' || notification.type === 'new_order' || notification.type === 'order_created') &&
+      notification.order_id &&
+      profile?.is_artist
+    ) {
+      navigate('/artist/orders', {
+        state: {
+          highlightOrderId: notification.order_id,
+          highlightType: 'new'
+        }
+      });
+      return;
+    }
+
+    // Otros tipos: comportamiento anterior
     if (
       notification.type === 'order_phase_updated' ||
       notification.type === 'order_completed' ||
       notification.type === 'order_paid' ||
       notification.type === 'new_message' ||
       notification.type === 'new_sample' ||
-      notification.type === 'sample_uploaded' ||
-      notification.type === 'new_order' ||
-      notification.type === 'order_created' ||
-      notification.type === 'order_accepted' ||    // <-- Agrega esto
-      notification.type === 'order_rejected'        // <-- Y esto
+      notification.type === 'sample_uploaded'
     ) {
       if (notification.order_id) {
-        // Agrega un query param único para forzar el montaje
         const uniqueKey = Date.now();
         navigate(`/orders/${notification.order_id}?notif=${uniqueKey}`, {
           state: {
@@ -324,12 +351,6 @@ const MainNav = ({
         navigate(`/orders/${notification.related_order_id}`);
         return;
       }
-      // Si es artista y no hay order_id, ir a pedidos de artista
-      if (profile?.is_artist) {
-        navigate('/artist/orders');
-        return;
-      }
-      // Si es cliente y no hay order_id, ir a pedidos de cliente
       navigate('/orders');
       return;
     }
