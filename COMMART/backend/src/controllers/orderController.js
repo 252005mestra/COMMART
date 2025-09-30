@@ -143,6 +143,19 @@ export const updateOrderStatusController = async (req, res) => {
       console.log(`📧 Cliente ${order.client_id} notificado de rechazo del pedido ${id}`);
     }
 
+    // Notificar al cliente si es aceptado
+    if (status === 'in_progress') {
+      await createNotification({
+        user_id: order.client_id,
+        type: 'order_accepted',
+        message: `¡Tu pedido #${id} fue aceptado por el artista!`,
+        link: `/orders/${id}`,
+        order_id: id,
+        is_read: false
+      });
+      console.log(`📧 Cliente ${order.client_id} notificado de aceptación del pedido ${id}`);
+    }
+
     // Notificar al cliente y artista si el pedido es completado
     if (status === 'completed') {
       // Notificar al cliente

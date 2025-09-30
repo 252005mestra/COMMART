@@ -143,6 +143,7 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  position: relative;
 }
 
 .notifications,
@@ -388,6 +389,28 @@
 .profile-dropdown li[disabled],
 .notifications-dropdown li[disabled] {
   cursor: not-allowed;
+}
+
+/* Badge de notificaciones no leídas (arriba y a la derecha del icono) */
+.bell-notification-badge {
+  position: absolute;
+  top: -6px;    /* Arriba del icono */
+  right: -6px;  /* A la derecha */
+  min-width: 20px;
+  height: 20px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 0.85rem;
+  font-family: 'Goldman', sans-serif;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  pointer-events: none;
+  border: 2px solid #fff;
 }
 
 

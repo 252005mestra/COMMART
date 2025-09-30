@@ -305,7 +305,9 @@ const MainNav = ({
       notification.type === 'new_sample' ||
       notification.type === 'sample_uploaded' ||
       notification.type === 'new_order' ||
-      notification.type === 'order_created'
+      notification.type === 'order_created' ||
+      notification.type === 'order_accepted' ||    // <-- Agrega esto
+      notification.type === 'order_rejected'        // <-- Y esto
     ) {
       if (notification.order_id) {
         // Agrega un query param único para forzar el montaje
@@ -438,13 +440,20 @@ const MainNav = ({
             </ul>
           )}
         </div>
-        <div className='navbar-actions' ref={iconsRef}>
-          <Bell
-            className='thick-icon notifications'
-            onClick={() => toggleMenu('notifications')}
-            aria-label='Notificaciones'
-            size={28}
-          />
+        <div className='navbar-actions' ref={iconsRef} style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <Bell
+              className='thick-icon notifications'
+              onClick={() => toggleMenu('notifications')}
+              aria-label='Notificaciones'
+              size={28}
+            />
+            {notifications.filter(n => !n.is_read).length > 0 && (
+              <span className="bell-notification-badge">
+                {notifications.filter(n => !n.is_read).length}
+              </span>
+            )}
+          </div>
           <CircleUserRound
             className='thick-icon profile'
             onClick={() => toggleMenu('profile')}
