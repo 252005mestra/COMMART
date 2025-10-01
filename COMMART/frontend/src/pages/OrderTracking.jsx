@@ -30,8 +30,6 @@ const OrderTracking = ({ user }) => {
   const [order, setOrder] = useState(null);
   const [messages, setMessages] = useState([]);
   const [msg, setMsg] = useState('');
-  const [sampleFiles, setSampleFiles] = useState([]);
-  const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState(null);
@@ -56,6 +54,8 @@ const OrderTracking = ({ user }) => {
   const [showExtrasModal, setShowExtrasModal] = useState(false);
   const [availablePackages, setAvailablePackages] = useState([]);
   const [availableExtras, setAvailableExtras] = useState([]);
+  const [showSamplePreviewModal, setShowSamplePreviewModal] = useState(false);
+  const [selectedSampleFile, setSelectedSampleFile] = useState(null);
 
   // ✅ useEffect para cargar datos iniciales del pedido
   useEffect(() => {
@@ -163,16 +163,6 @@ const OrderTracking = ({ user }) => {
     }
   }, [order, selectedStage]);
 
-  // ✅ useEffect para manejar preview de archivos
-  useEffect(() => {
-    if (!sampleFiles.length) {
-      setPreviewUrls([]);
-      return;
-    }
-    const urls = sampleFiles.map(file => URL.createObjectURL(file));
-    setPreviewUrls(urls);
-    return () => urls.forEach(url => URL.revokeObjectURL(url));
-  }, [sampleFiles]);
 
   // ✅ AGREGAR AQUÍ: Cargar paquetes y extras cuando se necesiten
   useEffect(() => {
@@ -410,104 +400,6 @@ const OrderTracking = ({ user }) => {
         open: true, 
         type: 'error', 
         message: 'Error al finalizar el pedido.' 
-      });
-    }
-  };
-
-  // ✅ Función para subir muestras MEJORADA
-  const handleUploadSamples = async () => {
-    if (!sampleFiles.length) {
-      setAlert({ 
-        open: true, 
-        type: 'error', 
-        message: 'Selecciona al menos una imagen para subir.' 
-      });
-      return;
-    }
-
-    // Verificar límite de 3 archivos
-    if (sampleFiles.length > 3) {
-      setAlert({ 
-        open: true, 
-        type: 'error', 
-        message: 'Máximo 3 archivos por fase.' 
-      });
-      return;
-    }
-
-    // Verificar que ya no exceda el límite con las muestras existentes
-    const currentSamplesCount = selectedPhaseImages.length;
-    if (currentSamplesCount + sampleFiles.length > 3) {
-      setAlert({ 
-        open: true, 
-        type: 'error', 
-        message: `Solo puedes subir ${3 - currentSamplesCount} imagen(es) más en esta fase.` 
-      });
-      return;
-    }
-
-    try {
-      setAlert({ 
-        open: true, 
-        type: 'info', 
-        message: `Subiendo ${sampleFiles.length} muestra(s)...` 
-      });
-
-      console.log('📤 Subiendo muestras:', {
-        phase: selectedStage,
-        fileCount: sampleFiles.length,
-        orderId: order.id
-      });
-
-      // Subir cada archivo individualmente
-      for (let i = 0; i < sampleFiles.length; i++) {
-        const file = sampleFiles[i];
-        const formData = new FormData();
-        formData.append('phase', selectedStage);
-        formData.append('sample_image', file);
-
-        console.log(`📁 Subiendo archivo ${i + 1}:`, {
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type
-        });
-
-        const response = await axios.post(
-          `http://localhost:5000/api/orders/${order.id}/sample`,
-          formData,
-          { 
-            withCredentials: true,
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-        );
-
-        console.log(`✅ Archivo ${i + 1} subido:`, response.data);
-      }
-
-      // Limpiar archivos seleccionados
-      setSampleFiles([]);
-      setPreviewUrls([]);
-      
-      // Recargar el pedido para ver las muestras subidas
-      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-      setOrder(res.data);
-      
-      setAlert({ 
-        open: true, 
-        type: 'success', 
-        message: `✅ ${sampleFiles.length} muestra(s) subida(s) correctamente.` 
-      });
-
-    } catch (err) {
-      console.error('❌ Error subiendo muestras:', err);
-      console.error('❌ Error response:', err.response?.data);
-      
-      setAlert({ 
-        open: true, 
-        type: 'error', 
-        message: `Error al subir muestras: ${err.response?.data?.message || err.message}` 
       });
     }
   };
@@ -1169,6 +1061,94 @@ const OrderTracking = ({ user }) => {
     }
   };
 
+    // ✅ NUEVO: Función para manejar selección de archivo de muestra
+  const handleSampleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Solo se permiten archivos de imagen.' 
+      });
+      return;
+    }
+
+    // Validar tamaño (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'La imagen no puede ser mayor a 5MB.' 
+      });
+      return;
+    }
+
+    setSelectedSampleFile(file);
+    setShowSamplePreviewModal(true);
+  };
+
+  // ✅ NUEVO: Función para confirmar subida de muestra
+  const handleConfirmSampleUpload = async () => {
+    if (!selectedSampleFile) return;
+
+    try {
+      setAlert({ 
+        open: true, 
+        type: 'info', 
+        message: 'Subiendo muestra...' 
+      });
+
+      console.log('📤 Subiendo muestra individual:', {
+        phase: selectedStage,
+        fileName: selectedSampleFile.name,
+        orderId: order.id
+      });
+
+      const formData = new FormData();
+      formData.append('phase', selectedStage);
+      formData.append('sample_image', selectedSampleFile);
+
+      const response = await axios.post(
+        `http://localhost:5000/api/orders/${order.id}/sample`,
+        formData,
+        { 
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      console.log('✅ Muestra subida:', response.data);
+
+      // Cerrar modal y limpiar
+      setShowSamplePreviewModal(false);
+      setSelectedSampleFile(null);
+      
+      // Recargar el pedido para ver la muestra subida
+      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
+      setOrder(res.data);
+      
+      setAlert({ 
+        open: true, 
+        type: 'success', 
+        message: '✅ Muestra subida correctamente.' 
+      });
+
+    } catch (err) {
+      console.error('❌ Error subiendo muestra:', err);
+      
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: `Error al subir muestra: ${err.response?.data?.message || err.message}` 
+      });
+    }
+  };
+
   // ✅ LÓGICA DE PERMISOS MEJORADA
   const isFinal = ['cancelled', 'rejected', 'completed', 'finalized'].includes(order?.status);
   const currentStageIdx = order ? STAGES.findIndex(s => s.key === order.current_stage) : 0;
@@ -1184,6 +1164,8 @@ const OrderTracking = ({ user }) => {
   const selectedPhaseImages = order && order[`${selectedStage}_image`]
     ? order[`${selectedStage}_image`].split(',').filter(Boolean)
     : [];
+
+  const displayImages = selectedPhaseImages;
 
   // ✅ Renders de estados especiales
   if (!user) return <div>Cargando usuario...</div>;
@@ -1456,98 +1438,69 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
               
-              {/* Muestras del artista - OCULTAR EN FASE DE PLANEACIÓN */}
-              {selectedStage !== 'plan' && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">
-                    {selectedStage === 'completed' ? '🎨 Obra Final:' : 'Muestras del artista:'}
-                  </div>
-                  
-                  {/* FASE COMPLETED: Solo obra final */}
-                  {selectedStage === 'completed' ? (
-                    order.completed_image ? (
-                      <div className="ordertracking-final-art">
-                        <div className="ordertracking-samples-list">
-                          <div className="ordertracking-sample-img-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
-                            <img
-                              src={`http://localhost:5000/${order.completed_image}`}
-                              alt="Obra Final"
-                              className="ordertracking-sample-img"
-                              onClick={() => setShowFinalArtModal(true)}
-                              style={{ cursor: 'pointer' }}
-                            />
-                            {/* Botón eliminar obra final - MISMO ESTILO QUE LAS MUESTRAS */}
-                            {user.role === 'artist' && isCurrentPhase && order.status !== 'completed' && (
-                              <button
-                                className="ordertracking-delete-sample-btn"
+
+                    {/* Modal para subir muestra individual */}
+                    <ConfirmModal
+                      open={showSamplePreviewModal}
+                      message={
+                        <div>
+                          <div style={{ marginBottom: 16, fontWeight: 700, fontFamily: "'Goldman', sans-serif" }}>
+                            Vista Previa de Muestra
+                          </div>
+                          {selectedSampleFile && (
+                            <div style={{ marginBottom: 16, textAlign: 'center' }}>
+                              <img
+                                src={URL.createObjectURL(selectedSampleFile)}
+                                alt="Vista previa"
                                 style={{
-                                  position: 'absolute',
-                                  top: 4,
-                                  right: 4,
-                                  background: '#fff',
-                                  border: '1px solid #e74c3c',
-                                  color: '#e74c3c',
-                                  borderRadius: '50%',
-                                  width: 28,
-                                  height: 28,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontWeight: 'bold',
-                                  fontSize: 18,
-                                  zIndex: 2,
+                                  maxWidth: '300px',
+                                  maxHeight: '300px',
+                                  objectFit: 'contain',
+                                  border: '2px solid #8B6D47',
+                                  borderRadius: '8px',
+                                  background: '#f8f8f5'
                                 }}
-                                title="Eliminar obra final"
-                                onClick={handleDeleteFinalArt}
-                              >
-                                ×
-                              </button>
-                            )}
+                              />
+                              <div style={{ marginTop: 8, fontSize: '14px', color: '#6c757d' }}>
+                                {selectedSampleFile.name}
+                              </div>
+                            </div>
+                          )}
+                          <div style={{ fontSize: '14px', color: '#6c757d', textAlign: 'center' }}>
+                            ¿Deseas subir esta muestra?
                           </div>
                         </div>
-                        
-                        {/* Mensaje para el cliente */}
-                        {user.id === order.client_id && (
-                          <div className="ordertracking-final-art-message">
-                            <p className="ordertracking-client-message">
-                              Tu obra está lista. Haz clic en la imagen para verla en tamaño completo y descargarla.
-                            </p>
-                          </div>
-                        )}
-                        
-                        {/* Mensaje para el artista */}
-                        {user.id === order.artist_id && (
-                          <div className="ordertracking-final-art-message">
-                            <p className="ordertracking-artist-message">
-                              Obra final entregada exitosamente. El cliente puede descargarla cuando guste.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="ordertracking-no-final-art">
-                        {user.role === 'artist' && isCurrentPhase ? (
-                          <p className="ordertracking-message-artist">
-                            Sube la obra final para completar definitivamente el pedido
-                          </p>
-                        ) : isFuturePhase ? (
-                          <p className="ordertracking-message-future">
-                            La obra final aparecerá cuando el pedido sea finalizado
-                          </p>
-                        ) : (
-                          <p className="ordertracking-message-pending">
-                            El artista aún no ha subido la obra final
-                          </p>
+                      }
+                      onCancel={() => {
+                        setShowSamplePreviewModal(false);
+                        setSelectedSampleFile(null);
+                      }}
+                      onConfirm={handleConfirmSampleUpload}
+                      confirmText="Subir Muestra"
+                      cancelText="Cancelar"
+                    />
+                  
+                  {/* Subir/Mostrar muestras - GRID UNIFICADO */}
+                  {selectedStage !== 'plan' && selectedStage !== 'completed' && (
+                    <div className="ordertracking-section">
+                      <div className="ordertracking-section-title">
+                        {selectedStage === 'completed' ? '🎨 Obra Final:' : 'Muestras del artista:'}
+                        {canUploadSamples && (
+                          <small style={{ 
+                            display: 'block', 
+                            fontSize: '12px', 
+                            color: '#6c757d', 
+                            fontWeight: 'normal' 
+                          }}>
+                            {selectedPhaseImages.length}/3 subidas en esta fase
+                          </small>
                         )}
                       </div>
-                    )
-                  ) : (
-                    /* TODAS LAS OTRAS FASES: Mostrar muestras */
-                    ['sketch', 'details', 'final'].includes(selectedStage) ? (
-                      selectedPhaseImages.length > 0 ? (
-                        <div className="ordertracking-samples-selection">
-                          {/* ✅ MENSAJE DE SELECCIÓN PARA EL CLIENTE */}
+                      
+                      {/* MENSAJES DE SELECCIÓN */}
+                      {selectedPhaseImages.length > 0 && (
+                        <>
+                          {/* Mensaje para cliente - seleccionar */}
                           {user.id === order.client_id && isCurrentPhase && !order[`${selectedStage}_selected`] && (
                             <div style={{
                               background: '#e8f4fd',
@@ -1565,7 +1518,7 @@ const OrderTracking = ({ user }) => {
                             </div>
                           )}
 
-                          {/* ✅ MENSAJE DE CONFIRMACIÓN CUANDO YA SELECCIONÓ */}
+                          {/* Mensaje de confirmación cuando ya seleccionó */}
                           {order[`${selectedStage}_selected`] && (
                             <div style={{
                               background: '#d4edda',
@@ -1579,244 +1532,331 @@ const OrderTracking = ({ user }) => {
                               </p>
                             </div>
                           )}
-
-                          <div className="ordertracking-samples-list">
-                            {selectedPhaseImages.map((img, idx) => {
-                              const fullImageUrl = `http://localhost:5000/${img}`;
-                              const isSelected = order[`${selectedStage}_selected`] === img;
-                              const canSelect = user.id === order.client_id && isCurrentPhase && !order[`${selectedStage}_selected`];
+                        </>
+                      )}
+                      
+                      {/* GRID UNIFICADO - MUESTRAS + SLOTS PARA AGREGAR */}
+                      <div className="ordertracking-samples-upload-grid" style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '1rem',
+                        marginTop: '1rem'
+                      }}>
+                        {/* Mostrar muestras existentes */}
+                        {selectedPhaseImages.map((img, idx) => {
+                          const fullImageUrl = `http://localhost:5000/${img}`;
+                          const isSelected = order[`${selectedStage}_selected`] === img;
+                          const canSelect = user.id === order.client_id && isCurrentPhase && !order[`${selectedStage}_selected`];
+                          const canDeleteSample = user.role === 'artist' && canUploadSamples && !order[`${selectedStage}_selected`];
+                          
+                          return (
+                            <div 
+                              key={idx} 
+                              className={`ordertracking-sample-slot ${isSelected ? 'selected' : ''} ${canSelect ? 'selectable' : ''}`}
+                              style={{
+                                position: 'relative',
+                                aspectRatio: '1',
+                                borderRadius: '12px',
+                                overflow: 'hidden',
+                                border: isSelected ? '3px solid #28a745' : '2px solid #000',
+                                cursor: canSelect ? 'pointer' : 'default'
+                              }}
+                              onClick={() => canSelect && handleSelectSample(fullImageUrl, selectedStage)}
+                              title={canSelect ? 'Clic para seleccionar esta muestra' : ''}
+                            >
+                              <img
+                                src={fullImageUrl}
+                                alt={`Muestra ${idx + 1}`}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover'
+                                }}
+                              />
                               
-                              return (
+                              {/* Indicador de selección */}
+                              {isSelected && (
+                                <div style={{
+                                  position: 'absolute',
+                                  top: '8px',
+                                  left: '8px',
+                                  background: '#28a745',
+                                  color: 'white',
+                                  borderRadius: '50%',
+                                  width: 32,
+                                  height: 32,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: 18,
+                                  fontWeight: 'bold',
+                                  zIndex: 3
+                                }}>
+                                  ✓
+                                </div>
+                              )}
+
+                              {/* Overlay de hover para selección */}
+                              {canSelect && (
                                 <div 
-                                  key={idx} 
-                                  className={`ordertracking-sample-img-wrapper ${isSelected ? 'selected' : ''} ${canSelect ? 'selectable' : ''}`}
-                                  style={{ 
-                                    position: 'relative', 
-                                    display: 'inline-block',
-                                    cursor: canSelect ? 'pointer' : 'default',
-                                    border: isSelected ? '3px solid #28a745' : '2px solid transparent',
+                                  className="ordertracking-selection-overlay"
+                                  style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    background: 'rgba(40, 167, 69, 0.1)',
                                     borderRadius: '8px',
-                                    margin: '4px'
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    opacity: 0,
+                                    transition: 'opacity 0.2s',
+                                    zIndex: 2
                                   }}
-                                  onClick={() => canSelect && handleSelectSample(fullImageUrl, selectedStage)}
-                                  title={canSelect ? 'Clic para seleccionar esta muestra' : ''}
+                                  onMouseEnter={(e) => e.target.style.opacity = 1}
+                                  onMouseLeave={(e) => e.target.style.opacity = 0}
                                 >
-                                  <img
-                                    src={fullImageUrl}
-                                    alt={`Muestra ${idx + 1}`}
-                                    className="ordertracking-sample-img"
-                                  />
-                                  
-                                  {/* ✅ INDICADOR DE SELECCIÓN */}
-                                  {isSelected && (
-                                    <div style={{
+                                  <span style={{
+                                    background: 'rgba(40, 167, 69, 0.9)',
+                                    color: 'white',
+                                    padding: '8px 16px',
+                                    borderRadius: '20px',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    Seleccionar
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Botón eliminar (solo para artista y si no hay selección) */}
+                              {canDeleteSample && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteSample(img, idx);
+                                  }}
+                                  style={{
+                                    position: 'absolute',
+                                    top: '8px',
+                                    right: '8px',
+                                    background: '#fff',
+                                    border: '2px solid #e74c3c',
+                                    color: '#e74c3c',
+                                    borderRadius: '50%',
+                                    width: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    zIndex: 4
+                                  }}
+                                  title="Eliminar muestra"
+                                >
+                                  ×
+                                </button>
+                              )}
+                              {/* Botón de descarga para obra final */}
+                                {selectedStage === 'completed' && (
+                                  <a
+                                    href={fullImageUrl}
+                                    download={`obra_final_pedido_${order.id}.${img.split('.').pop()}`}
+                                    style={{
                                       position: 'absolute',
-                                      top: '8px',
-                                      right: '8px',
+                                      bottom: '8px',
+                                      left: '8px',
                                       background: '#28a745',
                                       color: 'white',
+                                      border: 'none',
                                       borderRadius: '50%',
-                                      width: 32,
-                                      height: 32,
+                                      width: '32px',
+                                      height: '32px',
                                       display: 'flex',
                                       alignItems: 'center',
                                       justifyContent: 'center',
-                                      fontSize: 18,
+                                      cursor: 'pointer',
+                                      fontSize: '16px',
                                       fontWeight: 'bold',
-                                      zIndex: 3
-                                    }}>
-                                      ✓
-                                    </div>
-                                  )}
-
-                                  {/* ✅ OVERLAY DE HOVER PARA SELECCIÓN */}
-                                  {canSelect && (
-                                    <div 
-                                      className="ordertracking-selection-overlay"
-                                      style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        background: 'rgba(40, 167, 69, 0.1)',
-                                        borderRadius: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        opacity: 0,
-                                        transition: 'opacity 0.2s',
-                                        zIndex: 2
-                                      }}
-                                      onMouseEnter={(e) => e.target.style.opacity = 1}
-                                      onMouseLeave={(e) => e.target.style.opacity = 0}
-                                    >
-                                      <span style={{
-                                        background: 'rgba(40, 167, 69, 0.9)',
-                                        color: 'white',
-                                        padding: '8px 16px',
-                                        borderRadius: '20px',
-                                        fontSize: '14px',
-                                        fontWeight: 'bold'
-                                      }}>
-                                        Seleccionar
-                                      </span>
-                                    </div>
-                                  )}
-
-                                  {/* Botón eliminar (solo para artista) */}
-                                  {user.role === 'artist' && canUploadSamples && (
-                                    <button
-                                      className="ordertracking-delete-sample-btn"
-                                      style={{
-                                        position: 'absolute',
-                                        top: 4,
-                                        right: 4,
-                                        background: '#fff',
-                                        border: '1px solid #e74c3c',
-                                        color: '#e74c3c',
-                                        borderRadius: '50%',
-                                        width: 28,
-                                        height: 28,
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontWeight: 'bold',
-                                        fontSize: 18,
-                                        zIndex: 4,
-                                      }}
-                                      title="Eliminar muestra"
-                                      onClick={(e) => {
-                                        e.stopPropagation(); // Evitar que se active la selección
-                                        handleDeleteSample(img, idx);
-                                      }}
-                                    >
-                                      ×
-                                    </button>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="ordertracking-no-samples">
-                          {isFuturePhase 
-                            ? 'Las muestras aparecerán cuando se alcance esta fase'
-                            : 'Sin muestras aún'
-                          }
-                        </span>
-                      )
-                    ) : (
-                      /* FASES SKETCH, DETAILS, FINAL SIN MUESTRAS */
-                      <span className="ordertracking-no-samples">
-                        {isFuturePhase 
-                          ? 'Las muestras aparecerán cuando se alcance esta fase'
-                          : 'Sin muestras aún'
+                                      zIndex: 4,
+                                      textDecoration: 'none'
+                                    }}
+                                    title="Descargar obra final"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    ⬇
+                                  </a>
+                                )}
+                            </div>
+                          );
+                        })}
+                        
+                        {/* Slots para agregar nuevas muestras (solo si el artista puede subir) */}
+                        {canUploadSamples && !order[`${selectedStage}_selected`] && 
+                          Array.from({ length: 3 - selectedPhaseImages.length }, (_, idx) => (
+                            <div
+                              key={`add-${idx}`}
+                              className="ordertracking-sample-add-slot"
+                              onClick={() => document.getElementById('sample-file-input').click()}
+                              style={{
+                                aspectRatio: '1',
+                                border: '3px dashed #333',
+                                borderRadius: '12px',
+                                background: '#fff',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                color: '#333',
+                                fontFamily: "'Goldman', sans-serif",
+                                fontSize: '1rem',
+                                fontWeight: '500',
+                                gap: '0.5rem'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.borderColor = '#666';
+                                e.target.style.background = '#f8f8f8';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.borderColor = '#333';
+                                e.target.style.background = '#fff';
+                              }}
+                            >
+                              <span style={{ fontSize: '3rem', lineHeight: '1', fontWeight: 'bold' }}>+</span>
+                              <span>Agregar</span>
+                            </div>
+                          ))
                         }
-                      </span>
-                    )
-                  )}
-                </div>
-              )}
-              
-              {/* Subir muestras - OCULTAR EN FASE DE PLANEACIÓN */}
-              {canUploadSamples && selectedStage !== 'completed' && selectedStage !== 'plan' && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">
-                    Subir muestras (máx 3 por fase)
-                    <small style={{ 
-                      display: 'block', 
-                      fontSize: '12px', 
-                      color: '#6c757d', 
-                      fontWeight: 'normal' 
-                    }}>
-                      {selectedPhaseImages.length}/3 subidas en esta fase
-                    </small>
-                  </div>
-                  
-                  {/* Solo mostrar input si no ha llegado al límite */}
-                  {selectedPhaseImages.length < 3 && (
-                    <>
+                      </div>
+                      
+                      {/* Input oculto para subir archivos */}
                       <input
                         type="file"
                         accept="image/*"
-                        multiple
-                        onChange={e => {
-                          const files = Array.from(e.target.files);
-                          const remainingSlots = 3 - selectedPhaseImages.length;
-                          const filesToAdd = files.slice(0, remainingSlots);
-                          
-                          if (files.length > remainingSlots) {
-                            setAlert({
-                              open: true,
-                              type: 'warning',
-                              message: `Solo puedes subir ${remainingSlots} imagen(es) más. Se seleccionaron las primeras ${remainingSlots}.`
-                            });
-                          }
-                          
-                          setSampleFiles(filesToAdd);
-                        }}
-                        style={{ marginBottom: '12px' }}
+                        id="sample-file-input"
+                        style={{ display: 'none' }}
+                        onChange={handleSampleFileSelect}
                       />
                       
-                      {/* Vista previa de archivos seleccionados */}
-                      {previewUrls.length > 0 && (
-                        <div className="ordertracking-preview-list">
-                          {previewUrls.map((url, idx) => (
-                            <div key={idx} className="ordertracking-preview-item">
-                              <img 
-                                src={url} 
-                                alt={`Preview ${idx + 1}`} 
-                                className="ordertracking-preview-img" 
-                              />
-                              <button
-                                onClick={() => {
-                                  const newFiles = sampleFiles.filter((_, i) => i !== idx);
-                                  setSampleFiles(newFiles);
-                                }}
-                                className="ordertracking-preview-remove"
-                                title="Quitar imagen"
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
+                      {/* Mensaje cuando no hay muestras */}
+                      {selectedPhaseImages.length === 0 && (
+                        <div style={{
+                          textAlign: 'center',
+                          padding: '2rem',
+                          background: '#f8f9fa',
+                          border: '2px dashed #dee2e6',
+                          borderRadius: '12px',
+                          color: '#6c757d',
+                          fontFamily: "'Nunito Sans', sans-serif"
+                        }}>
+                          {isFuturePhase 
+                            ? 'Las muestras aparecerán cuando se alcance esta fase'
+                            : canUploadSamples 
+                              ? 'Haz clic en "Agregar" para subir la primera muestra'
+                              : 'Sin muestras aún'
+                          }
                         </div>
                       )}
                       
-                      <button 
-                        className="ordertracking-upload-btn" 
-                        onClick={handleUploadSamples} 
-                        disabled={!sampleFiles.length}
-                        style={{
-                          background: sampleFiles.length ? '#8B6D47' : '#ccc',
-                          cursor: sampleFiles.length ? 'pointer' : 'not-allowed'
-                        }}
-                      >
-                        Subir {sampleFiles.length > 0 ? `${sampleFiles.length} ` : ''}muestra{sampleFiles.length !== 1 ? 's' : ''}
-                      </button>
-                    </>
-                  )}
-                  
-                  {/* Mensaje cuando ya se alcanzó el límite */}
-                  {selectedPhaseImages.length >= 3 && (
-                    <div style={{
-                      padding: '12px',
-                      background: '#fff3cd',
-                      border: '1px solid #ffeaa7',
-                      borderRadius: '6px',
-                      color: '#856404'
-                    }}>
-                      ✅ Ya has subido el máximo de 3 muestras en esta fase.
+                      {/* Mensaje informativo para artista */}
+                      {canUploadSamples && selectedPhaseImages.length < 3 && !order[`${selectedStage}_selected`] && (
+                        <p style={{ 
+                          margin: '1rem 0 0 0', 
+                          fontSize: '14px', 
+                          color: '#6c757d',
+                          textAlign: 'center'
+                        }}>
+                          Haz clic en los recuadros para agregar muestras
+                        </p>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
+
+                  {/* ✅ MOSTRAR OBRA FINAL - Sección separada */}
+                  {selectedStage === 'completed' && order.completed_image && (
+                    <div className="ordertracking-section">
+                      <div className="ordertracking-section-title">
+                        🎨 Obra Final Entregada
+                      </div>
+                      
+                      {/* Contenedor especial para obra final - MÁS GRANDE */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        marginTop: '1rem'
+                      }}>
+                        <div 
+                          style={{
+                            position: 'relative',
+                            width: '400px',
+                            height: '400px',
+                            borderRadius: '16px',
+                            overflow: 'hidden',
+                            border: '3px solid #28a745',
+                            cursor: 'pointer',
+                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+                          }}
+                          onClick={() => setShowFinalArtModal(true)}
+                          title="Clic para ver en tamaño completo"
+                        >
+                          <img
+                            src={`http://localhost:5000/${order.completed_image}`}
+                            alt="Obra Final"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          
+                          {/* Overlay con información */}
+                          <div style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                            color: 'white',
+                            padding: '20px 16px 16px 16px',
+                            textAlign: 'center'
+                          }}>
+                            <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                              🎉 Obra Finalizada
+                            </div>
+                            <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                              Clic para ver completa
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Mensaje informativo */}
+                      <div style={{
+                        textAlign: 'center',
+                        marginTop: '1rem',
+                        padding: '12px',
+                        background: '#d4edda',
+                        border: '1px solid #c3e6cb',
+                        borderRadius: '8px',
+                        color: '#155724'
+                      }}>
+                        <strong>¡Pedido completado exitosamente!</strong>
+                        <br />
+                        <span style={{ fontSize: '14px' }}>
+                          Puedes ver la obra en tamaño completo o descargarla cuando quieras.
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
               {/* ✅ SUBIR OBRA FINAL - Solo en fase 'completed' si eres artista */}
-              {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && !order.completed_image && (
+              {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && !order.completed_image && selectedPhaseImages.length === 0 && (
                 <div className="ordertracking-section">
                   <div className="ordertracking-section-title">
                     🎨 Subir Obra Final

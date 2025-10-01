@@ -352,6 +352,66 @@
   right: 0.5rem;
 }
 
+/* ========== Grid de subida de muestras - IGUAL QUE PAQUETES ========== */
+.ordertracking-samples-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ordertracking-sample-slot {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #000;
+}
+
+.ordertracking-sample-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ordertracking-sample-add-slot {
+  aspect-ratio: 1;
+  border: 3px dashed #333 !important;
+  border-radius: 12px;
+  background: #fff !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #333 !important;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  gap: 0.5rem;
+}
+
+.ordertracking-sample-add-slot:hover {
+  border-color: #666 !important;
+  background: #f8f8f8 !important;
+  color: #666 !important;
+}
+
+.ordertracking-sample-add-slot span:first-child {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: bold;
+  color: inherit;
+}
+
+.ordertracking-sample-add-slot span:last-child {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .ordertracking-tracking-col {
@@ -561,9 +621,12 @@
   border: 3px solid #000;
   margin: 1rem 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* ✅ Evitar desbordamiento */
+  min-height: 140px; /* ✅ Altura mínima aumentada para mensajes */
+  box-sizing: border-box; /* ✅ Asegurar que padding no cause desbordamiento */
 }
 
-/* Wrapper individual de cada muestra */
+/* ✅ Wrapper individual de cada muestra - CORREGIDO */
 .ordertracking-sample-img-wrapper {
   position: relative;
   width: 100%;
@@ -582,19 +645,110 @@
   border-color: #7d5938;
 }
 
-/* Imagen de la muestra */
+/* ✅ Imagen de la muestra - CORREGIDA PARA EVITAR RECORTES */
 .ordertracking-sample-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* ✅ CAMBIADO: mostrar imagen completa sin recortes */
+  object-position: center; /* ✅ Centrar la imagen */
   transition: transform 0.3s ease;
+  background: #f8f8f5; /* ✅ Fondo para áreas vacías */
 }
 
 .ordertracking-sample-img:hover {
   transform: scale(1.05);
 }
 
-/* Overlay con información */
+/* ✅ Indicador de selección - SOLO UNO */
+.ordertracking-sample-img-wrapper.selected {
+  border-color: #28a745;
+  box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.3);
+}
+
+/* ✅ ELIMINAR completamente el pseudoelemento duplicado */
+.ordertracking-sample-img-wrapper.selected::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* ✅ Mensaje cuando no hay muestras - CORREGIDO */
+.ordertracking-no-samples {
+  grid-column: 1 / -1; /* Ocupar todas las columnas */
+  text-align: center;
+  padding: 1.5rem 1rem; /* ✅ Padding aún más reducido */
+  background: #f8f8f5;
+  border: 2px dashed #ccc;
+  border-radius: 16px;
+  color: #666;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem; /* ✅ Tamaño de fuente ajustado */
+  line-height: 1.4;
+  margin: 0; /* ✅ Sin margen para evitar desbordamiento */
+  word-wrap: break-word; /* ✅ Romper palabras largas */
+}
+
+/* ✅ Vista previa de archivos seleccionados - MEJORADA */
+.ordertracking-preview-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* ✅ Tamaño mínimo aumentado más */
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #dee2e6;
+}
+
+.ordertracking-preview-item {
+  position: relative;
+  width: 100%;
+  height: 200px; /* ✅ Altura fija aún más grande */
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #7d5938;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.ordertracking-preview-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(125, 89, 56, 0.3);
+}
+
+.ordertracking-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ✅ Mismo estilo que las muestras finales */
+  object-position: center;
+}
+
+.ordertracking-preview-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #fff;
+  border: 2px solid #e74c3c;
+  color: #e74c3c;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ordertracking-preview-remove:hover {
+  background: #e74c3c;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* ✅ Overlay con información - MEJORADO */
 .ordertracking-sample-overlay {
   position: absolute;
   bottom: 0;
@@ -613,7 +767,7 @@
   opacity: 1;
 }
 
-/* Botón eliminar muestra - Mejorado */
+/* ✅ Botón eliminar muestra - MEJORADO */
 .ordertracking-delete-sample-btn {
   position: absolute;
   top: 8px;
@@ -633,6 +787,7 @@
   font-size: 18px;
   z-index: 10;
   opacity: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .ordertracking-sample-img-wrapper:hover .ordertracking-delete-sample-btn {
@@ -645,49 +800,56 @@
   transform: scale(1.1);
 }
 
-/* Indicador de selección para cliente */
+/* ✅ Indicadores de selección para cliente - SIMPLIFICADOS */
 .ordertracking-sample-img-wrapper.selectable {
   cursor: pointer;
   border: 3px solid #ddd;
 }
 
-.ordertracking-sample-img-wrapper.selected {
+.ordertracking-sample-img-wrapper.selectable:hover {
   border-color: #28a745;
-  box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
 }
 
-.ordertracking-sample-img-wrapper.selected::after {
-  content: '✓';
+/* ✅ Overlay de selección - MEJORADO */
+.ordertracking-selection-overlay {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  background: #28a745;
-  color: white;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.ordertracking-selection-overlay span {
+  background: rgba(40, 167, 69, 0.95);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 14px;
   font-weight: bold;
-  font-size: 16px;
-  z-index: 10;
+  font-family: 'Goldman', sans-serif;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(0.9);
+  transition: transform 0.2s ease;
 }
 
-/* Mensaje cuando no hay muestras */
-.ordertracking-no-samples {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 3rem 2rem;
-  background: #f8f8f5;
-  border: 2px dashed #ccc;
-  border-radius: 16px;
-  color: #666;
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 1.1rem;
+.ordertracking-sample-img-wrapper:hover .ordertracking-selection-overlay {
+  opacity: 1;
 }
 
-/* Sección de subir muestras mejorada */
+.ordertracking-sample-img-wrapper:hover .ordertracking-selection-overlay span {
+  transform: scale(1);
+}
+
+/* ✅ Sección de muestras mejorada */
 .ordertracking-section {
   background: #fff;
   border-radius: 20px;
@@ -695,6 +857,7 @@
   padding: 2rem;
   margin: 1.5rem 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* ✅ Evitar desbordamiento */
 }
 
 .ordertracking-section-title {
@@ -707,54 +870,7 @@
   gap: 0.5rem;
 }
 
-/* Vista previa de archivos seleccionados */
-.ordertracking-preview-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-  margin: 1rem 0;
-}
-
-.ordertracking-preview-item {
-  position: relative;
-  width: 100%;
-  height: 150px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 2px solid #7d5938;
-}
-
-.ordertracking-preview-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.ordertracking-preview-remove {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: #fff;
-  border: 2px solid #e74c3c;
-  color: #e74c3c;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-  transition: all 0.3s ease;
-}
-
-.ordertracking-preview-remove:hover {
-  background: #e74c3c;
-  color: #fff;
-}
-
-/* Botón de subir muestras mejorado */
+/* ✅ Botón de subir muestras mejorado */
 .ordertracking-upload-btn {
   background: #7d5938;
   color: white;
@@ -766,6 +882,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 8px rgba(125, 89, 56, 0.3);
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .ordertracking-upload-btn:hover:not(:disabled) {
@@ -781,7 +899,7 @@
   box-shadow: none;
 }
 
-/* ========== RESPONSIVE PARA MUESTRAS ========== */
+/* ========== RESPONSIVE PARA MUESTRAS CORREGIDO ========== */
 
 /* Tablets */
 @media (max-width: 1024px) {
@@ -793,6 +911,14 @@
   
   .ordertracking-sample-img-wrapper {
     height: 250px;
+  }
+  
+  .ordertracking-preview-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .ordertracking-preview-item {
+    height: 160px;
   }
 }
 
@@ -814,7 +940,16 @@
   }
   
   .ordertracking-preview-list {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+  }
+  
+  .ordertracking-preview-item {
+    height: 140px;
+  }
+  
+  .ordertracking-no-samples {
+    padding: 1.5rem 1rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -832,71 +967,62 @@
     font-size: 1rem;
   }
   
-  .ordertracking-preview-list {
-    grid-template-columns: 1fr;
-  }
-  
   .ordertracking-preview-item {
     height: 120px;
   }
+  
+  .ordertracking-delete-sample-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  
+  .ordertracking-preview-remove {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
 }
 
-/* ========== OBRA FINAL - DISEÑO ESPECIAL ========== */
-
-.ordertracking-final-art-container {
-  background: linear-gradient(135deg, #7d5938 0%, #593f28 100%);
-  border-radius: 24px;
-  padding: 2rem;
-  margin: 2rem 0;
-  border: 4px solid #000;
-  position: relative;
-  overflow: hidden;
-}
-
-.ordertracking-final-art-container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-  animation: shimmer 3s infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.ordertracking-final-art-wrapper {
-  position: relative;
-  z-index: 2;
-  max-width: 400px;
-  margin: 0 auto;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 4px solid #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.ordertracking-final-art-img {
+/* ========== MENSAJE ESPECIAL PARA SELECCIÓN ========== */
+.ordertracking-samples-selection {
   width: 100%;
-  height: auto;
-  display: block;
-  cursor: pointer;
-  transition: transform 0.3s ease;
 }
 
-.ordertracking-final-art-img:hover {
-  transform: scale(1.02);
+.ordertracking-samples-selection .ordertracking-samples-list {
+  margin-top: 0; /* ✅ Sin margen superior cuando hay mensaje de selección */
 }
 
-.ordertracking-final-art-title {
-  color: #fff;
-  font-family: 'Goldman', sans-serif;
-  font-size: 1.5rem;
+/* ✅ Contenedor de obra final especial */
+.ordertracking-final-art {
   text-align: center;
-  margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.ordertracking-final-art .ordertracking-samples-list {
+  justify-content: center; /* ✅ Centrar obra final */
+  grid-template-columns: minmax(300px, 400px); /* ✅ Tamaño específico para obra final */
+}
+
+.ordertracking-final-art-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 2px solid #dee2e6;
+}
+
+.ordertracking-client-message {
+  color: #28a745;
+  font-weight: 600;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.ordertracking-artist-message {
+  color: #7d5938;
+  font-weight: 600;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  margin: 0;
 }
