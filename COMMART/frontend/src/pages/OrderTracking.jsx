@@ -1,6 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { 
+  MessageCircle, 
+  Upload, 
+  Palette, 
+  Image as ImageIcon, 
+  Star,
+  Settings,
+  Smile,
+  Target,
+  Save,
+  ArrowUp,
+  X,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Trash2,
+  ArrowRightCircle,
+  ArrowLeftCircle,
+  DollarSign,
+  FileCheck,
+  FileX,
+  FilePlus,
+  FileMinus,
+  Sparkles, 
+  Lightbulb,
+  SendHorizontal
+} from 'lucide-react';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import AlertModal from '../components/AlertModal';
@@ -56,6 +83,8 @@ const OrderTracking = ({ user }) => {
   const [showExtrasModal, setShowExtrasModal] = useState(false);
   const [availablePackages, setAvailablePackages] = useState([]);
   const [availableExtras, setAvailableExtras] = useState([]);
+  const fileInputRef = useRef(null);
+  const [referenceImages, setReferenceImages] = useState([]);
 
   // ✅ useEffect para cargar datos iniciales del pedido
   useEffect(() => {
@@ -828,7 +857,7 @@ const OrderTracking = ({ user }) => {
       setAlert({ 
         open: true, 
         type: 'success', 
-        message: '🎉 ¡Obra final subida correctamente! Ahora puedes completar el pedido.' 
+        message: '¡Obra final subida correctamente! Ahora puedes completar el pedido.' 
       });
     } catch (err) {
       console.error('❌ Error subiendo obra final:', err);
@@ -1019,7 +1048,7 @@ const OrderTracking = ({ user }) => {
     }
 
     try {
-      console.log('❌ Cancelando pedido...', { stage: selectedStage, isPaid: order.is_paid });
+      console.log('Cancelando pedido...', { stage: selectedStage, isPaid: order.is_paid });
       
       setAlert({ 
         open: true, 
@@ -1112,7 +1141,7 @@ const OrderTracking = ({ user }) => {
       setAlert({ 
         open: true, 
         type: 'success', 
-        message: '✅ Cambios guardados exitosamente. El cliente ha sido notificado y verá el nuevo precio actualizado.' 
+        message: 'Cambios guardados exitosamente. El cliente ha sido notificado y verá el nuevo precio actualizado.' 
       });
 
     } catch (err) {
@@ -1397,11 +1426,13 @@ const OrderTracking = ({ user }) => {
               {/* Card especial para fase de planeación - DEBAJO DE LA CARD DE FASES */}
               {selectedStage === 'plan' && user.id === order.client_id && (
                 <div className="ordertracking-planning-card">
-                  <h3 className="ordertracking-planning-title">¡Querido Cliente!</h3>
+                  <h3 className="ordertracking-planning-title">
+                    ¡Querido Cliente!
+                  </h3>
                   
                   <div className="ordertracking-planning-message">
                     <div className="ordertracking-planning-text">
-                      Todo buen arte toma su tiempo 😊<br />
+                      Todo buen arte toma su tiempo <Smile size={16} style={{ display: 'inline', verticalAlign: 'middle' }} /><br />
                       El artista está revisando tu pedido y creando los<br />
                       primeros bocetos.
                       <span className="ordertracking-planning-thanks">
@@ -1428,7 +1459,9 @@ const OrderTracking = ({ user }) => {
               {/* Card especial para fase de planeación - PARA ARTISTAS */}
               {selectedStage === 'plan' && user.role === 'artist' && isCurrentPhase && order.is_paid === 0 && (
                 <div className="ordertracking-planning-card">
-                  <h3 className="ordertracking-planning-title">¡Querido Artista!</h3>
+                  <h3 className="ordertracking-planning-title">
+                    ¡Querido Artista!
+                  </h3>
                   
                   <div className="ordertracking-planning-message">
                     <div className="ordertracking-planning-text">
@@ -1460,7 +1493,17 @@ const OrderTracking = ({ user }) => {
               {selectedStage !== 'plan' && (
                 <div className="ordertracking-section">
                   <div className="ordertracking-section-title">
-                    {selectedStage === 'completed' ? '🎨 Obra Final:' : 'Muestras del artista:'}
+                    {selectedStage === 'completed' ? (
+                      <>
+                        <Star size={20} />
+                        Obra Final:
+                      </>
+                    ) : (
+                      <>
+                        <Palette size={20} />
+                        Muestras del artista:
+                      </>
+                    )}
                   </div>
                   
                   {/* FASE COMPLETED: Solo obra final */}
@@ -1725,6 +1768,7 @@ const OrderTracking = ({ user }) => {
               {canUploadSamples && selectedStage !== 'completed' && selectedStage !== 'plan' && (
                 <div className="ordertracking-section">
                   <div className="ordertracking-section-title">
+                    <Upload size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                     Subir muestras (máx 3 por fase)
                     <small style={{ 
                       display: 'block', 
@@ -1819,7 +1863,8 @@ const OrderTracking = ({ user }) => {
               {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && !order.completed_image && (
                 <div className="ordertracking-section">
                   <div className="ordertracking-section-title">
-                    🎨 Subir Obra Final
+                    <FilePlus size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                    Subir Obra Final
                   </div>
                   <div style={{
                     background: '#e8f4fd',
@@ -1849,7 +1894,7 @@ const OrderTracking = ({ user }) => {
               {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && order.completed_image && order.status !== 'completed' && (
                 <div className="ordertracking-section">
                   <div className="ordertracking-section-title">
-                    ✅ Completar Pedido
+                    Completar Pedido
                   </div>
                   <div style={{
                     background: '#d4edda',
@@ -1880,7 +1925,7 @@ const OrderTracking = ({ user }) => {
                       width: '100%'
                     }}
                   >
-                    🎉 Completar Pedido Definitivamente
+                    Completar Pedido Definitivamente
                   </button>
                 </div>
               )}
@@ -1889,7 +1934,8 @@ const OrderTracking = ({ user }) => {
               {selectedStage === 'plan' && isCurrentPhase && user.role === 'artist' && order.is_paid === 0 && (
                 <div className="ordertracking-section ordertracking-planning-section">
                   <div className="ordertracking-section-title">
-                    📋 Ajustar Detalles del Pedido
+                    <Settings size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                    Ajustar Detalles del Pedido
                   </div>
                   <div className="ordertracking-planning-info">
                     <p style={{ 
@@ -1907,7 +1953,8 @@ const OrderTracking = ({ user }) => {
                   {/* Cambiar paquete */}
                   <div className="ordertracking-planning-package">
                     <div className="ordertracking-planning-subtitle">
-                      🎨 Paquete Actual: <strong>{selectedPackage?.title || 'Sin paquete'}</strong>
+                      <Palette size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      Paquete Actual: <strong>{selectedPackage?.title || 'Sin paquete'}</strong>
                     </div>
                     <button
                       onClick={() => setShowPackageChangeModal(true)}
@@ -1930,7 +1977,8 @@ const OrderTracking = ({ user }) => {
                   {/* Agregar extras */}
                   <div className="ordertracking-planning-extras">
                     <div className="ordertracking-planning-subtitle">
-                      ✨ Extras Incluidos ({selectedExtras.length})
+                      <Sparkles size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      Extras Incluidos ({selectedExtras.length})
                     </div>
                     {selectedExtras.length > 0 && (
                       <div className="ordertracking-current-extras">
@@ -1959,7 +2007,7 @@ const OrderTracking = ({ user }) => {
                               }}
                               title="Quitar extra"
                             >
-                              ×
+                              <X size={14} />
                             </button>
                           </div>
                         ))}
@@ -1979,30 +2027,8 @@ const OrderTracking = ({ user }) => {
                         marginTop: '8px'
                       }}
                     >
-                      + Agregar Extras
+                      Agregar Extra
                     </button>
-                  </div>
-
-                  {/* Total actualizado */}
-                  <div className="ordertracking-planning-total">
-                    <div style={{
-                      background: '#f8f9fa',
-                      border: '2px solid #8B6D47',
-                      borderRadius: '8px',
-                      padding: '12px',
-                      textAlign: 'center',
-                      marginTop: '16px'
-                    }}>
-                      <strong style={{ fontSize: '18px', color: '#8B6D47' }}>
-                        Total Actualizado: {formatColombianPrice(
-                          (Number(selectedPackage?.price) || 0) + 
-                          selectedExtras.reduce((sum, e) => sum + (Number(e.price) || 0), 0)
-                        )}
-                      </strong>
-                      <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#6c757d' }}>
-                        Los cambios se aplicarán cuando el cliente realice el pago
-                      </p>
-                    </div>
                   </div>
 
                   {/* Botón para guardar cambios */}
@@ -2023,8 +2049,24 @@ const OrderTracking = ({ user }) => {
                         width: '100%'
                       }}
                     >
-                      💾 Guardar Cambios del Pedido
+                      <Save size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      Guardar Cambios del Pedido
                     </button>
+                  </div>
+
+                  {/* Mensaje de ayuda en planeación */}
+                  <div className="ordertracking-planning-info">
+                    <p style={{ 
+                      background: '#e8f4fd', 
+                      padding: '12px', 
+                      borderRadius: '6px',
+                      margin: '0 0 16px 0',
+                      fontSize: '14px',
+                      color: '#0c5460'
+                    }}>
+                      <Lightbulb size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      <strong>En esta fase puedes:</strong> Agregar extras necesarios, cambiar el paquete si el cliente lo requiere, y negociar todos los detalles antes de que realice el pago.
+                    </p>
                   </div>
                 </div>
               )}
@@ -2092,7 +2134,7 @@ const OrderTracking = ({ user }) => {
                         width: '100%'
                       }}
                     >
-                      ➡️ Avanzar a {
+                      Avanzar a {
                         selectedStage === 'plan' ? 'Boceto' :
                         selectedStage === 'sketch' ? 'Definición' :
                         selectedStage === 'details' ? 'Últimos Detalles' :
@@ -2103,45 +2145,13 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
 
-              {/* BOTÓN CANCELAR POR FALTA DE PAGO - En fase planeación Y boceto sin pago */}
-              {user.role === 'artist' && 
-                (selectedStage === 'plan' || selectedStage === 'sketch') && 
-                isCurrentPhase && 
-                !order.is_paid && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">
-                    ⚠️ Gestión de Pago
-                  </div>
-                  <div style={{
-                    background: '#fff3cd',
-                    border: '1px solid #ffeaa7',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    marginBottom: '12px'
-                  }}>
-                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#856404' }}>
-                      {selectedStage === 'plan' 
-                        ? 'El cliente aún no ha realizado el pago'
-                        : 'El cliente aún no ha realizado el pago'
-                      }
-                    </p>
-                    <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
-                      {selectedStage === 'plan' 
-                        ? 'Si no puedes llegar a un acuerdo con el cliente sobre los detalles del pedido o el cliente no responde, puedes cancelar el pedido.'
-                        : 'En la fase de boceto, si el cliente no ha pagado después de ver las propuestas, puedes cancelar el pedido.'
-                      } El cliente recibirá una notificación explicando el motivo.
-                    </p>
-                  </div>
-                </div>
-              )}
-
               {/* ✅ CHAT - FUNDAMENTAL EN TODAS LAS FASES */}
               <div className="ordertracking-section">
                 <div className="ordertracking-section-title">
-                  💬 Comunicación
+                  <MessageCircle size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                  Comunicación
                   {!canSendMsg && <small style={{ color: '#6c757d', fontWeight: 'normal' }}> (Solo lectura)</small>}
                 </div>
-                
                 {/* Lista de mensajes */}
                 <div className="ordertracking-messages" ref={messageListRef}>
                   {messages.length > 0 ? (
@@ -2151,7 +2161,15 @@ const OrderTracking = ({ user }) => {
                         className={`ordertracking-message ${message.sender_id === user.id ? 'own' : 'other'}`}
                       >
                         <div className="ordertracking-message-header">
-                          <strong>{message.sender_username}</strong>
+                          <strong
+                            style={{
+                             color: '#111', // Negro
+                              fontSize: '1.08rem', // Más grande
+                              fontWeight: 700,
+                            }}
+                          >
+                            {message.sender_username}
+                          </strong>
                           <span className="ordertracking-message-time">
                             {new Date(message.created_at).toLocaleString()}
                           </span>
@@ -2161,60 +2179,39 @@ const OrderTracking = ({ user }) => {
                     ))
                   ) : (
                     <p className="ordertracking-no-messages">
-                      {selectedStage === 'plan' 
+                      {selectedStage === 'plan'
                         ? 'Inicia la conversación para coordinar los detalles del pedido'
                         : 'Sin mensajes en esta fase'
                       }
                     </p>
                   )}
                 </div>
-                
                 {/* Input para enviar mensajes */}
                 {canSendMsg && (
                   <div className="ordertracking-message-input">
                     <textarea
                       value={msg}
                       onChange={e => setMsg(e.target.value)}
-                      placeholder={selectedStage === 'plan' 
-                        ? 'Escribe aquí para coordinar los detalles del pedido...'
-                        : 'Escribe tu mensaje aquí...'
-                      }
+                      placeholder="Escribe tu mensaje aquí..."
+                      className="ordertracking-chat-input"
                       onKeyDown={e => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
                           handleSendMsg();
                         }
                       }}
-                      style={{
-                        width: '100%',
-                        minHeight: '80px',
-                        padding: '12px',
-                        border: '1px solid #ddd',
-                        borderRadius: '6px',
-                        resize: 'vertical',
-                        fontFamily: 'inherit'
-                      }}
                     />
                     <button
+                      type="button"
+                      className="send-btn"
                       onClick={handleSendMsg}
                       disabled={!msg.trim()}
-                      style={{
-                        marginTop: '8px',
-                        padding: '10px 20px',
-                        background: msg.trim() ? '#8B6D47' : '#ccc',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: msg.trim() ? 'pointer' : 'not-allowed',
-                        fontSize: '14px',
-                        fontWeight: 'bold'
-                      }}
+                      aria-label="Enviar mensaje"
                     >
-                      Enviar mensaje
+                      <SendHorizontal size={22} />
                     </button>
                   </div>
                 )}
-                
                 {!canSendMsg && (
                   <div style={{
                     padding: '12px',
@@ -2225,7 +2222,7 @@ const OrderTracking = ({ user }) => {
                     fontSize: '14px',
                     textAlign: 'center'
                   }}>
-                    {isFinal 
+                    {isFinal
                       ? 'La comunicación está cerrada en pedidos finalizados'
                       : 'Solo puedes enviar mensajes en la fase actual'
                     }
@@ -2241,6 +2238,33 @@ const OrderTracking = ({ user }) => {
               <h2>Datos del pedido</h2>
             </div>
             <div className="ordertracking-data-section-bg">
+              {user.role === 'artist' && 
+                (selectedStage === 'plan' || selectedStage === 'sketch') && 
+                isCurrentPhase && 
+                !order.is_paid && (
+                <div 
+                  className="order-preview-info-message"
+                  style={{
+                    background: '#fff9db',
+                    border: '1px solid #ffeaa7',
+                    color: '#856404',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    margin: '18px auto 0 auto',
+                    maxWidth: 460,
+                    fontFamily: "'Nunito Sans', sans-serif",
+                    fontSize: '1rem'
+                  }}
+                >
+                  <span>
+                    <b>El cliente aún no ha realizado el pago</b><br />
+                    {selectedStage === 'plan'
+                      ? 'Si no puedes llegar a un acuerdo con el cliente sobre los detalles del pedido o el cliente no responde, puedes cancelar el pedido. El cliente recibirá una notificación explicando el motivo.'
+                      : 'En la fase de boceto, si el cliente no ha pagado después de ver las propuestas, puedes cancelar el pedido. El cliente recibirá una notificación explicando el motivo.'
+                    }
+                  </span>
+                </div>
+              )}
               <div className="ordertracking-data-content">
                 <OrderDataCard
                   order={order}
@@ -2341,7 +2365,7 @@ const OrderTracking = ({ user }) => {
           if (select.value) {
             handleChangePackage(select.value);
           } else {
-            setAlert({ open: true, type: 'warning', message: 'Selecciona un paquete.' });
+            setAlert({ open: true, type: 'error', message: 'Selecciona un paquete.' });
           }
         }}
         confirmText="Cambiar Paquete"
@@ -2390,7 +2414,7 @@ const OrderTracking = ({ user }) => {
             handleAddExtra(select.value);
             setShowExtrasModal(false);
           } else {
-            setAlert({ open: true, type: 'warning', message: 'Selecciona un extra.' });
+            setAlert({ open: true, type: 'error', message: 'Selecciona un extra.' });
           }
         }}
         confirmText="Agregar Extra"

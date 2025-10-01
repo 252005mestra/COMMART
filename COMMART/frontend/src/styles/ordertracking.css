@@ -900,3 +900,299 @@
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
+
+/* ========== CHAT MODERNO CON BURBUJAS ========== */
+
+/* Contenedor principal de mensajes */
+.ordertracking-messages {
+  background: #f8f8f5;
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  max-height: 320px; /* REDUCIDO */
+  min-height: 120px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  border: 2px solid #e0e0e0;
+}
+
+/* Scroll suave y estilizado */
+.ordertracking-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ordertracking-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.ordertracking-messages::-webkit-scrollbar-thumb {
+  background: #8B6D47;
+  border-radius: 10px;
+}
+
+.ordertracking-messages::-webkit-scrollbar-thumb:hover {
+  background: #7A5D3F;
+}
+
+/* Mensaje individual */
+.ordertracking-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mensajes propios (del usuario actual) - Alineados a la derecha */
+.ordertracking-message.own {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+/* Mensajes de otros - Alineados a la izquierda */
+.ordertracking-message.other {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+/* Header del mensaje con nombre y hora */
+.ordertracking-message-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.85rem;
+}
+
+.ordertracking-message.own .ordertracking-message-header {
+  flex-direction: row-reverse;
+}
+
+.ordertracking-message-header strong {
+  color: #8B6D47;
+  font-weight: 700;
+}
+
+.ordertracking-message-time {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+/* Burbuja del mensaje - Mensajes propios */
+.ordertracking-message.own .ordertracking-message-text {
+  background: #8B6D47;
+  color: white;
+  padding: 0.875rem 1.125rem;
+  border-radius: 18px 18px 4px 18px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(139, 109, 71, 0.25);
+}
+
+/* Burbuja del mensaje - Mensajes de otros */
+.ordertracking-message.other .ordertracking-message-text {
+  background: white;
+  color: #333;
+  padding: 0.875rem 1.125rem;
+  border-radius: 18px 18px 18px 4px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Mensaje cuando no hay mensajes */
+.ordertracking-no-messages {
+  text-align: center;
+  color: #999;
+  padding: 2rem;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+/* Área de input de mensaje */
+.ordertracking-message-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  margin-top: 0.5rem;
+}
+
+.ordertracking-message-input textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  resize: vertical;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: white;
+}
+
+.ordertracking-message-input textarea:focus {
+  outline: none;
+  border-color: #8B6D47;
+  box-shadow: 0 0 0 3px rgba(139, 109, 71, 0.1);
+}
+
+.ordertracking-chat-input {
+  width: 100%;
+  min-height: 32px; /* MÁS PEQUEÑO */
+  max-height: 38px;
+  padding: 0.4rem 2.2rem 0.4rem 1rem; /* Espacio para el icono */
+  border-radius: 12px;
+  border: 2px solid #7d5938;
+  font-size: 1rem;
+  font-family: 'Nunito Sans', sans-serif;
+  box-sizing: border-box;
+  resize: none;
+  background: #f8f8f5;
+  color: #222;
+  line-height: 1.3;
+  transition: border-color 0.2s;
+}
+
+/* Botón de enviar con icono SendHorizontal más pequeño */
+.ordertracking-message-input .send-btn {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #7d5938;
+  font-size: 1.2rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  width: 28px;
+}
+
+.ordertracking-message-input button {
+  align-self: flex-end;
+  padding: 0.75rem 2rem;
+  background: #8B6D47;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(139, 109, 71, 0.3);
+}
+
+.ordertracking-message-input button:hover:not(:disabled) {
+  background: #7A5D3F;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(139, 109, 71, 0.4);
+}
+
+.ordertracking-message-input button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ========== RESPONSIVE PARA CHAT ========== */
+
+@media (max-width: 768px) {
+  .ordertracking-messages {
+    max-height: 400px;
+    padding: 1rem;
+  }
+  
+  .ordertracking-message {
+    max-width: 85%;
+  }
+  
+  .ordertracking-message-text {
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  .ordertracking-message-input textarea {
+    min-height: 60px;
+    padding: 0.875rem;
+    font-size: 0.9rem;
+  }
+  
+  .ordertracking-message-input button {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ordertracking-messages {
+    max-height: 350px;
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .ordertracking-message {
+    max-width: 90%;
+  }
+  
+  .ordertracking-message-header {
+    font-size: 0.8rem;
+  }
+  
+  .ordertracking-message-time {
+    font-size: 0.7rem;
+  }
+  
+  .ordertracking-message.own .ordertracking-message-text,
+  .ordertracking-message.other .ordertracking-message-text {
+    font-size: 0.85rem;
+    padding: 0.625rem 0.875rem;
+  }
+  
+  .ordertracking-message-input button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* ...ordertracking.css... */
+.ordertracking-chat-input {
+  width: 100%;
+  min-height: 38px;
+  padding: 0.5rem 3rem 0.5rem 1.2rem;
+  border-radius: 15px;
+  border: 2px solid #7d5938;
+  font-size: 1rem;
+  font-family: 'Nunito Sans', sans-serif;
+  box-sizing: border-box;
+  resize: none;
+  background: #f8f8f5;
+  color: #222;
+}
