@@ -31,13 +31,15 @@
 }
 
 /* Layout con fondo naranja y header verde - altura automática */
+/* Layout con fondo naranja y header verde - altura automática */
+/* Layout con fondo naranja y header verde - altura automática */
 .ordertracking-data-section-bg {
   background: #d2ab80;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  height: fit-content;
+  height: 100%; /* CAMBIADO: altura mínima del 100% */
   overflow: hidden;
   margin-right: 0; /* AÑADIDO: quitar margen derecho */
 }
@@ -74,7 +76,6 @@
   background: transparent;
   box-sizing: border-box;
   border-radius: 0; /* CAMBIADO: quitar borde redondeado */
-  flex: 1; /* AÑADIDO: tomar espacio disponible */
 }
 
 /* Asegurar que el OrderDataCard se adapte bien */
@@ -101,6 +102,25 @@
   box-sizing: border-box;
   gap: 2rem;
   position: relative;
+}
+
+/* NUEVO: Footer de acciones FUERA del contenedor naranja */
+.ordertracking-actions-footer {
+  background: #fff; /* ✅ Fondo blanco restaurado */
+  box-shadow: 0 -4px 16px rgba(60, 48, 36, 0.13); /* Sombra hacia arriba */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-radius: 0;
+  margin: 0;
+  padding: 1.5rem 2.5rem; /* ✅ Padding aumentado para más espacio */
+  min-height: 80px; /* ✅ Altura aumentada */
+  box-sizing: border-box;
+  gap: 2rem;
+  position: relative;
+  flex-shrink: 0; /* No se comprime */
+  border-top: 2px solid #e0e0e0; /* Separador visual */
 }
 
 /* Asegura que los botones estén pegados a los extremos */
@@ -350,6 +370,206 @@
 
 .ordertracking-planning-character.right {
   right: 0.5rem;
+}
+
+/* ========== SECCIÓN DE PLANEACIÓN - AJUSTES DE PEDIDO ========== */
+.ordertracking-planning-section {
+  background: #fff;
+  border-radius: 20px;
+  border: 3px solid #8B6D47; /* Color café consistente */
+  padding: 2rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ordertracking-planning-section .ordertracking-section-title {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.3rem;
+  color: #8B6D47;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ✅ MENSAJE INFORMATIVO - MISMO COLOR VERDE QUE VISTA PREVIA */
+.ordertracking-planning-info {
+  margin-bottom: 2rem;
+}
+
+.ordertracking-planning-info p {
+  background: #d4edda !important; /* Verde igual que vista previa */
+  border: 2px solid #c3e6cb !important; /* Verde igual que vista previa */
+  color: #155724 !important; /* Verde oscuro igual que vista previa */
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 0;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.ordertracking-planning-info p strong {
+  color: #155724 !important; /* Verde oscuro igual que vista previa */
+  font-weight: 600;
+}
+
+/* Contenedores de paquete y extras */
+.ordertracking-planning-package,
+.ordertracking-planning-extras {
+  background: #f8f8f5;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.ordertracking-planning-subtitle {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.1rem;
+  color: #000000;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ordertracking-planning-subtitle strong {
+  color: #8B6D47;
+}
+
+/* Lista de extras actuales */
+.ordertracking-current-extras {
+  margin: 1rem 0;
+}
+
+.ordertracking-extra-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  background: white;
+  border: 2px solid #B3B792;
+  border-radius: 12px;
+  margin: 0.5rem 0;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  color: #333;
+}
+
+.ordertracking-extra-item span {
+  flex: 1;
+}
+
+.ordertracking-extra-item button {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.ordertracking-extra-item button:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+/* Botones de acción - ESTILO CONSISTENTE */
+.ordertracking-planning-btn {
+  background: #8B6D47 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 20px !important;
+  padding: 0.6rem 1.5rem !important;
+  font-family: 'Goldman', sans-serif !important;
+  font-size: 0.9rem !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ordertracking-planning-btn:hover {
+  background: #7A5D3F !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Botón de cambiar paquete - azul */
+.ordertracking-planning-btn.package-change {
+  background: #809671 !important;
+}
+
+.ordertracking-planning-btn.package-change:hover {
+  background: #6B7D5A !important;
+}
+
+/* Botón de agregar extra - verde */
+.ordertracking-planning-btn.add-extra {
+  background: #78966a !important;
+}
+
+.ordertracking-planning-btn.add-extra:hover {
+  background: #6B8259 !important;
+}
+
+/* Botón principal de guardar */
+.ordertracking-planning-save-btn {
+  background: linear-gradient(135deg, #8B6D47 0%, #7A5D3F 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 25px !important;
+  padding: 1rem 2rem !important;
+  font-family: 'Goldman', sans-serif !important;
+  font-size: 1.1rem !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 6px 16px rgba(139, 109, 71, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+.ordertracking-planning-save-btn:hover {
+  background: linear-gradient(135deg, #7A5D3F 0%, #6B5237 100%) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 20px rgba(139, 109, 71, 0.4) !important;
+}
+
+/* Acciones principales */
+.ordertracking-planning-actions {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e0e0e0;
+}
+
+/* Mensaje cuando no hay extras */
+.ordertracking-no-extras {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin: 0.5rem 0;
 }
 
 /* Responsive */

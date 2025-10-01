@@ -1432,7 +1432,7 @@ const OrderTracking = ({ user }) => {
                   
                   <div className="ordertracking-planning-message">
                     <div className="ordertracking-planning-text">
-                      Todo buen arte toma su tiempo <Smile size={16} style={{ display: 'inline', verticalAlign: 'middle' }} /><br />
+                      Todo buen arte toma su tiempo 😉<br />
                       El artista está revisando tu pedido y creando los<br />
                       primeros bocetos.
                       <span className="ordertracking-planning-thanks">
@@ -1457,7 +1457,7 @@ const OrderTracking = ({ user }) => {
               )}
 
               {/* Card especial para fase de planeación - PARA ARTISTAS */}
-              {selectedStage === 'plan' && user.role === 'artist' && isCurrentPhase && order.is_paid === 0 && (
+              {selectedStage === 'plan' && user.role === 'artist' && isCurrentPhase && !order.is_paid && (
                 <div className="ordertracking-planning-card">
                   <h3 className="ordertracking-planning-title">
                     ¡Querido Artista!
@@ -1931,22 +1931,17 @@ const OrderTracking = ({ user }) => {
               )}
 
               {/* ✅ FASE DE PLANEACIÓN - Negociación de detalles */}
-              {selectedStage === 'plan' && isCurrentPhase && user.role === 'artist' && order.is_paid === 0 && (
+              {selectedStage === 'plan' && isCurrentPhase && user.role === 'artist' && !order.is_paid && (
                 <div className="ordertracking-section ordertracking-planning-section">
                   <div className="ordertracking-section-title">
                     <Settings size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                     Ajustar Detalles del Pedido
                   </div>
+                  
                   <div className="ordertracking-planning-info">
-                    <p style={{ 
-                      background: '#e8f4fd', 
-                      padding: '12px', 
-                      borderRadius: '6px',
-                      margin: '0 0 16px 0',
-                      fontSize: '14px',
-                      color: '#0c5460'
-                    }}>
-                      💡 <strong>En esta fase puedes:</strong> Agregar extras necesarios, cambiar el paquete si el cliente lo requiere, y negociar todos los detalles antes de que realice el pago.
+                    <p>
+                      <Lightbulb size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      <strong>En esta fase puedes:</strong> Agregar extras necesarios, cambiar el paquete si el cliente lo requiere, y negociar todos los detalles antes de que realice el pago.
                     </p>
                   </div>
 
@@ -1958,17 +1953,7 @@ const OrderTracking = ({ user }) => {
                     </div>
                     <button
                       onClick={() => setShowPackageChangeModal(true)}
-                      className="ordertracking-planning-btn"
-                      style={{
-                        background: '#17a2b8',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        marginTop: '8px'
-                      }}
+                      className="ordertracking-planning-btn package-change"
                     >
                       Cambiar Paquete
                     </button>
@@ -1980,53 +1965,34 @@ const OrderTracking = ({ user }) => {
                       <Sparkles size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                       Extras Incluidos ({selectedExtras.length})
                     </div>
-                    {selectedExtras.length > 0 && (
+                    
+                    {selectedExtras.length > 0 ? (
                       <div className="ordertracking-current-extras">
                         {selectedExtras.map(extra => (
-                          <div key={extra.id} className="ordertracking-extra-item" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '8px',
-                            background: '#f8f9fa',
-                            borderRadius: '4px',
-                            margin: '4px 0'
-                          }}>
-                            <span>{extra.name} - ${extra.price?.toLocaleString()}</span>
+                          <div key={extra.id} className="ordertracking-extra-item">
+                            <span>
+                              {extra.name} - {formatColombianPrice(extra.price)}
+                            </span>
                             <button
                               onClick={() => handleRemoveExtra(extra.id)}
-                              style={{
-                                background: '#e74c3c',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '50%',
-                                width: 20,
-                                height: 20,
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                marginLeft: '8px'
-                              }}
                               title="Quitar extra"
                             >
-                              <X size={14} />
+                              <X size={12} />
                             </button>
                           </div>
                         ))}
                       </div>
+                    ) : (
+                      <div className="ordertracking-no-extras">
+                        No hay extras agregados al pedido
+                      </div>
                     )}
+                    
                     <button
                       onClick={() => setShowExtrasModal(true)}
-                      className="ordertracking-planning-btn"
-                      style={{
-                        background: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        marginTop: '8px'
-                      }}
+                      className="ordertracking-planning-btn add-extra"
                     >
+                      <Sparkles size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                       Agregar Extra
                     </button>
                   </div>
@@ -2036,37 +2002,10 @@ const OrderTracking = ({ user }) => {
                     <button
                       onClick={handleSavePlanningChanges}
                       className="ordertracking-planning-save-btn"
-                      style={{
-                        background: '#8B6D47',
-                        color: 'white',
-                        border: 'none',
-                        padding: '12px 24px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        marginTop: '16px',
-                        width: '100%'
-                      }}
                     >
                       <Save size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                       Guardar Cambios del Pedido
                     </button>
-                  </div>
-
-                  {/* Mensaje de ayuda en planeación */}
-                  <div className="ordertracking-planning-info">
-                    <p style={{ 
-                      background: '#e8f4fd', 
-                      padding: '12px', 
-                      borderRadius: '6px',
-                      margin: '0 0 16px 0',
-                      fontSize: '14px',
-                      color: '#0c5460'
-                    }}>
-                      <Lightbulb size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
-                      <strong>En esta fase puedes:</strong> Agregar extras necesarios, cambiar el paquete si el cliente lo requiere, y negociar todos los detalles antes de que realice el pago.
-                    </p>
                   </div>
                 </div>
               )}
@@ -2281,7 +2220,7 @@ const OrderTracking = ({ user }) => {
                     borderRadius: '12px',
                     padding: '16px',
                     margin: '18px auto 0 auto',
-                    maxWidth: 460,
+                    width: '85%',
                     fontFamily: "'Nunito Sans', sans-serif",
                     fontSize: '1rem'
                   }}
@@ -2308,43 +2247,42 @@ const OrderTracking = ({ user }) => {
                   currentUser={user}
                 />
               </div>
-              
-              {/* BOTONES PARA CLIENTE - PAGAR Y CANCELAR */}
-              {(order.status === 'accepted' || order.status === 'in_progress' || order.status === 'plan' || order.status === 'sketch') && !order.is_paid && user.id === order.client_id && (
-                <div className="ordertracking-actions-row">
-                  <button
-                    className="ordertracking-cancel-btn"
-                    onClick={() => setShowCancelModal(true)}
-                  >
-                    Cancelar pedido
-                  </button>
-                  <button
-                    className="ordertracking-pay-btn"
-                    onClick={handlePay}
-                  >
-                    Realizar Pago
-                  </button>
-                </div>
-              )}
-
-              {/* BOTÓN PARA ARTISTA - CANCELAR POR FALTA DE PAGO */}
-              {user.role === 'artist' && 
-                (selectedStage === 'plan' || selectedStage === 'sketch') && 
-                isCurrentPhase && 
-                !order.is_paid && (
-                <div className="ordertracking-actions-row">
-                  <button
-                    className="ordertracking-cancel-btn"
-                    onClick={() => setShowArtistCancelModal(true)}
-                  >
-                    {selectedStage === 'plan' ? 'Cancelar Pedido' : 'Cancelar por Falta de Pago'}
-                  </button>
-                  
-                  {/* Espacio vacío para mantener el layout */}
-                  <div style={{ width: '1px' }}></div>
-                </div>
-              )}
             </div>
+
+            {/* BOTONES FUERA DEL CONTENEDOR NARANJA - COMO FOOTER */}
+            {((order.status === 'accepted' || order.status === 'in_progress' || order.status === 'plan' || order.status === 'sketch') && !order.is_paid && user.id === order.client_id) && (
+              <div className="ordertracking-actions-footer">
+                <button
+                  className="ordertracking-cancel-btn"
+                  onClick={() => setShowCancelModal(true)}
+                >
+                  Cancelar pedido
+                </button>
+                <button
+                  className="ordertracking-pay-btn"
+                  onClick={handlePay}
+                >
+                  Realizar Pago
+                </button>
+              </div>
+            )}
+
+            {/* BOTÓN PARA ARTISTA - CANCELAR POR FALTA DE PAGO - FUERA DEL CONTENEDOR */}
+            {user.role === 'artist' && 
+              (selectedStage === 'plan' || selectedStage === 'sketch') && 
+              isCurrentPhase && 
+              !order.is_paid && (
+              <div className="ordertracking-actions-footer">
+                <button
+                  className="ordertracking-cancel-btn"
+                  onClick={() => setShowArtistCancelModal(true)}
+                >
+                  {selectedStage === 'plan' ? 'Cancelar Pedido' : 'Cancelar por Falta de Pago'}
+                </button>
+                {/* Espacio vacío para mantener el layout */}
+                <div style={{ width: '1px' }}></div>
+              </div>
+            )}
           </aside>
         </div>
       </main>
