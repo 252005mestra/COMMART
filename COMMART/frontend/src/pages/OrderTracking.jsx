@@ -1,6 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { 
+  MessageCircle, 
+  Upload, 
+  Palette, 
+  Image as ImageIcon, 
+  Star,
+  Settings,
+  Smile,
+  Target,
+  Save,
+  ArrowUp,
+  X,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Trash2,
+  ArrowRightCircle,
+  ArrowLeftCircle,
+  DollarSign,
+  FileCheck,
+  FileX,
+  FilePlus,
+  FileMinus,
+  Sparkles, 
+  Lightbulb,
+  SendHorizontal
+} from 'lucide-react';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
 import AlertModal from '../components/AlertModal';
@@ -56,6 +83,8 @@ const OrderTracking = ({ user }) => {
   const [availableExtras, setAvailableExtras] = useState([]);
   const [showSamplePreviewModal, setShowSamplePreviewModal] = useState(false);
   const [selectedSampleFile, setSelectedSampleFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const [referenceImages, setReferenceImages] = useState([]);
 
   // ✅ useEffect para cargar datos iniciales del pedido
   useEffect(() => {
@@ -720,7 +749,7 @@ const OrderTracking = ({ user }) => {
       setAlert({ 
         open: true, 
         type: 'success', 
-        message: '🎉 ¡Obra final subida correctamente! Ahora puedes completar el pedido.' 
+        message: '¡Obra final subida correctamente! Ahora puedes completar el pedido.' 
       });
     } catch (err) {
       console.error('❌ Error subiendo obra final:', err);
@@ -911,7 +940,7 @@ const OrderTracking = ({ user }) => {
     }
 
     try {
-      console.log('❌ Cancelando pedido...', { stage: selectedStage, isPaid: order.is_paid });
+      console.log('Cancelando pedido...', { stage: selectedStage, isPaid: order.is_paid });
       
       setAlert({ 
         open: true, 
@@ -1004,7 +1033,7 @@ const OrderTracking = ({ user }) => {
       setAlert({ 
         open: true, 
         type: 'success', 
-        message: '✅ Cambios guardados exitosamente. El cliente ha sido notificado y verá el nuevo precio actualizado.' 
+        message: 'Cambios guardados exitosamente. El cliente ha sido notificado y verá el nuevo precio actualizado.' 
       });
 
     } catch (err) {
@@ -1379,11 +1408,13 @@ const OrderTracking = ({ user }) => {
               {/* Card especial para fase de planeación - DEBAJO DE LA CARD DE FASES */}
               {selectedStage === 'plan' && user.id === order.client_id && (
                 <div className="ordertracking-planning-card">
-                  <h3 className="ordertracking-planning-title">¡Querido Cliente!</h3>
+                  <h3 className="ordertracking-planning-title">
+                    ¡Querido Cliente!
+                  </h3>
                   
                   <div className="ordertracking-planning-message">
                     <div className="ordertracking-planning-text">
-                      Todo buen arte toma su tiempo 😊<br />
+                      Todo buen arte toma su tiempo 😉<br />
                       El artista está revisando tu pedido y creando los<br />
                       primeros bocetos.
                       <span className="ordertracking-planning-thanks">
@@ -1408,9 +1439,11 @@ const OrderTracking = ({ user }) => {
               )}
 
               {/* Card especial para fase de planeación - PARA ARTISTAS */}
-              {selectedStage === 'plan' && user.role === 'artist' && isCurrentPhase && order.is_paid === 0 && (
+              {selectedStage === 'plan' && user.role === 'artist' && isCurrentPhase && !order.is_paid && (
                 <div className="ordertracking-planning-card">
-                  <h3 className="ordertracking-planning-title">¡Querido Artista!</h3>
+                  <h3 className="ordertracking-planning-title">
+                    ¡Querido Artista!
+                  </h3>
                   
                   <div className="ordertracking-planning-message">
                     <div className="ordertracking-planning-text">
@@ -1438,65 +1471,144 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
               
+              {/* ✅ COMBINANDO AMBAS RAMAS: Modal para subir muestra individual */}
+              <ConfirmModal
+                open={showSamplePreviewModal}
+                message={
+                  <div>
+                    <div style={{ marginBottom: 16, fontWeight: 700, fontFamily: "'Goldman', sans-serif" }}>
+                      Vista Previa de Muestra
+                    </div>
+                    {selectedSampleFile && (
+                      <div style={{ marginBottom: 16, textAlign: 'center' }}>
+                        <img
+                          src={URL.createObjectURL(selectedSampleFile)}
+                          alt="Vista previa"
+                          style={{
+                            maxWidth: '300px',
+                            maxHeight: '300px',
+                            objectFit: 'contain',
+                            border: '2px solid #8B6D47',
+                            borderRadius: '8px',
+                            background: '#f8f8f5'
+                          }}
+                        />
+                        <div style={{ marginTop: 8, fontSize: '14px', color: '#6c757d' }}>
+                          {selectedSampleFile.name}
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ fontSize: '14px', color: '#6c757d', textAlign: 'center' }}>
+                      ¿Deseas subir esta muestra?
+                    </div>
+                  </div>
+                }
+                onCancel={() => {
+                  setShowSamplePreviewModal(false);
+                  setSelectedSampleFile(null);
+                }}
+                onConfirm={handleConfirmSampleUpload}
+                confirmText="Subir Muestra"
+                cancelText="Cancelar"
+              />
 
-                    {/* Modal para subir muestra individual */}
-                    <ConfirmModal
-                      open={showSamplePreviewModal}
-                      message={
-                        <div>
-                          <div style={{ marginBottom: 16, fontWeight: 700, fontFamily: "'Goldman', sans-serif" }}>
-                            Vista Previa de Muestra
-                          </div>
-                          {selectedSampleFile && (
-                            <div style={{ marginBottom: 16, textAlign: 'center' }}>
-                              <img
-                                src={URL.createObjectURL(selectedSampleFile)}
-                                alt="Vista previa"
+              {/* ✅ COMBINANDO AMBAS RAMAS: Muestras del artista - OCULTAR EN FASE DE PLANEACIÓN */}
+              {selectedStage !== 'plan' && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">
+                    {selectedStage === 'completed' ? (
+                      <>
+                        <Star size={20} />
+                        Obra Final:
+                      </>
+                    ) : (
+                      <>
+                        <Palette size={20} />
+                        Muestras del artista:
+                      </>
+                    )}
+                  </div>
+                  
+                  {/* FASE COMPLETED: Solo obra final */}
+                  {selectedStage === 'completed' ? (
+                    order.completed_image ? (
+                      <div className="ordertracking-final-art">
+                        <div className="ordertracking-samples-list">
+                          <div className="ordertracking-sample-img-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
+                            <img
+                              src={`http://localhost:5000/${order.completed_image}`}
+                              alt="Obra Final"
+                              className="ordertracking-sample-img"
+                              onClick={() => setShowFinalArtModal(true)}
+                              style={{ cursor: 'pointer' }}
+                            />
+                            {/* Botón eliminar obra final - MISMO ESTILO QUE LAS MUESTRAS */}
+                            {user.role === 'artist' && isCurrentPhase && order.status !== 'completed' && (
+                              <button
+                                className="ordertracking-delete-sample-btn"
+                                onClick={handleDeleteFinalArt}
                                 style={{
-                                  maxWidth: '300px',
-                                  maxHeight: '300px',
-                                  objectFit: 'contain',
-                                  border: '2px solid #8B6D47',
-                                  borderRadius: '8px',
-                                  background: '#f8f8f5'
+                                  position: 'absolute',
+                                  top: '8px',
+                                  right: '8px',
+                                  background: '#fff',
+                                  border: '2px solid #e74c3c',
+                                  color: '#e74c3c',
+                                  borderRadius: '50%',
+                                  width: '32px',
+                                  height: '32px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                  fontSize: '16px',
+                                  fontWeight: 'bold',
+                                  zIndex: 4
                                 }}
-                              />
-                              <div style={{ marginTop: 8, fontSize: '14px', color: '#6c757d' }}>
-                                {selectedSampleFile.name}
-                              </div>
-                            </div>
-                          )}
-                          <div style={{ fontSize: '14px', color: '#6c757d', textAlign: 'center' }}>
-                            ¿Deseas subir esta muestra?
+                                title="Eliminar obra final"
+                              >
+                                ×
+                              </button>
+                            )}
+                            {/* Botón de descarga para obra final */}
+                            <a
+                              href={`http://localhost:5000/${order.completed_image}`}
+                              download={`obra_final_pedido_${order.id}.${order.completed_image.split('.').pop()}`}
+                              style={{
+                                position: 'absolute',
+                                bottom: '8px',
+                                left: '8px',
+                                background: '#28a745',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                zIndex: 4,
+                                textDecoration: 'none'
+                              }}
+                              title="Descargar obra final"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              ⬇
+                            </a>
                           </div>
                         </div>
-                      }
-                      onCancel={() => {
-                        setShowSamplePreviewModal(false);
-                        setSelectedSampleFile(null);
-                      }}
-                      onConfirm={handleConfirmSampleUpload}
-                      confirmText="Subir Muestra"
-                      cancelText="Cancelar"
-                    />
-                  
-                  {/* Subir/Mostrar muestras - GRID UNIFICADO */}
-                  {selectedStage !== 'plan' && selectedStage !== 'completed' && (
-                    <div className="ordertracking-section">
-                      <div className="ordertracking-section-title">
-                        {selectedStage === 'completed' ? '🎨 Obra Final:' : 'Muestras del artista:'}
-                        {canUploadSamples && (
-                          <small style={{ 
-                            display: 'block', 
-                            fontSize: '12px', 
-                            color: '#6c757d', 
-                            fontWeight: 'normal' 
-                          }}>
-                            {selectedPhaseImages.length}/3 subidas en esta fase
-                          </small>
-                        )}
                       </div>
-                      
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '2rem', color: '#6c757d' }}>
+                        Sin obra final aún
+                      </div>
+                    )
+                  ) : (
+                    /* OTRAS FASES: Sistema de muestras normal */
+                    <>
                       {/* MENSAJES DE SELECCIÓN */}
                       {selectedPhaseImages.length > 0 && (
                         <>
@@ -1661,36 +1773,6 @@ const OrderTracking = ({ user }) => {
                                   ×
                                 </button>
                               )}
-                              {/* Botón de descarga para obra final */}
-                                {selectedStage === 'completed' && (
-                                  <a
-                                    href={fullImageUrl}
-                                    download={`obra_final_pedido_${order.id}.${img.split('.').pop()}`}
-                                    style={{
-                                      position: 'absolute',
-                                      bottom: '8px',
-                                      left: '8px',
-                                      background: '#28a745',
-                                      color: 'white',
-                                      border: 'none',
-                                      borderRadius: '50%',
-                                      width: '32px',
-                                      height: '32px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      cursor: 'pointer',
-                                      fontSize: '16px',
-                                      fontWeight: 'bold',
-                                      zIndex: 4,
-                                      textDecoration: 'none'
-                                    }}
-                                    title="Descargar obra final"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    ⬇
-                                  </a>
-                                )}
                             </div>
                           );
                         })}
@@ -1775,13 +1857,15 @@ const OrderTracking = ({ user }) => {
                           Haz clic en los recuadros para agregar muestras
                         </p>
                       )}
-                    </div>
+                    </>
                   )}
+                </div>
+              )}
 
-                  {/* ✅ MOSTRAR OBRA FINAL - Sección separada */}
-                  {selectedStage === 'completed' && order.completed_image && (
-                    <div className="ordertracking-section">
-                      <div className="ordertracking-section-title">
+              {/* ✅ MOSTRAR OBRA FINAL - Sección separada */}
+              {selectedStage === 'completed' && order.completed_image && (
+                <div className="ordertracking-section">
+                  <div className="ordertracking-section-title">
                         🎨 Obra Final Entregada
                       </div>
                       
@@ -1859,7 +1943,8 @@ const OrderTracking = ({ user }) => {
               {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && !order.completed_image && selectedPhaseImages.length === 0 && (
                 <div className="ordertracking-section">
                   <div className="ordertracking-section-title">
-                    🎨 Subir Obra Final
+                    <FilePlus size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                    Subir Obra Final
                   </div>
                   <div style={{
                     background: '#e8f4fd',
@@ -1889,7 +1974,7 @@ const OrderTracking = ({ user }) => {
               {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && order.completed_image && order.status !== 'completed' && (
                 <div className="ordertracking-section">
                   <div className="ordertracking-section-title">
-                    ✅ Completar Pedido
+                    Completar Pedido
                   </div>
                   <div style={{
                     background: '#d4edda',
@@ -1920,48 +2005,35 @@ const OrderTracking = ({ user }) => {
                       width: '100%'
                     }}
                   >
-                    🎉 Completar Pedido Definitivamente
+                    Completar Pedido Definitivamente
                   </button>
                 </div>
               )}
 
               {/* ✅ FASE DE PLANEACIÓN - Negociación de detalles */}
-              {selectedStage === 'plan' && isCurrentPhase && user.role === 'artist' && order.is_paid === 0 && (
+              {selectedStage === 'plan' && isCurrentPhase && user.role === 'artist' && !order.is_paid && (
                 <div className="ordertracking-section ordertracking-planning-section">
                   <div className="ordertracking-section-title">
-                    📋 Ajustar Detalles del Pedido
+                    <Settings size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                    Ajustar Detalles del Pedido
                   </div>
+                  
                   <div className="ordertracking-planning-info">
-                    <p style={{ 
-                      background: '#e8f4fd', 
-                      padding: '12px', 
-                      borderRadius: '6px',
-                      margin: '0 0 16px 0',
-                      fontSize: '14px',
-                      color: '#0c5460'
-                    }}>
-                      💡 <strong>En esta fase puedes:</strong> Agregar extras necesarios, cambiar el paquete si el cliente lo requiere, y negociar todos los detalles antes de que realice el pago.
+                    <p>
+                      <Lightbulb size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      <strong>En esta fase puedes:</strong> Agregar extras necesarios, cambiar el paquete si el cliente lo requiere, y negociar todos los detalles antes de que realice el pago.
                     </p>
                   </div>
 
                   {/* Cambiar paquete */}
                   <div className="ordertracking-planning-package">
                     <div className="ordertracking-planning-subtitle">
-                      🎨 Paquete Actual: <strong>{selectedPackage?.title || 'Sin paquete'}</strong>
+                      <Palette size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      Paquete Actual: <strong>{selectedPackage?.title || 'Sin paquete'}</strong>
                     </div>
                     <button
                       onClick={() => setShowPackageChangeModal(true)}
-                      className="ordertracking-planning-btn"
-                      style={{
-                        background: '#17a2b8',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        marginTop: '8px'
-                      }}
+                      className="ordertracking-planning-btn package-change"
                     >
                       Cambiar Paquete
                     </button>
@@ -1970,79 +2042,39 @@ const OrderTracking = ({ user }) => {
                   {/* Agregar extras */}
                   <div className="ordertracking-planning-extras">
                     <div className="ordertracking-planning-subtitle">
-                      ✨ Extras Incluidos ({selectedExtras.length})
+                      <Sparkles size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      Extras Incluidos ({selectedExtras.length})
                     </div>
-                    {selectedExtras.length > 0 && (
+                    
+                    {selectedExtras.length > 0 ? (
                       <div className="ordertracking-current-extras">
                         {selectedExtras.map(extra => (
-                          <div key={extra.id} className="ordertracking-extra-item" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '8px',
-                            background: '#f8f9fa',
-                            borderRadius: '4px',
-                            margin: '4px 0'
-                          }}>
-                            <span>{extra.name} - ${extra.price?.toLocaleString()}</span>
+                          <div key={extra.id} className="ordertracking-extra-item">
+                            <span>
+                              {extra.name} - {formatColombianPrice(extra.price)}
+                            </span>
                             <button
                               onClick={() => handleRemoveExtra(extra.id)}
-                              style={{
-                                background: '#e74c3c',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '50%',
-                                width: 20,
-                                height: 20,
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                marginLeft: '8px'
-                              }}
                               title="Quitar extra"
                             >
-                              ×
+                              <X size={12} />
                             </button>
                           </div>
                         ))}
                       </div>
+                    ) : (
+                      <div className="ordertracking-no-extras">
+                        No hay extras agregados al pedido
+                      </div>
                     )}
+                    
                     <button
                       onClick={() => setShowExtrasModal(true)}
-                      className="ordertracking-planning-btn"
-                      style={{
-                        background: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        marginTop: '8px'
-                      }}
+                      className="ordertracking-planning-btn add-extra"
                     >
-                      + Agregar Extras
+                      <Sparkles size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      Agregar Extra
                     </button>
-                  </div>
-
-                  {/* Total actualizado */}
-                  <div className="ordertracking-planning-total">
-                    <div style={{
-                      background: '#f8f9fa',
-                      border: '2px solid #8B6D47',
-                      borderRadius: '8px',
-                      padding: '12px',
-                      textAlign: 'center',
-                      marginTop: '16px'
-                    }}>
-                      <strong style={{ fontSize: '18px', color: '#8B6D47' }}>
-                        Total Actualizado: {formatColombianPrice(
-                          (Number(selectedPackage?.price) || 0) + 
-                          selectedExtras.reduce((sum, e) => sum + (Number(e.price) || 0), 0)
-                        )}
-                      </strong>
-                      <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#6c757d' }}>
-                        Los cambios se aplicarán cuando el cliente realice el pago
-                      </p>
-                    </div>
                   </div>
 
                   {/* Botón para guardar cambios */}
@@ -2050,20 +2082,9 @@ const OrderTracking = ({ user }) => {
                     <button
                       onClick={handleSavePlanningChanges}
                       className="ordertracking-planning-save-btn"
-                      style={{
-                        background: '#8B6D47',
-                        color: 'white',
-                        border: 'none',
-                        padding: '12px 24px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        marginTop: '16px',
-                        width: '100%'
-                      }}
                     >
-                      💾 Guardar Cambios del Pedido
+                      <Save size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                      Guardar Cambios del Pedido
                     </button>
                   </div>
                 </div>
@@ -2132,7 +2153,7 @@ const OrderTracking = ({ user }) => {
                         width: '100%'
                       }}
                     >
-                      ➡️ Avanzar a {
+                      Avanzar a {
                         selectedStage === 'plan' ? 'Boceto' :
                         selectedStage === 'sketch' ? 'Definición' :
                         selectedStage === 'details' ? 'Últimos Detalles' :
@@ -2143,45 +2164,13 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
 
-              {/* BOTÓN CANCELAR POR FALTA DE PAGO - En fase planeación Y boceto sin pago */}
-              {user.role === 'artist' && 
-                (selectedStage === 'plan' || selectedStage === 'sketch') && 
-                isCurrentPhase && 
-                !order.is_paid && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">
-                    ⚠️ Gestión de Pago
-                  </div>
-                  <div style={{
-                    background: '#fff3cd',
-                    border: '1px solid #ffeaa7',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    marginBottom: '12px'
-                  }}>
-                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#856404' }}>
-                      {selectedStage === 'plan' 
-                        ? 'El cliente aún no ha realizado el pago'
-                        : 'El cliente aún no ha realizado el pago'
-                      }
-                    </p>
-                    <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
-                      {selectedStage === 'plan' 
-                        ? 'Si no puedes llegar a un acuerdo con el cliente sobre los detalles del pedido o el cliente no responde, puedes cancelar el pedido.'
-                        : 'En la fase de boceto, si el cliente no ha pagado después de ver las propuestas, puedes cancelar el pedido.'
-                      } El cliente recibirá una notificación explicando el motivo.
-                    </p>
-                  </div>
-                </div>
-              )}
-
               {/* ✅ CHAT - FUNDAMENTAL EN TODAS LAS FASES */}
               <div className="ordertracking-section">
                 <div className="ordertracking-section-title">
-                  💬 Comunicación
+                  <MessageCircle size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                  Comunicación
                   {!canSendMsg && <small style={{ color: '#6c757d', fontWeight: 'normal' }}> (Solo lectura)</small>}
                 </div>
-                
                 {/* Lista de mensajes */}
                 <div className="ordertracking-messages" ref={messageListRef}>
                   {messages.length > 0 ? (
@@ -2191,7 +2180,15 @@ const OrderTracking = ({ user }) => {
                         className={`ordertracking-message ${message.sender_id === user.id ? 'own' : 'other'}`}
                       >
                         <div className="ordertracking-message-header">
-                          <strong>{message.sender_username}</strong>
+                          <strong
+                            style={{
+                             color: '#111', // Negro
+                              fontSize: '1.08rem', // Más grande
+                              fontWeight: 700,
+                            }}
+                          >
+                            {message.sender_username}
+                          </strong>
                           <span className="ordertracking-message-time">
                             {new Date(message.created_at).toLocaleString()}
                           </span>
@@ -2201,60 +2198,69 @@ const OrderTracking = ({ user }) => {
                     ))
                   ) : (
                     <p className="ordertracking-no-messages">
-                      {selectedStage === 'plan' 
+                      {selectedStage === 'plan'
                         ? 'Inicia la conversación para coordinar los detalles del pedido'
                         : 'Sin mensajes en esta fase'
                       }
                     </p>
                   )}
                 </div>
-                
                 {/* Input para enviar mensajes */}
                 {canSendMsg && (
-                  <div className="ordertracking-message-input">
-                    <textarea
-                      value={msg}
-                      onChange={e => setMsg(e.target.value)}
-                      placeholder={selectedStage === 'plan' 
-                        ? 'Escribe aquí para coordinar los detalles del pedido...'
-                        : 'Escribe tu mensaje aquí...'
-                      }
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMsg();
-                        }
-                      }}
-                      style={{
-                        width: '100%',
-                        minHeight: '80px',
-                        padding: '12px',
-                        border: '1px solid #ddd',
-                        borderRadius: '6px',
-                        resize: 'vertical',
-                        fontFamily: 'inherit'
-                      }}
-                    />
-                    <button
-                      onClick={handleSendMsg}
-                      disabled={!msg.trim()}
-                      style={{
-                        marginTop: '8px',
-                        padding: '10px 20px',
-                        background: msg.trim() ? '#8B6D47' : '#ccc',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: msg.trim() ? 'pointer' : 'not-allowed',
-                        fontSize: '14px',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      Enviar mensaje
-                    </button>
+                  <div className="ordertracking-message-input" style={{ width: '100%' }}>
+                    <div style={{ position: 'relative', width: '100%' }}>
+                      <textarea
+                        value={msg}
+                        onChange={e => setMsg(e.target.value)}
+                        placeholder="Escribe tu mensaje aquí..."
+                        className="ordertracking-chat-input"
+                        style={{
+                          minHeight: '32px',
+                          maxHeight: '40px',
+                          padding: '0.4rem 2.2rem 0.4rem 1rem',
+                          borderRadius: '10px',
+                          border: '2px solid #7d5938',
+                          background: '#f8f8f5',
+                          fontSize: '1rem',
+                          fontFamily: "'Nunito Sans', sans-serif",
+                          color: '#222',
+                          resize: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMsg();
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="send-btn"
+                        onClick={handleSendMsg}
+                        disabled={!msg.trim()}
+                        aria-label="Enviar mensaje"
+                        style={{
+                          position: 'absolute',
+                          right: '0.7rem',
+                          top: '48%',
+                          transform: 'translateY(-50%)',
+                          background: 'none',
+                          border: 'none',
+                          cursor: msg.trim() ? 'pointer' : 'not-allowed',
+                          fontSize: '1.2rem',
+                          padding: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          height: 22,
+                          width: 22,
+                        }}
+                      >
+                        <SendHorizontal size={19} />
+                      </button>
+                    </div>
                   </div>
                 )}
-                
                 {!canSendMsg && (
                   <div style={{
                     padding: '12px',
@@ -2265,7 +2271,7 @@ const OrderTracking = ({ user }) => {
                     fontSize: '14px',
                     textAlign: 'center'
                   }}>
-                    {isFinal 
+                    {isFinal
                       ? 'La comunicación está cerrada en pedidos finalizados'
                       : 'Solo puedes enviar mensajes en la fase actual'
                     }
@@ -2281,6 +2287,33 @@ const OrderTracking = ({ user }) => {
               <h2>Datos del pedido</h2>
             </div>
             <div className="ordertracking-data-section-bg">
+              {user.role === 'artist' && 
+                (selectedStage === 'plan' || selectedStage === 'sketch') && 
+                isCurrentPhase && 
+                !order.is_paid && (
+                <div 
+                  className="order-preview-info-message"
+                  style={{
+                    background: '#fff9db',
+                    border: '1px solid #ffeaa7',
+                    color: '#856404',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    margin: '18px auto 0 auto',
+                    width: '85%',
+                    fontFamily: "'Nunito Sans', sans-serif",
+                    fontSize: '1rem'
+                  }}
+                >
+                  <span>
+                    <b>El cliente aún no ha realizado el pago</b><br />
+                    {selectedStage === 'plan'
+                      ? 'Si no puedes llegar a un acuerdo con el cliente sobre los detalles del pedido o el cliente no responde, puedes cancelar el pedido. El cliente recibirá una notificación explicando el motivo.'
+                      : 'En la fase de boceto, si el cliente no ha pagado después de ver las propuestas, puedes cancelar el pedido. El cliente recibirá una notificación explicando el motivo.'
+                    }
+                  </span>
+                </div>
+              )}
               <div className="ordertracking-data-content">
                 <OrderDataCard
                   order={order}
@@ -2294,43 +2327,42 @@ const OrderTracking = ({ user }) => {
                   currentUser={user}
                 />
               </div>
-              
-              {/* BOTONES PARA CLIENTE - PAGAR Y CANCELAR */}
-              {(order.status === 'accepted' || order.status === 'in_progress' || order.status === 'plan' || order.status === 'sketch') && !order.is_paid && user.id === order.client_id && (
-                <div className="ordertracking-actions-row">
-                  <button
-                    className="ordertracking-cancel-btn"
-                    onClick={() => setShowCancelModal(true)}
-                  >
-                    Cancelar pedido
-                  </button>
-                  <button
-                    className="ordertracking-pay-btn"
-                    onClick={handlePay}
-                  >
-                    Realizar Pago
-                  </button>
-                </div>
-              )}
-
-              {/* BOTÓN PARA ARTISTA - CANCELAR POR FALTA DE PAGO */}
-              {user.role === 'artist' && 
-                (selectedStage === 'plan' || selectedStage === 'sketch') && 
-                isCurrentPhase && 
-                !order.is_paid && (
-                <div className="ordertracking-actions-row">
-                  <button
-                    className="ordertracking-cancel-btn"
-                    onClick={() => setShowArtistCancelModal(true)}
-                  >
-                    {selectedStage === 'plan' ? 'Cancelar Pedido' : 'Cancelar por Falta de Pago'}
-                  </button>
-                  
-                  {/* Espacio vacío para mantener el layout */}
-                  <div style={{ width: '1px' }}></div>
-                </div>
-              )}
             </div>
+
+            {/* BOTONES FUERA DEL CONTENEDOR NARANJA - COMO FOOTER */}
+            {((order.status === 'accepted' || order.status === 'in_progress' || order.status === 'plan' || order.status === 'sketch') && !order.is_paid && user.id === order.client_id) && (
+              <div className="ordertracking-actions-footer">
+                <button
+                  className="ordertracking-cancel-btn"
+                  onClick={() => setShowCancelModal(true)}
+                >
+                  Cancelar pedido
+                </button>
+                <button
+                  className="ordertracking-pay-btn"
+                  onClick={handlePay}
+                >
+                  Realizar Pago
+                </button>
+              </div>
+            )}
+
+            {/* BOTÓN PARA ARTISTA - CANCELAR POR FALTA DE PAGO - FUERA DEL CONTENEDOR */}
+            {user.role === 'artist' && 
+              (selectedStage === 'plan' || selectedStage === 'sketch') && 
+              isCurrentPhase && 
+              !order.is_paid && (
+              <div className="ordertracking-actions-footer">
+                <button
+                  className="ordertracking-cancel-btn"
+                  onClick={() => setShowArtistCancelModal(true)}
+                >
+                  {selectedStage === 'plan' ? 'Cancelar Pedido' : 'Cancelar por Falta de Pago'}
+                </button>
+                {/* Espacio vacío para mantener el layout */}
+                <div style={{ width: '1px' }}></div>
+              </div>
+            )}
           </aside>
         </div>
       </main>
@@ -2381,7 +2413,7 @@ const OrderTracking = ({ user }) => {
           if (select.value) {
             handleChangePackage(select.value);
           } else {
-            setAlert({ open: true, type: 'warning', message: 'Selecciona un paquete.' });
+            setAlert({ open: true, type: 'error', message: 'Selecciona un paquete.' });
           }
         }}
         confirmText="Cambiar Paquete"
@@ -2430,7 +2462,7 @@ const OrderTracking = ({ user }) => {
             handleAddExtra(select.value);
             setShowExtrasModal(false);
           } else {
-            setAlert({ open: true, type: 'warning', message: 'Selecciona un extra.' });
+            setAlert({ open: true, type: 'error', message: 'Selecciona un extra.' });
           }
         }}
         confirmText="Agregar Extra"
