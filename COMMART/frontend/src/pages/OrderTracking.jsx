@@ -2188,28 +2188,58 @@ const OrderTracking = ({ user }) => {
                 </div>
                 {/* Input para enviar mensajes */}
                 {canSendMsg && (
-                  <div className="ordertracking-message-input">
-                    <textarea
-                      value={msg}
-                      onChange={e => setMsg(e.target.value)}
-                      placeholder="Escribe tu mensaje aquí..."
-                      className="ordertracking-chat-input"
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMsg();
-                        }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      className="send-btn"
-                      onClick={handleSendMsg}
-                      disabled={!msg.trim()}
-                      aria-label="Enviar mensaje"
-                    >
-                      <SendHorizontal size={22} />
-                    </button>
+                  <div className="ordertracking-message-input" style={{ width: '100%' }}>
+                    <div style={{ position: 'relative', width: '100%' }}>
+                      <textarea
+                        value={msg}
+                        onChange={e => setMsg(e.target.value)}
+                        placeholder="Escribe tu mensaje aquí..."
+                        className="ordertracking-chat-input"
+                        style={{
+                          minHeight: '32px',
+                          maxHeight: '40px',
+                          padding: '0.4rem 2.2rem 0.4rem 1rem',
+                          borderRadius: '10px',
+                          border: '2px solid #7d5938',
+                          background: '#f8f8f5',
+                          fontSize: '1rem',
+                          fontFamily: "'Nunito Sans', sans-serif",
+                          color: '#222',
+                          resize: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMsg();
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="send-btn"
+                        onClick={handleSendMsg}
+                        disabled={!msg.trim()}
+                        aria-label="Enviar mensaje"
+                        style={{
+                          position: 'absolute',
+                          right: '0.7rem',
+                          top: '48%',
+                          transform: 'translateY(-50%)',
+                          background: 'none',
+                          border: 'none',
+                          cursor: msg.trim() ? 'pointer' : 'not-allowed',
+                          fontSize: '1.2rem',
+                          padding: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          height: 22,
+                          width: 22,
+                        }}
+                      >
+                        <SendHorizontal size={19} />
+                      </button>
+                    </div>
                   </div>
                 )}
                 {!canSendMsg && (

@@ -909,7 +909,7 @@
   border-radius: 16px;
   padding: 1rem;
   margin-bottom: 1rem;
-  max-height: 320px; /* REDUCIDO */
+  max-height: 280px; /* REDUCIDO */
   min-height: 120px;
   overflow-y: auto;
   display: flex;
@@ -1062,22 +1062,22 @@
 
 .ordertracking-chat-input {
   width: 100%;
-  min-height: 32px; /* MÁS PEQUEÑO */
+  min-height: 32px;
   max-height: 38px;
-  padding: 0.4rem 2.2rem 0.4rem 1rem; /* Espacio para el icono */
-  border-radius: 12px;
+  padding: 0.4rem 2.2rem 0.4rem 1rem;
+  border-radius: 15px;
   border: 2px solid #7d5938;
+  background: #f8f8f5;
   font-size: 1rem;
   font-family: 'Nunito Sans', sans-serif;
-  box-sizing: border-box;
-  resize: none;
-  background: #f8f8f5;
   color: #222;
+  resize: none;         /* <-- ya está */
+  box-sizing: border-box;
   line-height: 1.3;
   transition: border-color 0.2s;
+  overflow: hidden;     /* <-- añade esto para quitar scroll */
 }
 
-/* Botón de enviar con icono SendHorizontal más pequeño */
 .ordertracking-message-input .send-btn {
   position: absolute;
   right: 0.7rem;
@@ -1091,8 +1091,8 @@
   padding: 0;
   display: flex;
   align-items: center;
-  height: 28px;
-  width: 28px;
+  height: 22px;
+  width: 22px;
 }
 
 .ordertracking-message-input button {
@@ -1106,7 +1106,6 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(139, 109, 71, 0.3);
 }
 
 .ordertracking-message-input button:hover:not(:disabled) {
@@ -1185,14 +1184,18 @@
 /* ...ordertracking.css... */
 .ordertracking-chat-input {
   width: 100%;
-  min-height: 38px;
-  padding: 0.5rem 3rem 0.5rem 1.2rem;
+  min-height: 32px;
+  max-height: 38px;
+  padding: 0.4rem 2.2rem 0.4rem 1rem;
   border-radius: 15px;
   border: 2px solid #7d5938;
+  background: #f8f8f5;
   font-size: 1rem;
   font-family: 'Nunito Sans', sans-serif;
-  box-sizing: border-box;
-  resize: none;
-  background: #f8f8f5;
   color: #222;
+  resize: none;     
+  box-sizing: border-box;
+  line-height: 1.3;
+  transition: border-color 0.2s;
+  overflow: hidden;    
 }
