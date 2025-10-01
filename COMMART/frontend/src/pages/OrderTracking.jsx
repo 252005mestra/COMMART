@@ -47,6 +47,8 @@ const OrderTracking = ({ user }) => {
   const [rejectReason, setRejectReason] = useState('');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [showArtistCancelModal, setShowArtistCancelModal] = useState(false);
+  const [artistCancelReason, setArtistCancelReason] = useState('');
   const messageListRef = useRef(null);
   const { processPayment, loading: paymentLoading, error: paymentError } = usePayment();
   const [showFinalArtModal, setShowFinalArtModal] = useState(false);
@@ -1011,6 +1013,11 @@ const OrderTracking = ({ user }) => {
 
   // ✅ Función para cancelar pedido por falta de pago (solo artista) - CORREGIDA
   const handleCancelForNonPayment = async () => {
+    if (!artistCancelReason.trim()) {
+      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo.' });
+      return;
+    }
+
     try {
       console.log('❌ Cancelando pedido...', { stage: selectedStage, isPaid: order.is_paid });
       
@@ -1020,19 +1027,17 @@ const OrderTracking = ({ user }) => {
         message: 'Cancelando pedido...' 
       });
 
-      // Mensaje personalizado según la fase
-      const cancellationReason = selectedStage === 'plan'
-        ? 'Pedido cancelado por el artista durante la fase de planeación debido a problemas de comunicación o acuerdo en los detalles.'
-        : 'Pedido cancelado por el artista debido a falta de pago en la fase de boceto.';
-
       await axios.put(
         `http://localhost:5000/api/orders/${order.id}/status`,
         { 
           status: 'cancelled',
-          reason: cancellationReason  // ✅ CAMBIAR DE 'cancellation_reason' A 'reason'
+          reason: artistCancelReason  
         },
         { withCredentials: true }
       );
+      
+      setShowArtistCancelModal(false);
+      setArtistCancelReason('');
       
       // Recargar datos
       const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
@@ -2016,7 +2021,7 @@ const OrderTracking = ({ user }) => {
                         fontWeight: 'bold',
                         marginTop: '16px',
                         width: '100%'
-                                                                                     }}
+                      }}
                     >
                       💾 Guardar Cambios del Pedido
                     </button>
@@ -2276,15 +2281,7 @@ const OrderTracking = ({ user }) => {
                 <div className="ordertracking-actions-row">
                   <button
                     className="ordertracking-cancel-btn"
-                    onClick={() => {
-                      const confirmMessage = selectedStage === 'plan' 
-                        ? '¿Estás seguro de que quieres cancelar este pedido?\n\nMotivos comunes:\n- No se llegó a un acuerdo en los detalles\n- El cliente no responde\n- Problemas de comunicación\n\nEsta acción no se puede deshacer y el cliente será notificado.'
-                        : '¿Estás seguro de que quieres cancelar este pedido por falta de pago?\n\nEsta acción no se puede deshacer y el cliente será notificado.';
-                        
-                      if (window.confirm(confirmMessage)) {
-                        handleCancelForNonPayment();
-                      }
-                    }}
+                    onClick={() => setShowArtistCancelModal(true)}
                   >
                     {selectedStage === 'plan' ? 'Cancelar Pedido' : 'Cancelar por Falta de Pago'}
                   </button>
@@ -2399,6 +2396,87 @@ const OrderTracking = ({ user }) => {
         confirmText="Agregar Extra"
         cancelText="Cancelar"
       />
+
+      {/* Modal para cancelar pedido del artista */}
+      <ConfirmModal
+        open={showArtistCancelModal}
+        message={
+          <div>
+            <div style={{ marginBottom: 16, fontWeight: 700, fontFamily: "'Nunito Sans', sans-serif" }}>
+              {selectedStage === 'plan' ? 'Cancelar Pedido' : 'Cancelar por Falta de Pago'}
+            </div>
+            <div style={{ marginBottom: 12, fontSize: '14px', color: '#6c757d' }}>
+              {selectedStage === 'plan' 
+                ? 'Motivos comunes: No se llegó a un acuerdo, el cliente no responde, problemas de comunicación.'
+                : 'El cliente no ha realizado el pago después de ver las propuestas.'
+              }
+            </div>
+            <textarea
+              className="confirm-modal-textarea"
+              value={artistCancelReason}
+              onChange={(e) => setArtistCancelReason(e.target.value)}
+              placeholder="Explica el motivo de la cancelación..."
+            />
+            <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '8px' }}>
+              Esta acción no se puede deshacer. El cliente será notificado de la cancelación.
+            </div>
+          </div>
+        }
+        onCancel={() => {
+          setShowArtistCancelModal(false);
+          setArtistCancelReason('');
+        }}
+        onConfirm={handleCancelForNonPayment}
+        confirmText="Cancelar Pedido"
+        cancelText="Mantener Pedido"
+      />
+
+      {/* Modal para cancelar pedido del cliente - MODIFICADO */}
+      <ConfirmModal
+        open={showCancelModal}
+        message={
+          <div>
+            <div style={{ marginBottom: 16, fontWeight: 700, fontFamily: "'Nunito Sans', sans-serif" }}>
+              Cancelar Pedido
+            </div>
+            <textarea
+              className="confirm-modal-textarea"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Explica por qué quieres cancelar el pedido..."
+            />
+            <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '8px' }}>
+              Esta acción no se puede deshacer. El artista será notificado de la cancelación.
+            </div>
+          </div>
+        }
+        onCancel={() => {
+          setShowCancelModal(false);
+          setCancelReason('');
+        }}
+        onConfirm={handleCancelOrder}
+        confirmText="Cancelar Pedido"
+        cancelText="Mantener Pedido"
+      />
+
+      {/* Modal de factura */}
+      {showInvoice && invoiceData && (
+        <InvoiceModal
+          open={showInvoice}
+          invoiceData={invoiceData}
+          onClose={() => setShowInvoice(false)}
+        />
+      )}
+
+      {/* Modal de alertas */}
+      <AlertModal
+        open={alert.open}
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert(a => ({ ...a, open: false }))}
+      />
+
+      <Footer />
     </>
   );
 };
