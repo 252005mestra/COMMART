@@ -686,3 +686,20 @@ textarea.disabled-field {
   margin-top: 0.25rem;
 }
 
+.cancel-modal-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Goldman';
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #666;
+  color: white;
+}
+
+.cancel-modal-btn:hover {
+  background: #555;
+}
+

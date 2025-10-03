@@ -75,31 +75,36 @@ export const getOrderById = (id) => {
 // Cambiar estado de un pedido
 export const updateOrderStatus = (orderId, status, reason = null) => {
   return new Promise((resolve, reject) => {
+    console.log('🔍 [MODEL] updateOrderStatus llamado:', {
+      orderId,
+      status,
+      reason
+    });
+
     let query = 'UPDATE orders SET status = ?';
     const params = [status];
     
-    // ✅ GUARDAR EL MOTIVO EN EL CAMPO CORRECTO SEGÚN EL ESTADO
     if (status === 'rejected' && reason) {
       query += ', rejection_reason = ?';
       params.push(reason);
     } else if (status === 'cancelled' && reason) {
-      // ✅ AGREGAR: Campo para motivo de cancelación
       query += ', cancellation_reason = ?';
       params.push(reason);
     }
     
     query += ' WHERE id = ?';
     params.push(orderId);
-    
-    console.log('🔍 Query SQL:', query);
-    console.log('🔍 Parámetros:', params);
-    
+
+    console.log('🔍 [MODEL] Query SQL:', query);
+    console.log('🔍 [MODEL] Parámetros:', params);
+
     dbConnection.query(query, params, (err, result) => {
       if (err) {
-        console.error('❌ Error en query SQL:', err);
+        console.error('❌ [MODEL] Error en query:', err);
         return reject(err);
       }
-      console.log('✅ Query ejecutada exitosamente:', result);
+      
+      console.log('✅ [MODEL] Query ejecutada exitosamente:', result);
       resolve(result);
     });
   });

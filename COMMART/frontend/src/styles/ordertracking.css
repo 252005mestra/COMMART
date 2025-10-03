@@ -178,6 +178,7 @@
   background: #fff;
   border-radius: 22px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  border: none;
   padding: 3.5rem 2.5rem 2.5rem 2.5rem;
   margin-bottom: 2.5rem;
   width: 90%;
@@ -374,7 +375,7 @@
 .ordertracking-planning-section {
   background: #fff;
   border-radius: 20px;
-  border: 3px solid #8B6D47; /* Color café consistente */
+  border: 3px solid #000;
   padding: 2rem;
   margin: 1.5rem 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -583,7 +584,7 @@
   aspect-ratio: 1;
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid #ddd;
+  border: 2px solid #e0e0e0; /* Gris sutil en lugar de negro */
 }
 
 .ordertracking-sample-slot img {
@@ -594,7 +595,7 @@
 
 .ordertracking-sample-add-slot {
   aspect-ratio: 1;
-  border: 3px dashed #ddd !important;
+  border: 3px dashed #ccc !important; /* Gris en lugar de negro */
   border-radius: 12px;
   background: #fff !important;
   display: flex;
@@ -611,7 +612,7 @@
 }
 
 .ordertracking-sample-add-slot:hover {
-  border-color: #666 !important;
+  border-color: #8B6D47 !important; /* Café al hover */
   background: #f8f8f8 !important;
   color: #666 !important;
 }
@@ -637,26 +638,36 @@
 }
 
 .ordertracking-sample-slot.selectable:hover {
-  border-color: #28a745;
-  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+  border-color: #8B6D47; /* Café al hover */
+  box-shadow: 0 0 0 2px rgba(139, 109, 71, 0.2);
 }
 
-/* ========== DISEÑO MEJORADO PARA MUESTRAS - ESTILO COMMART ========== */
-
-/* Contenedor principal de muestras */
-.ordertracking-samples-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  padding: 1.5rem;
+/* ✅ SECCIÓN DE MUESTRAS - más limpia */
+.ordertracking-section {
   background: #fff;
   border-radius: 20px;
   border: 3px solid #000;
-  margin: 1rem 0;
+  padding: 2rem;
+  margin: 1.5rem 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden; /* ✅ Evitar desbordamiento */
-  min-height: 140px; /* ✅ Altura mínima aumentada para mensajes */
-  box-sizing: border-box; /* ✅ Asegurar que padding no cause desbordamiento */
+  overflow: hidden;
+  min-height: 140px;
+  box-sizing: border-box;
+}
+
+/* ✅ EXCEPCIÓN ESPECÍFICA: Solo secciones de muestras sin borde (pero chat mantiene borde) */
+.ordertracking-section:has(.ordertracking-samples-upload-grid) {
+  border: none;
+}
+
+/* ✅ EXCEPCIÓN: Secciones que contienen el título de muestras sin borde */
+.ordertracking-section:has([data-section="samples"]) {
+  border: none;
+}
+
+/* ✅ FORZAR que el chat siempre tenga borde negro */
+.ordertracking-section:has(.ordertracking-messages) {
+  border: 3px solid #000 !important;
 }
 
 /* ✅ Wrapper individual de cada muestra - CORREGIDO */
@@ -666,7 +677,7 @@
   height: 280px; /* Altura fija para consistencia */
   border-radius: 16px;
   overflow: hidden;
-  border: 3px solid #000;
+  border: 2px solid #e0e0e0; /* Borde sutil gris */
   background: #f8f8f5;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -880,17 +891,6 @@
 
 .ordertracking-sample-img-wrapper:hover .ordertracking-selection-overlay span {
   transform: scale(1);
-}
-
-/* ✅ Sección de muestras mejorada */
-.ordertracking-section {
-  background: #fff;
-  border-radius: 20px;
-  border: 3px solid #000;
-  padding: 2rem;
-  margin: 1.5rem 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden; /* ✅ Evitar desbordamiento */
 }
 
 .ordertracking-section-title {
@@ -1488,4 +1488,39 @@
     width: 26px;
     height: 26px;
   }
+}
+
+/* ✅ REGLAS ESPECÍFICAS PARA REMOVER BORDES SOLO EN SECCIONES DE MUESTRAS */
+.ordertracking-section-title:has-text("Muestras"),
+.ordertracking-section-title:has-text("Bocetos"),
+.ordertracking-section-title:has-text("Definición"),
+.ordertracking-section-title:has-text("Últimos Detalles"),
+.ordertracking-section-title:has-text("Obra Final") {
+  /* Seleccionar el contenedor padre */
+}
+
+/* ✅ Clase específica para secciones de muestras sin borde */
+.ordertracking-samples-section {
+  background: #fff;
+  border-radius: 20px;
+  border: none !important; /* Sin borde para secciones de muestras */
+  padding: 2rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  min-height: 140px;
+  box-sizing: border-box;
+}
+
+/* ✅ Clase específica para chat con borde */
+.ordertracking-chat-section {
+  background: #fff;
+  border-radius: 20px;
+  border: 3px solid #000 !important; /* Forzar borde negro para chat */
+  padding: 2rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  min-height: 140px;
+  box-sizing: border-box;
 }

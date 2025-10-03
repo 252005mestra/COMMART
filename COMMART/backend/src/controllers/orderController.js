@@ -121,40 +121,75 @@ export const updateOrderStatusController = async (req, res) => {
     const { id } = req.params;
     const { status, reason } = req.body;
 
-    // PRIMERO obtener los datos del pedido
+    console.log('🔍 [DEBUG] Actualizando estado del pedido:', {
+      orderId: id,
+      newStatus: status,
+      reason: reason,
+      userId: req.user?.id,
+      userRole: req.user?.role
+    });
+
+    // Obtener los datos del pedido
     const order = await getOrderById(id);
     if (!order) {
+      console.log('❌ [DEBUG] Pedido no encontrado:', id);
       return res.status(404).json({ message: 'Pedido no encontrado.' });
     }
 
-    // ✅ PASAR EL MOTIVO CORRECTAMENTE
+    console.log('📋 [DEBUG] Pedido encontrado:', {
+      orderId: order.id,
+      currentStatus: order.status,
+      currentStage: order.current_stage,
+      artistId: order.artist_id,
+      clientId: order.client_id
+    });
+
+    // Verificar permisos
+    if (status === 'completed') {
+      if (req.user.role === 'artist' && req.user.id !== order.artist_id) {
+        console.log('❌ [DEBUG] Artista no autorizado');
+        return res.status(403).json({ message: 'No autorizado.' });
+      }
+      if (req.user.role === 'client' && req.user.id !== order.client_id) {
+        console.log('❌ [DEBUG] Cliente no autorizado');
+        return res.status(403).json({ message: 'No autorizado.' });
+      }
+    }
+
+    console.log('✅ [DEBUG] Permisos verificados, actualizando estado...');
+
+    // Actualizar estado
     await updateOrderStatus(id, status, reason);
 
-    // ✅ NOTIFICAR SEGÚN EL TIPO DE CANCELACIÓN/RECHAZO
+    console.log('✅ [DEBUG] Estado actualizado en la base de datos');
+
+    // Enviar notificaciones según el estado
     if (status === 'rejected') {
       await createNotification({
         user_id: order.client_id,
         type: 'order_rejected',
-        message: `Tu pedido #${id} ha sido rechazado por el artista. Motivo: ${reason || 'Sin motivo especificado'}`,
+        message: `Tu pedido #${id} fue rechazado por el artista. Motivo: ${reason || 'Sin motivo especificado'}`,
         link: `/orders/${id}`,
         order_id: id,
         is_read: false
       });
-      console.log(`📧 Cliente ${order.client_id} notificado de rechazo del pedido ${id}`);
-    } else if (status === 'cancelled') {
-      // ✅ AGREGAR: Notificar cuando el cliente cancela
-      await createNotification({
-        user_id: order.artist_id,
-        type: 'order_cancelled',
-        message: `El pedido #${id} ha sido cancelado por el cliente. Motivo: ${reason || 'Sin motivo especificado'}`,
-        link: `/orders/${id}`,
-        order_id: id,
-        is_read: false
-      });
-      console.log(`📧 Artista ${order.artist_id} notificado de cancelación del pedido ${id}`);
     }
 
-    // Notificar al cliente si es aceptado
+    if (status === 'cancelled') {
+      const isArtistCancellation = req.user.id === order.artist_id;
+      const targetUserId = isArtistCancellation ? order.client_id : order.artist_id;
+      const cancellerRole = isArtistCancellation ? 'artista' : 'cliente';
+      
+      await createNotification({
+        user_id: targetUserId,
+        type: 'order_cancelled',
+        message: `El pedido #${id} fue cancelado por el ${cancellerRole}. Motivo: ${reason || 'Sin motivo especificado'}`,
+        link: `/orders/${id}`,
+        order_id: id,
+        is_read: false
+      });
+    }
+
     if (status === 'in_progress') {
       await createNotification({
         user_id: order.client_id,
@@ -164,11 +199,12 @@ export const updateOrderStatusController = async (req, res) => {
         order_id: id,
         is_read: false
       });
-      console.log(`📧 Cliente ${order.client_id} notificado de aceptación del pedido ${id}`);
     }
 
-    // Notificar al cliente y artista si el pedido es completado
+    // Manejar completado
     if (status === 'completed') {
+      console.log('🎉 [DEBUG] Procesando completado del pedido...');
+      
       // Notificar al cliente
       await createNotification({
         user_id: order.client_id,
@@ -178,7 +214,7 @@ export const updateOrderStatusController = async (req, res) => {
         order_id: id,
         is_read: false
       });
-
+      
       // Notificar al artista
       await createNotification({
         user_id: order.artist_id,
@@ -195,20 +231,32 @@ export const updateOrderStatusController = async (req, res) => {
           'UPDATE orders SET completed_at = NOW() WHERE id = ?',
           [id],
           (err, result) => {
-            if (err) return reject(err);
+            if (err) {
+              console.error('❌ [DEBUG] Error actualizando completed_at:', err);
+              return reject(err);
+            }
+            console.log('✅ [DEBUG] completed_at actualizado');
             resolve(result);
           }
         );
       });
 
       console.log(`✅ Pedido ${id} completado exitosamente`);
-      console.log(`📧 Notificaciones enviadas a cliente ${order.client_id} y artista ${order.artist_id}`);
     }
 
+    console.log('✅ [DEBUG] Proceso completado exitosamente');
     res.json({ message: 'Estado actualizado correctamente.' });
+    
   } catch (error) {
-    console.error('Error al actualizar estado del pedido:', error);
-    res.status(500).json({ message: 'Error al actualizar el estado del pedido.' });
+    console.error('❌ [DEBUG] Error crítico en updateOrderStatusController:');
+    console.error('❌ [DEBUG] Error:', error);
+    console.error('❌ [DEBUG] Stack:', error.stack);
+    console.error('❌ [DEBUG] Message:', error.message);
+    
+    res.status(500).json({ 
+      message: 'Error al actualizar el estado del pedido.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 

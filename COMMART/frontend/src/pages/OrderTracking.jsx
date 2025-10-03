@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   MessageCircle, 
@@ -12,6 +12,7 @@ import {
   Target,
   Save,
   ArrowUp,
+  ArrowDown,
   X,
   AlertTriangle,
   CheckCircle2,
@@ -26,7 +27,8 @@ import {
   FileMinus,
   Sparkles, 
   Lightbulb,
-  SendHorizontal
+  SendHorizontal,
+  CirclePlus
 } from 'lucide-react';
 import MainNav from '../components/MainNav';
 import Footer from '../components/Footer';
@@ -54,6 +56,7 @@ function getStageIndex(key) {
 const OrderTracking = ({ user }) => {
   const location = useLocation();
   const { id } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [messages, setMessages] = useState([]);
   const [msg, setMsg] = useState('');
@@ -85,6 +88,7 @@ const OrderTracking = ({ user }) => {
   const [selectedSampleFile, setSelectedSampleFile] = useState(null);
   const fileInputRef = useRef(null);
   const [referenceImages, setReferenceImages] = useState([]);
+
 
   // ✅ useEffect para cargar datos iniciales del pedido
   useEffect(() => {
@@ -594,42 +598,46 @@ const OrderTracking = ({ user }) => {
   };
 
   // Función para cancelar pedido
-  const handleCancelOrder = async () => {
-    if (!cancelReason.trim()) {
-      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo.' });
-      return;
-    }
+const handleCancelOrder = async () => {
+  if (!cancelReason.trim()) {
+    setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo.' });
+    return;
+  }
 
-    try {
-      await axios.put(
-        `http://localhost:5000/api/orders/${order.id}/status`,
-        { 
-          status: 'cancelled', 
-          reason: cancelReason  // ✅ CAMBIAR DE 'cancellation_reason' A 'reason'
-        },
-        { withCredentials: true }
-      );
-      
-      setShowCancelModal(false);
-      setCancelReason('');
-      
-      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-      setOrder(res.data);
-      
-      setAlert({ 
-        open: true, 
-        type: 'success', 
-        message: 'Pedido cancelado exitosamente.' 
-      });
-    } catch (err) {
-      console.error('Error cancelando pedido:', err);
-      setAlert({ 
-        open: true, 
-        type: 'error', 
-        message: `Error al cancelar el pedido: ${err.response?.data?.message || err.message}` 
-      });
-    }
-  };
+  try {
+    await axios.put(
+      `http://localhost:5000/api/orders/${order.id}/status`,
+      { 
+        status: 'cancelled', 
+        reason: cancelReason
+      },
+      { withCredentials: true }
+    );
+    
+    setShowCancelModal(false);
+    setCancelReason('');
+    
+    // ✅ REDIRIGIR A PEDIDOS EN LUGAR DE QUEDARSE EN EL PEDIDO CANCELADO
+    setAlert({ 
+      open: true, 
+      type: 'success', 
+      message: 'Pedido cancelado exitosamente. Redirigiendo...' 
+    });
+
+    // Redirigir después de 1.5 segundos
+    setTimeout(() => {
+      navigate('/orders');
+    }, 1500);
+
+  } catch (err) {
+    console.error('Error cancelando pedido:', err);
+    setAlert({ 
+      open: true, 
+      type: 'error', 
+      message: `Error al cancelar el pedido: ${err.response?.data?.message || err.message}` 
+    });
+  }
+};
 
   // ✅ Función para marcar como completado (solo cliente, fase final)
   const handleMarkAsCompleted = async () => {
@@ -711,12 +719,32 @@ const OrderTracking = ({ user }) => {
     }
   };
 
-  // ✅ Función para subir obra final
+    // ✅ Función para subir obra final
   const handleUploadFinalArt = async (e) => {
     const file = e.target.files[0];
     console.log('🎨 handleUploadFinalArt llamada:', { file: !!file, fileName: file?.name });
     
     if (!file) return;
+    
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'Solo se permiten archivos de imagen.' 
+      });
+      return;
+    }
+
+    // Validar tamaño (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setAlert({ 
+        open: true, 
+        type: 'error', 
+        message: 'La imagen no puede ser mayor a 5MB.' 
+      });
+      return;
+    }
     
     try {
       console.log('📤 Iniciando subida de obra final...');
@@ -749,8 +777,12 @@ const OrderTracking = ({ user }) => {
       setAlert({ 
         open: true, 
         type: 'success', 
-        message: '¡Obra final subida correctamente! Ahora puedes completar el pedido.' 
+        message: '🎨 ¡Obra final subida correctamente! Ahora puedes completar el pedido.' 
       });
+
+      // Limpiar el input
+      document.getElementById('final-art-file-input').value = '';
+      
     } catch (err) {
       console.error('❌ Error subiendo obra final:', err);
       console.error('❌ Error details:', err.response?.data);
@@ -763,7 +795,7 @@ const OrderTracking = ({ user }) => {
     }
   };
 
-  // ✅ Función para completar pedido definitivamente
+    // ✅ Función para completar pedido definitivamente
   const handleCompletePedido = async () => {
     try {
       setAlert({ 
@@ -933,55 +965,57 @@ const OrderTracking = ({ user }) => {
   };
 
   // ✅ Función para cancelar pedido por falta de pago (solo artista) - CORREGIDA
-  const handleCancelForNonPayment = async () => {
-    if (!artistCancelReason.trim()) {
-      setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo.' });
-      return;
-    }
+const handleCancelForNonPayment = async () => {
+  if (!artistCancelReason.trim()) {
+    setAlert({ open: true, type: 'error', message: 'Debes proporcionar un motivo.' });
+    return;
+  }
 
-    try {
-      console.log('Cancelando pedido...', { stage: selectedStage, isPaid: order.is_paid });
-      
-      setAlert({ 
-        open: true, 
-        type: 'info', 
-        message: 'Cancelando pedido...' 
-      });
+  try {
+    console.log('Cancelando pedido...', { stage: selectedStage, isPaid: order.is_paid });
+    
+    setAlert({ 
+      open: true, 
+      type: 'info', 
+      message: 'Cancelando pedido...' 
+    });
 
-      await axios.put(
-        `http://localhost:5000/api/orders/${order.id}/status`,
-        { 
-          status: 'cancelled',
-          reason: artistCancelReason  
-        },
-        { withCredentials: true }
-      );
-      
-      setShowArtistCancelModal(false);
-      setArtistCancelReason('');
-      
-      // Recargar datos
-      const res = await axios.get(`http://localhost:5000/api/orders/${order.id}`, { withCredentials: true });
-      setOrder(res.data);
-      
-      setAlert({ 
-        open: true, 
-        type: 'success', 
-        message: selectedStage === 'plan' 
-          ? 'Pedido cancelado. El cliente ha sido notificado.' 
-          : 'Pedido cancelado por falta de pago. El cliente ha sido notificado.'
-      });
-    } catch (err) {
-      console.error('Error cancelando pedido:', err);
-      console.error('Error response:', err.response?.data);
-      setAlert({ 
-        open: true, 
-        type: 'error', 
-        message: `Error al cancelar el pedido: ${err.response?.data?.message || err.message}` 
-      });
-    }
-  };
+    await axios.put(
+      `http://localhost:5000/api/orders/${order.id}/status`,
+      { 
+        status: 'cancelled',
+        reason: artistCancelReason  
+      },
+      { withCredentials: true }
+    );
+    
+    setShowArtistCancelModal(false);
+    setArtistCancelReason('');
+    
+    // ✅ REDIRIGIR A PEDIDOS DEL ARTISTA EN LUGAR DE QUEDARSE
+    setAlert({ 
+      open: true, 
+      type: 'success', 
+      message: selectedStage === 'plan' 
+        ? 'Pedido cancelado. El cliente ha sido notificado. Redirigiendo...' 
+        : 'Pedido cancelado por falta de pago. El cliente ha sido notificado. Redirigiendo...'
+    });
 
+    // Redirigir después de 1.5 segundos
+    setTimeout(() => {
+      navigate('/artist/orders');
+    }, 1500);
+
+  } catch (err) {
+    console.error('Error cancelando pedido:', err);
+    console.error('Error response:', err.response?.data);
+    setAlert({ 
+      open: true, 
+      type: 'error', 
+      message: `Error al cancelar el pedido: ${err.response?.data?.message || err.message}` 
+    });
+  }
+};
   // ✅ Función para guardar cambios de planeación
   const handleSavePlanningChanges = async () => {
     try {
@@ -1514,7 +1548,7 @@ const OrderTracking = ({ user }) => {
 
               {/* ✅ COMBINANDO AMBAS RAMAS: Muestras del artista - OCULTAR EN FASE DE PLANEACIÓN */}
               {selectedStage !== 'plan' && (
-                <div className="ordertracking-section">
+                <div className="ordertracking-samples-section">
                   <div className="ordertracking-section-title">
                     {selectedStage === 'completed' ? (
                       <>
@@ -1529,81 +1563,112 @@ const OrderTracking = ({ user }) => {
                     )}
                   </div>
                   
-                  {/* FASE COMPLETED: Solo obra final */}
-                  {selectedStage === 'completed' ? (
-                    order.completed_image ? (
-                      <div className="ordertracking-final-art">
-                        <div className="ordertracking-samples-list">
-                          <div className="ordertracking-sample-img-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
+                    {selectedStage === 'completed' ? (
+                    // ✅ LÓGICA CORREGIDA: Mostrar obra final solo al cliente cuando esté completado
+                    order.status === 'completed' && order.completed_image ? (                      <div className="ordertracking-final-art">
+                        {/* CONTENEDOR ESPECIAL PARA OBRA FINAL - MÁS GRANDE Y CENTRADO */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          marginTop: '1rem'
+                        }}>
+                          <div 
+                            style={{
+                              position: 'relative',
+                              width: '400px',
+                              height: '400px',
+                              borderRadius: '16px',
+                              overflow: 'hidden',
+                              border: '3px solid #28a745',
+                              cursor: 'pointer',
+                              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+                            }}
+                            onClick={() => setShowFinalArtModal(true)}
+                            title="Clic para ver en tamaño completo"
+                          >
                             <img
                               src={`http://localhost:5000/${order.completed_image}`}
                               alt="Obra Final"
-                              className="ordertracking-sample-img"
-                              onClick={() => setShowFinalArtModal(true)}
-                              style={{ cursor: 'pointer' }}
-                            />
-                            {/* Botón eliminar obra final - MISMO ESTILO QUE LAS MUESTRAS */}
-                            {user.role === 'artist' && isCurrentPhase && order.status !== 'completed' && (
-                              <button
-                                className="ordertracking-delete-sample-btn"
-                                onClick={handleDeleteFinalArt}
-                                style={{
-                                  position: 'absolute',
-                                  top: '8px',
-                                  right: '8px',
-                                  background: '#fff',
-                                  border: '2px solid #e74c3c',
-                                  color: '#e74c3c',
-                                  borderRadius: '50%',
-                                  width: '32px',
-                                  height: '32px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  cursor: 'pointer',
-                                  fontSize: '16px',
-                                  fontWeight: 'bold',
-                                  zIndex: 4
-                                }}
-                                title="Eliminar obra final"
-                              >
-                                ×
-                              </button>
-                            )}
-                            {/* Botón de descarga para obra final */}
-                            <a
-                              href={`http://localhost:5000/${order.completed_image}`}
-                              download={`obra_final_pedido_${order.id}.${order.completed_image.split('.').pop()}`}
                               style={{
-                                position: 'absolute',
-                                bottom: '8px',
-                                left: '8px',
-                                background: '#28a745',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '50%',
-                                width: '32px',
-                                height: '32px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                fontWeight: 'bold',
-                                zIndex: 4,
-                                textDecoration: 'none'
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
                               }}
-                              title="Descargar obra final"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              ⬇
-                            </a>
+                            />
+                            
+                            {/* Indicador de obra final */}
+                            <div style={{
+                              position: 'absolute',
+                              top: '8px',
+                              left: '8px',
+                              background: '#28a745',
+                              color: 'white',
+                              borderRadius: '50%',
+                              width: 32,
+                              height: 32,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: 18,
+                              fontWeight: 'bold',
+                              zIndex: 3
+                            }}>
+                              <CheckCircle2 size={16} />
+                            </div>
+                            
+                            {/* Overlay con información */}
+                            <div style={{
+                              position: 'absolute',
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                              color: 'white',
+                              padding: '20px 16px 16px 16px',
+                              textAlign: 'center'
+                            }}>
+                              <div style={{ fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                <Star size={16} />
+                                Obra Finalizada
+                              </div>
+                              <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                                Clic para ver completa
+                              </div>
+                            </div>
                           </div>
+                        </div>
+
+                        {/* Mensaje informativo */}
+                        <div style={{
+                          textAlign: 'center',
+                          marginTop: '1rem',
+                          padding: '12px',
+                          background: '#d4edda',
+                          border: '1px solid #c3e6cb',
+                          borderRadius: '8px',
+                          color: '#155724'
+                        }}>
+                          <strong style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <CheckCircle2 size={16} />
+                            ¡Pedido completado exitosamente!
+                          </strong>
+                          <br />
+                          <span style={{ fontSize: '14px' }}>
+                            Puedes descargar tu obra final haciendo clic en el botón de descarga.
+                          </span>
                         </div>
                       </div>
                     ) : (
+                      // ✅ MENSAJE PARA ARTISTA O PEDIDO NO COMPLETADO
                       <div style={{ textAlign: 'center', padding: '2rem', color: '#6c757d' }}>
-                        Sin obra final aún
+                        {user.role === 'artist' && order.completed_image && order.status !== 'completed' 
+                          ? 'Obra final subida. Puedes completarla usando el botón de abajo.'
+                          : user.role === 'artist' && order.status === 'completed'
+                          ? 'Pedido completado exitosamente.'
+                          : order.completed_image && order.status !== 'completed'
+                          ? 'Obra final subida. Esperando confirmación para completar el pedido.'
+                          : 'Pedido aún no completado'
+                        }
                       </div>
                     )
                   ) : (
@@ -1810,7 +1875,9 @@ const OrderTracking = ({ user }) => {
                                 e.target.style.background = '#fff';
                               }}
                             >
-                              <span style={{ fontSize: '3rem', lineHeight: '1', fontWeight: 'bold' }}>+</span>
+                              <span style={{ fontSize: '3rem', lineHeight: '1', fontWeight: 'bold' }}>
+                                <CirclePlus size={32} />
+                              </span>
                               <span>Agregar</span>
                             </div>
                           ))
@@ -1862,96 +1929,78 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
 
-              {/* ✅ MOSTRAR OBRA FINAL - Sección separada */}
-              {selectedStage === 'completed' && order.completed_image && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">
-                        🎨 Obra Final Entregada
-                      </div>
-                      
-                      {/* Contenedor especial para obra final - MÁS GRANDE */}
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        marginTop: '1rem'
-                      }}>
-                        <div 
-                          style={{
-                            position: 'relative',
-                            width: '400px',
-                            height: '400px',
-                            borderRadius: '16px',
-                            overflow: 'hidden',
-                            border: '3px solid #28a745',
-                            cursor: 'pointer',
-                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
-                          }}
-                          onClick={() => setShowFinalArtModal(true)}
-                          title="Clic para ver en tamaño completo"
-                        >
-                          <img
-                            src={`http://localhost:5000/${order.completed_image}`}
-                            alt="Obra Final"
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover'
-                            }}
-                          />
-                          
-                          {/* Overlay con información */}
-                          <div style={{
-                            position: 'absolute',
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
-                            color: 'white',
-                            padding: '20px 16px 16px 16px',
-                            textAlign: 'center'
-                          }}>
-                            <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
-                              🎉 Obra Finalizada
-                            </div>
-                            <div style={{ fontSize: '12px', opacity: 0.9 }}>
-                              Clic para ver completa
-                            </div>
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Mensaje informativo */}
-                      <div style={{
-                        textAlign: 'center',
-                        marginTop: '1rem',
-                        padding: '12px',
-                        background: '#d4edda',
-                        border: '1px solid #c3e6cb',
-                        borderRadius: '8px',
-                        color: '#155724'
-                      }}>
-                        <strong>¡Pedido completado exitosamente!</strong>
-                        <br />
-                        <span style={{ fontSize: '14px' }}>
-                          Puedes ver la obra en tamaño completo o descargarla cuando quieras.
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-              {/* ✅ SUBIR OBRA FINAL - Solo en fase 'completed' si eres artista */}
-              {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && !order.completed_image && selectedPhaseImages.length === 0 && (
-                <div className="ordertracking-section">
+                            {/* ✅ SUBIR OBRA FINAL - Solo en fase 'completed' si eres artista y no hay obra final */}
+              {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && !order.completed_image && (
+                <div className="ordertracking-samples-section">
                   <div className="ordertracking-section-title">
                     <FilePlus size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                     Subir Obra Final
                   </div>
+                  
+                  {/* GRID UNIFICADO PARA SUBIR - IGUAL QUE LAS MUESTRAS */}
+                  <div className="ordertracking-samples-upload-grid" style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '1rem',
+                    marginTop: '1rem'
+                  }}>
+                    {/* Slot para subir obra final */}
+                    <div
+                      className="ordertracking-sample-add-slot"
+                      onClick={() => document.getElementById('final-art-file-input').click()}
+                      style={{
+                        aspectRatio: '1',
+                        border: '3px dashed #28a745', // Verde para obra final
+                        borderRadius: '12px',
+                        background: '#fff',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        color: '#28a745',
+                        fontFamily: "'Goldman', sans-serif",
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        gap: '0.5rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.borderColor = '#1e7e34';
+                        e.target.style.background = '#f8fff8';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.borderColor = '#28a745';
+                        e.target.style.background = '#fff';
+                      }}
+                    >
+                      <span style={{ fontSize: '3rem', lineHeight: '1', fontWeight: 'bold' }}>
+                        <FilePlus size={48} />
+                      </span>
+                      <span>Obra Final</span>
+                    </div>
+                    
+                    {/* Slots vacíos para mantener el grid */}
+                    <div style={{ aspectRatio: '1' }}></div>
+                    <div style={{ aspectRatio: '1' }}></div>
+                  </div>
+                  
+                  {/* Input oculto para subir obra final */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="final-art-file-input"
+                    style={{ display: 'none' }}
+                    onChange={handleUploadFinalArt}
+                  />
+                  
                   <div style={{
                     background: '#e8f4fd',
                     border: '1px solid #bee5eb',
                     borderRadius: '8px',
                     padding: '12px',
-                    marginBottom: '12px'
+                    marginTop: '12px'
                   }}>
                     <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#0c5460' }}>
                       ¡Es hora de entregar la obra final!
@@ -1960,30 +2009,110 @@ const OrderTracking = ({ user }) => {
                       Sube el archivo final del pedido. Una vez subido, podrás completar el pedido definitivamente.
                     </p>
                   </div>
+                </div>
+              )}
+              
+              {/* ✅ OBRA FINAL SUBIDA - Permitir eliminar y volver a subir */}
+              {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && order.completed_image && order.status !== 'completed' && (
+                <div className="ordertracking-samples-section">
+                  <div className="ordertracking-section-title">
+                    <FilePlus size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                    Obra Final Subida
+                  </div>
                   
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleUploadFinalArt}
-                    style={{ marginBottom: '12px' }}
-                  />
+                  {/* GRID UNIFICADO - IGUAL QUE LAS MUESTRAS */}
+                  <div className="ordertracking-samples-upload-grid" style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '1rem',
+                    marginTop: '1rem'
+                  }}>
+                    <div 
+                      className="ordertracking-sample-slot"
+                      style={{
+                        position: 'relative',
+                        aspectRatio: '1',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        border: '2px solid #28a745'
+                      }}
+                    >
+                      <img
+                        src={`http://localhost:5000/${order.completed_image}`}
+                        alt="Obra Final"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                      
+                      {/* Botón eliminar obra final - MISMO ESTILO QUE LAS MUESTRAS */}
+                      <button
+                        onClick={handleDeleteFinalArt}
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          background: '#fff',
+                          border: '2px solid #e74c3c',
+                          color: '#e74c3c',
+                          borderRadius: '50%',
+                          width: '32px',
+                          height: '32px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          fontSize: '16px',
+                          fontWeight: 'bold',
+                          zIndex: 4
+                        }}
+                        title="Eliminar obra final (podrás volver a subirla)"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    
+                    {/* Slots vacíos para mantener el grid */}
+                    <div style={{ aspectRatio: '1' }}></div>
+                    <div style={{ aspectRatio: '1' }}></div>
+                  </div>
                 </div>
               )}
 
+                            
               {/* ✅ COMPLETAR PEDIDO - Solo si ya hay obra final */}
               {selectedStage === 'completed' && user.role === 'artist' && isCurrentPhase && order.completed_image && order.status !== 'completed' && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">
+                <div style={{
+                  background: '#fff',
+                  borderRadius: '20px',
+                  padding: '2rem',
+                  margin: '1.5rem 0',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                }}>
+                  <div style={{
+                    fontFamily: "'Goldman', sans-serif",
+                    fontSize: '1.2rem',
+                    color: '#7d5938',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <CheckCircle2 size={20} />
                     Completar Pedido
                   </div>
+                  
                   <div style={{
                     background: '#d4edda',
                     border: '1px solid #c3e6cb',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    marginBottom: '12px'
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '20px'
                   }}>
                     <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#155724' }}>
+                      <Star size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                       ¡Obra final subida correctamente!
                     </p>
                     <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
@@ -1994,18 +2123,37 @@ const OrderTracking = ({ user }) => {
                   <button
                     onClick={handleCompletePedido}
                     style={{
-                      background: '#28a745',
+                      background: 'linear-gradient(135deg, #8B6D47 0%, #7A5D3F 100%)', /* ✅ Café COMMART */
                       color: 'white',
                       border: 'none',
-                      padding: '12px 24px',
-                      borderRadius: '6px',
+                      padding: '16px 32px',
+                      borderRadius: '35px',
                       cursor: 'pointer',
                       fontSize: '16px',
                       fontWeight: 'bold',
-                      width: '100%'
+                      fontFamily: "'Goldman', sans-serif",
+                      width: '100%',
+                      boxShadow: '0 4px 8px rgba(139, 109, 71, 0.3)', /* ✅ Sombra café */
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.04em',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #7A5D3F 0%, #6B5237 100%)'; /* ✅ Café más oscuro al hover */
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 6px 12px rgba(139, 109, 71, 0.4)'; /* ✅ Sombra café */
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #8B6D47 0%, #7A5D3F 100%)'; /* ✅ Café original */
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 4px 8px rgba(139, 109, 71, 0.3)'; /* ✅ Sombra café */
                     }}
                   >
-                    Completar Pedido Definitivamente
+                    <CheckCircle2 size={20} />
+                    COMPLETAR PEDIDO DEFINITIVAMENTE
                   </button>
                 </div>
               )}
@@ -2090,7 +2238,7 @@ const OrderTracking = ({ user }) => {
                 </div>
               )}
 
-              {/* BOTÓN AVANZAR FASE - Para todas las fases excepto 'completed' */}
+               {/* BOTÓN AVANZAR FASE - Para todas las fases excepto 'completed' */}
               {user.role === 'artist' && 
                 isCurrentPhase && 
                 order.is_paid && 
@@ -2105,18 +2253,34 @@ const OrderTracking = ({ user }) => {
                     true
                   ))
                 ) && (
-                <div className="ordertracking-section">
-                  <div className="ordertracking-section-title">
-                    ➡️ Avanzar de Fase
-                  </div>
+                <div style={{
+                  background: '#fff',
+                  borderRadius: '20px',
+                  padding: '2rem',
+                  margin: '1.5rem 0',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                }}>
                   <div style={{
-                    background: '#e8f4fd',
-                    border: '1px solid #bee5eb',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    marginBottom: '12px'
+                    fontFamily: "'Goldman', sans-serif",
+                    fontSize: '1.2rem',
+                    color: '#7d5938',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}>
-                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>
+                    <ArrowRightCircle size={20} />
+                    Avanzar de Fase
+                  </div>
+                  
+                  {/* Mensaje informativo sin bordes */}
+                  <div style={{
+                    background: '#f8f9fa',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '20px'
+                  }}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#333' }}>
                       ¿Listo para avanzar a la siguiente fase?
                     </p>
                     <p style={{ margin: '0', fontSize: '14px', color: '#6c757d' }}>
@@ -2140,24 +2304,35 @@ const OrderTracking = ({ user }) => {
                   ) && (
                     <button
                       onClick={handleAdvancePhase}
-                      className="ordertracking-advance-btn"
                       style={{
-                        background: '#17a2b8',
+                        background: 'linear-gradient(135deg, #8B6D47 0%, #7A5D3F 100%)',
                         color: 'white',
                         border: 'none',
-                        padding: '12px 24px',
-                        borderRadius: '6px',
+                        padding: '16px 32px',
+                        borderRadius: '35px',
                         cursor: 'pointer',
                         fontSize: '16px',
                         fontWeight: 'bold',
-                        width: '100%'
+                        fontFamily: "'Goldman', sans-serif",
+                        width: '100%',
+                        boxShadow: '0 4px 8px rgba(139, 109, 71, 0.3)',
+                        transition: 'all 0.3s ease',
+                        letterSpacing: '0.04em'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 6px 12px rgba(139, 109, 71, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 4px 8px rgba(139, 109, 71, 0.3)';
                       }}
                     >
-                      Avanzar a {
-                        selectedStage === 'plan' ? 'Boceto' :
-                        selectedStage === 'sketch' ? 'Definición' :
-                        selectedStage === 'details' ? 'Últimos Detalles' :
-                        selectedStage === 'final' ? 'Finalizado' : 'Siguiente Fase'
+                      SIGUIENTE FASE: {
+                        selectedStage === 'plan' ? 'BOCETO' :
+                        selectedStage === 'sketch' ? 'DEFINICIÓN' :
+                        selectedStage === 'details' ? 'ÚLTIMOS DETALLES' :
+                        selectedStage === 'final' ? 'FINALIZADO' : 'SIGUIENTE'
                       }
                     </button>
                   )}
@@ -2165,7 +2340,7 @@ const OrderTracking = ({ user }) => {
               )}
 
               {/* ✅ CHAT - FUNDAMENTAL EN TODAS LAS FASES */}
-              <div className="ordertracking-section">
+              <div className="ordertracking-chat-section">
                 <div className="ordertracking-section-title">
                   <MessageCircle size={20} style={{ marginRight: 6, verticalAlign: 'middle' }} />
                   Comunicación
@@ -2323,27 +2498,73 @@ const OrderTracking = ({ user }) => {
                   selectedPackage={selectedPackage || { id: 1, title: 'Paquete', name: 'Paquete', price: 100000 }}
                   selectedExtras={selectedExtras || []}
                   onViewPackage={() => setShowPackageModal(true)}
+                  onViewInvoice={handleToggleInvoice}
                   currentUserId={user.id}
                   currentUser={user}
                 />
               </div>
             </div>
 
-            {/* BOTONES FUERA DEL CONTENEDOR NARANJA - COMO FOOTER */}
-            {((order.status === 'accepted' || order.status === 'in_progress' || order.status === 'plan' || order.status === 'sketch') && !order.is_paid && user.id === order.client_id) && (
+            {/* BOTONES PARA CLIENTE */}
+            {user.id === order.client_id && (
               <div className="ordertracking-actions-footer">
-                <button
-                  className="ordertracking-cancel-btn"
-                  onClick={() => setShowCancelModal(true)}
-                >
-                  Cancelar pedido
-                </button>
-                <button
-                  className="ordertracking-pay-btn"
-                  onClick={handlePay}
-                >
-                  Realizar Pago
-                </button>
+                {/* Mostrar botones de cancelar/pagar solo si no está pagado */}
+                {!order.is_paid && (order.status === 'accepted' || order.status === 'in_progress' || order.status === 'plan' || order.status === 'sketch') && (
+                  <>
+                    <button
+                      className="ordertracking-cancel-btn"
+                      onClick={() => setShowCancelModal(true)}
+                    >
+                      Cancelar pedido
+                    </button>
+                    <button
+                      className="ordertracking-pay-btn"
+                      onClick={handlePay}
+                    >
+                      Realizar Pago
+                    </button>
+                  </>
+                )}
+                
+                {/* Mostrar botón de factura solo si está pagado */}
+                {order.is_paid && (
+                    <button
+                      className="ordertracking-invoice-btn"
+                      onClick={handleToggleInvoice}
+                      style={{
+                        background: '#8B6D47',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '20px', /* ✅ Más redondeado */
+                        fontFamily: "'Goldman', sans-serif",
+                        fontSize: '1.1rem', /* ✅ Más grande */
+                        fontWeight: 'normal',
+                        padding: '0.8rem 2rem', /* ✅ Más padding */
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease', /* ✅ Transición mejorada */
+                        letterSpacing: '0.04em',
+                        width: '100%', /* ✅ Ancho completo para centrarlo */
+                        textAlign: 'center', /* ✅ Texto centrado */
+                        display: 'flex', /* ✅ Flexbox para centrar */
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem', /* ✅ Espacio entre icono y texto */
+                        boxShadow: '0 4px 8px rgba(139, 109, 71, 0.3)' /* ✅ Sombra consistente */
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = '#7A5D3F';
+                        e.target.style.transform = 'translateY(-2px)'; /* ✅ Efecto hover */
+                        e.target.style.boxShadow = '0 6px 12px rgba(139, 109, 71, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = '#8B6D47';
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 4px 8px rgba(139, 109, 71, 0.3)';
+                      }}
+                    >
+                      📄 Ver Factura
+                    </button>
+                )}
               </div>
             )}
 

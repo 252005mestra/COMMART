@@ -14,6 +14,7 @@ export default function OrderDataCard({
   selectedPackage,
   selectedExtras = [],
   onViewPackage,
+  onViewInvoice,
   currentUserId,
   currentUser,
 }) {
